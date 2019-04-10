@@ -141,12 +141,22 @@ up:
 
 ## JVM Configuration
 
-### Memory Limit
+### General Options
+The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and Spigot.
 
-The Java memory limit can be adjusted using the `JVM_OPTS` environment variable, where the default is
-the setting shown in the example (max and min at 1024 MB):
-
-    docker run -e 'JVM_OPTS=-Xmx1024M -Xms1024M' ...
+### Memory Options
+The amount of memory to be used by the JVM for the BuildTools and Spigot can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `SPIGOT_MEMORY_AMOUNT` variables, for example:
+```sh
+docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env SPIGOT_MEMORY_AMOUNT=1G
+```
+```yml
+services:
+  spigot:
+    environment:
+      BUILDTOOLS_MEMORY_AMOUNT: "800M"
+      SPIGOT_MEMORY_AMOUNT: "1G"
+```
+Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for Spigot itself, two separate variables are provided.
 
 ## Issues
 
