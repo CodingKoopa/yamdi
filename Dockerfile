@@ -1,4 +1,5 @@
-FROM alpine:3.6
+# Set the base image to the official Alpine Linux image.
+FROM alpine
 
 # Java Version and other ENV
 ENV JAVA_VERSION_MAJOR=8 \
