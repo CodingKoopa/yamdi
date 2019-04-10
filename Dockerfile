@@ -19,10 +19,8 @@ ADD ./spigot.sh /spigot.sh
 # Add the Spigot command running script to the image.
 ADD ./spigot_cmd.sh /spigot_cmd.sh
 
-# Expose the Minecraft server port.
-EXPOSE 25565
-# Expose the Dynmap web port.
-EXPOSE 8123
+# Expose the Minecraft server port and Dynmap web port.
+EXPOSE 25565 8123
 
 # Create a mount point for the Spigot installation directory and plugin directory.
 VOLUME /opt/spigot /opt/spigot-plugins
