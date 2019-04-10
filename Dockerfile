@@ -14,9 +14,9 @@ ENV SPIGOT_DIRECTORY /opt/spigot
 ENV COMMAND_INPUT_FILE_PATH=/tmp/spigot-commmand-input
 
 # Add the Spigot launch Bash script to the image.
-ADD ./lib/scripts/spigot.sh /spigot.sh
+ADD ./spigot.sh /spigot.sh
 # Add the Spigot command running script to the image.
-ADD ./lib/scripts/spigot_cmd.sh /spigot_cmd.sh
+ADD ./spigot_cmd.sh /spigot_cmd.sh
 
 # Expose the Minecraft server port.
 EXPOSE 25565
