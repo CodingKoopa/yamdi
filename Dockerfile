@@ -18,5 +18,5 @@ EXPOSE 25565
 EXPOSE 8123
 VOLUME ["/opt/spigot"]
 
-#set default command
-CMD trap 'exit' INT; /spigot.sh
+# Set the container entrypoint to the startup script.
+ENTRYPOINT /spigot.sh
