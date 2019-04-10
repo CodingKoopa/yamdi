@@ -222,6 +222,7 @@ fi
 
 cd $SPIGOT_HOME/
 
+JVM_OPTS+="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT}"
 /spigot_run.sh java $JVM_OPTS -jar spigot.jar nogui
 
 # fallback to root and run shell if spigot don't start/forced exit
