@@ -5,10 +5,7 @@ FROM openjdk:8-alpine
 ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=112 \
     JAVA_VERSION_BUILD=15 \
-    JAVA_PACKAGE=server-jre \
-    JAVA_HOME=/opt/jdk \
-    PATH=${PATH}:/opt/jdk/bin \
-    LANG=C.UTF-8
+    JAVA_PACKAGE=server-jre
 
 # Install dependencies
 # TODO: Some of these can probably be reduced.
