@@ -84,16 +84,6 @@ example:
 
     docker exec mc /spigot_cmd.sh op AshDevFr
 
-## EULA Support
-
-Mojang now requires accepting the [Minecraft EULA](https://account.mojang.com/documents/minecraft_eula). To accept add
-
-    -e EULA=TRUE
-
-such as
-
-    docker run -d -it -e EULA=TRUE -p 25565:25565 ashdev/minecraft-spigot:latest
-
 ## Attaching data directory to host filesystem
 
 In order to readily access the Minecraft data, use the `-v` argument

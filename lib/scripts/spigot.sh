@@ -1,22 +1,6 @@
 #!/bin/bash
 set -e
 
-if [ ! -e $SPIGOT_DIRECTORY/eula.txt ]; then
-  if [ "$EULA" != "" ]; then
-    echo "# Generated via Docker on $(date)" > $SPIGOT_DIRECTORY/eula.txt
-    echo "eula=$EULA" >> $SPIGOT_DIRECTORY/eula.txt
-  else
-    echo "*****************************************************************"
-    echo "*****************************************************************"
-    echo "** To be able to run spigot you need to accept minecrafts EULA **"
-    echo "** see https://account.mojang.com/documents/minecraft_eula     **"
-    echo "** include -e EULA=true on the docker run command              **"
-    echo "*****************************************************************"
-    echo "*****************************************************************"
-    exit
-  fi
-fi
-
 # Some variables are mandatory.
 if [ -z "$REV" ]; then
     REV="latest"
