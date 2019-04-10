@@ -28,6 +28,7 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.ja
   popd
   # Remove the build files to preserve space.
   rm -rf "$SPIGOT_BUILD_DIRECTORY"
+  # Make a plugin directory.
   mkdir -p $SPIGOT_DIRECTORY/plugins
 fi
 
@@ -36,9 +37,13 @@ rm -f $SPIGOT_DIRECTORY/spigot.jar
 # Select the specified revision.
 ln -s $SPIGOT_DIRECTORY/spigot-$REV.jar $SPIGOT_DIRECTORY/spigot.jar
 
+# Make sure the command input file is clear.
 rm -f "$COMMAND_INPUT_FILE_PATH"
+# Make a named pipe for sending commands to Spigot. It is important that the permissions are 700 because, if they were
+# world writeable, any user could run a Spigot command with administrator priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE_PATH"
-
+# Enter the Spigot directory because the Minecraft server checks the current directory for configuration files.
 cd $SPIGOT_DIRECTORY/
-exec java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar spigot.jar nogui \
+# Start the launcher with the specified memory amounts.
+java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar spigot.jar nogui \
     < <(tail -f "$COMMAND_INPUT_FILE_PATH")
