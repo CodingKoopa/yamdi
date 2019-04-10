@@ -21,11 +21,11 @@ RUN apk add openjdk8-jre
 
 ENV APP_NAME=server
 #default directory for SPIGOT-server
-ENV SPIGOT_HOME /minecraft
+ENV SPIGOT_DIRECTORY /opt/spigot
 ENV RUN_DIR /minecraft_run
 
 RUN addgroup -g 1000 -S minecraft && \
-  adduser -u 1000 -S minecraft -G minecraft -h /minecraft
+  adduser -u 1000 -S minecraft -G minecraft -h /opt/spigot
 
 RUN echo "minecraft ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/minecraft
 
@@ -45,7 +45,7 @@ RUN chmod +x /spigot_cmd.sh
 
 EXPOSE 25565
 EXPOSE 8123
-VOLUME ["/minecraft"]
+VOLUME ["/opt/spigot"]
 
 ENV UID=1000
 ENV GUID=1000
