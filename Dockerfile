@@ -1,7 +1,7 @@
 # Set the base image to the official OpenJDK image. 8 is an LTS release, with Alpine Linux support.
 FROM openjdk:8-alpine
 
-# Install the dependencies.
+# Install the dependencies and clean the cache.
 # - bash    Bash, for running the Spigot startup script.
 # - git     Git, for BuildTools to clone the repositories.
 RUN apk upgrade --update --no-cache && \
