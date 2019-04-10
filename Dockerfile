@@ -1,5 +1,4 @@
 FROM alpine:3.6
-MAINTAINER AshDev <ashdevfr@gmail.com>
 
 # Java Version and other ENV
 ENV JAVA_VERSION_MAJOR=8 \
