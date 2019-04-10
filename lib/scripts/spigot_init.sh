@@ -21,6 +21,12 @@ fi
 if [ -z "$REV" ]; then
     REV="latest"
 fi
+if [ -z "$BUILD_MEMORY_AMOUNT" ]; then
+    BUILD_MEMORY_AMOUNT="1024M"
+fi
+if [ -z "$GAME_MEMORY_AMOUNT" ]; then
+    GAME_MEMORY_AMOUNT="1024M"
+fi
 
 # Force rebuild of spigot.jar if REV is latest.
 rm -f $SPIGOT_DIRECTORY/spigot-latest.jar
@@ -31,7 +37,7 @@ if [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.jar ]; then
   mkdir -p /tmp/buildSpigot
   pushd /tmp/buildSpigot
   wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
-  HOME=/tmp/buildSpigot java $JVM_OPTS -jar BuildTools.jar --rev $REV
+  HOME=/tmp/buildSpigot java $JVM_OPTS "-Xmx${BUILD_MEMORY_AMOUNT} -Xms${BUILD_MEMORY_AMOUNT}" -jar BuildTools.jar --rev $REV
   cp /tmp/buildSpigot/Spigot/Spigot-Server/target/spigot-*.jar $SPIGOT_DIRECTORY/spigot-$REV.jar
   popd
   rm -rf /tmp/buildSpigot
@@ -129,8 +135,7 @@ fi
 
 cd $SPIGOT_DIRECTORY/
 
-JVM_OPTS+="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT}"
-/spigot_run.sh java $JVM_OPTS -jar spigot.jar nogui
+/spigot_run.sh java "$JVM_OPTS" "-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT}" -jar spigot.jar nogui
 
 # fallback to root and run shell if spigot don't start/forced exit
 bash

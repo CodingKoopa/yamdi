@@ -44,7 +44,6 @@ VOLUME ["/opt/spigot"]
 
 ENV MOTD A Minecraft Server Powered by Spigot & Docker
 ENV REV latest
-ENV JVM_OPTS -Xmx1024M -Xms1024M
 ENV LEVEL=world \
   PVP=true \
   VDIST=10 \
