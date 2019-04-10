@@ -27,9 +27,6 @@ ENV RUN_DIR /minecraft_run
 
 RUN mkdir $RUN_DIR
 
-ADD ./minecraft/ops.txt /usr/local/etc/minecraft/ops.txt
-ADD ./minecraft/white-list.txt /usr/local/etc/minecraft/white-list.txt
-ADD ./minecraft/server.properties /usr/local/etc/minecraft/server.properties
 ADD ./lib/scripts/spigot_init.sh /spigot_init.sh
 ADD ./lib/scripts/spigot_run.sh /spigot_run.sh
 ADD ./lib/scripts/spigot_cmd.sh /spigot_cmd.sh
