@@ -28,8 +28,10 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.ja
   popd
   # Remove the build files to preserve space.
   rm -rf "$SPIGOT_BUILD_DIRECTORY"
-  # Make a plugin directory.
-  mkdir -p $SPIGOT_DIRECTORY/plugins
+  # Make a separate plugin directory.
+  mkdir -p "$SPIGOT_PLUGIN_DIRECTORY"
+  # Direct Spigot to the separate directory.
+  ln -sf "$SPIGOT_PLUGIN_DIRECTORY" "$SPIGOT_DIRECTORY/plugins"
 fi
 
 # Remove any preexisting build.

@@ -10,6 +10,7 @@ RUN apk upgrade --update --no-cache && \
 
 # Set the directory for the Spigot installation to be kept.
 ENV SPIGOT_DIRECTORY /opt/spigot
+ENV SPIGOT_PLUGIN_DIRECTORY /opt/spigot-plugins
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE_PATH=/tmp/spigot-commmand-input
 
@@ -23,8 +24,8 @@ EXPOSE 25565
 # Expose the Dynmap web port.
 EXPOSE 8123
 
-# Create a mount point for the Spigot installation directory.
-VOLUME ["/opt/spigot"]
+# Create a mount point for the Spigot installation directory and plugin directory.
+VOLUME /opt/spigot /opt/spigot-plugins
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT /spigot.sh
