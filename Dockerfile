@@ -1,5 +1,6 @@
-# Set the base image to the official Alpine Linux image.
-FROM alpine
+# Set the base image to the official Alpine Linux image. This version is specified because the latest tag didn't pull
+# a functioning manifest list for aarch64.
+FROM alpine:3.8
 
 # Java Version and other ENV
 ENV JAVA_VERSION_MAJOR=8 \
