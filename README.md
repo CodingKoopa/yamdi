@@ -148,38 +148,6 @@ the setting shown in the example (max and min at 1024 MB):
 
     docker run -e 'JVM_OPTS=-Xmx1024M -Xms1024M' ...
 
-## Plugins  
-
-DYNMAP=true ESSENTIALS=false ESSENTIALSPROTECT=false PERMISSIONSEX=false CLEARLAG=false
-
-### WorldBorder
-
-    docker run -d -e WORLDBORDER=true -p 8123:8123 ...
-
-### Dynmap
-
-    docker run -d -e DYNMAP=true -p 8123:8123 ...
-
-### Essentials
-
-    docker run -d -e ESSENTIALS=true ...
-
-### EssentialsProctect
-
-    docker run -d -e ESSENTIALS=true ESSENTIALSPROTECT=true ...
-
-#### Creeper blockdamage options
-
-    docker run -d -e ESSENTIALS=true ESSENTIALSPROTECT=true ESSENTIALS_CREEPERBLOCKDMG=true ...
-
-### PermissionsEx
-
-    docker run -d -e PERMISSIONSEX=true ...
-
-### Clearlag
-
-    docker run -d -e CLEARLAG=true ...
-
 ## Issues
 
 If you have any problems with or questions about this image, please contact me by submitting a ticket through a [GitHub issue](https://github.com/AshDevFr/docker-spigot/issues)
