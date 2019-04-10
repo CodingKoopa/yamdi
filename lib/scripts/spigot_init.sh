@@ -1,13 +1,6 @@
 #!/bin/bash
 set -e
 
-# Change owner to minecraft.
-if [ "$SKIPCHMOD" != "true" ]; then
-  sudo chown -R minecraft:minecraft $SPIGOT_DIRECTORY/
-else
-  echo "SKIPCHMOD option enabled. If you have access issue with your files, disable it"
-fi
-
 if [ ! -e $SPIGOT_DIRECTORY/eula.txt ]; then
   if [ "$EULA" != "" ]; then
     echo "# Generated via Docker on $(date)" > $SPIGOT_DIRECTORY/eula.txt

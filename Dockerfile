@@ -25,13 +25,7 @@ ENV APP_NAME=server
 ENV SPIGOT_DIRECTORY /opt/spigot
 ENV RUN_DIR /minecraft_run
 
-RUN addgroup -g 1000 -S minecraft && \
-  adduser -u 1000 -S minecraft -G minecraft -h /opt/spigot
-
-RUN echo "minecraft ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/minecraft
-
 RUN mkdir $RUN_DIR
-RUN chown minecraft:minecraft $RUN_DIR
 
 ADD ./minecraft/ops.txt /usr/local/etc/minecraft/ops.txt
 ADD ./minecraft/white-list.txt /usr/local/etc/minecraft/white-list.txt
@@ -47,9 +41,6 @@ RUN chmod +x /spigot_cmd.sh
 EXPOSE 25565
 EXPOSE 8123
 VOLUME ["/opt/spigot"]
-
-ENV UID=1000
-ENV GUID=1000
 
 ENV MOTD A Minecraft Server Powered by Spigot & Docker
 ENV REV latest
