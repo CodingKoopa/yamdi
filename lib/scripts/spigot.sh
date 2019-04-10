@@ -47,9 +47,9 @@ fi
 # Select the spigot.jar for this particular rev.
 rm -f $SPIGOT_DIRECTORY/spigot.jar && ln -s $SPIGOT_DIRECTORY/spigot-$REV.jar $SPIGOT_DIRECTORY/spigot.jar
 
+rm -f "$COMMAND_INPUT_FILE_PATH"
+mkfifo -m700 "$COMMAND_INPUT_FILE_PATH"
+
 cd $SPIGOT_DIRECTORY/
-
-/spigot_run.sh java "$JVM_OPTS" "-Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT}" -jar spigot.jar nogui
-
-# fallback to root and run shell if spigot don't start/forced exit
-bash
+exec java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar spigot.jar nogui \
+    < <(tail -f "$COMMAND_INPUT_FILE_PATH")
