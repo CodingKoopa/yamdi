@@ -29,15 +29,6 @@ if [ -z "$REV" ]; then
     REV="latest"
 fi
 
-# Some variables depend on other variables.
-
-# Creeper block disable is a feature of the Essentials plugin.
-if [ -n "$ESSENTIALS_CREEPERBLOCKDMG" ]; then
-    if [ "$ESSENTIALS_CREEPERBLOCKDMG" = "true" ]; then
-	     ESSENTIALS=true
-    fi
-fi
-
 # Force rebuild of spigot.jar if REV is latest.
 rm -f $SPIGOT_HOME/spigot-latest.jar
 
@@ -56,83 +47,6 @@ fi
 
 # Select the spigot.jar for this particular rev.
 rm -f $SPIGOT_HOME/spigot.jar && ln -s $SPIGOT_HOME/spigot-$REV.jar $SPIGOT_HOME/spigot.jar
-
-# Install WorldBorder.
-if [ -n "$WORLDBORDER" ]; then
-  if [ "$WORLDBORDER" = "true" ]; then
-    echo "Downloading WorldBorder..."
-    wget -O $SPIGOT_HOME/plugins/WorldBorder.jar https://dev.bukkit.org/projects/worldborder/files/latest
-  else
-    echo "Removing WorldBorder..."
-    rm -f $SPIGOT_HOME/plugins/WorldBorder.jar
-  fi
-fi
-
-if [ -n "$DYNMAP" ]; then
-  if [ "$DYNMAP" = "true" ]; then
-    echo "Downloading Dynmap..."
-    wget -O $SPIGOT_HOME/plugins/dynmap-HEAD.jar http://mikeprimm.com/dynmap/builds/dynmap/Dynmap-HEAD-spigot.jar
-    wget -O $SPIGOT_HOME/plugins/dynmap-mobs-HEAD.jar http://mikeprimm.com/dynmap/builds/dynmap-mobs/dynmap-mobs-HEAD.jar
-    if [ -n "$ESSENTIALS" ]; then
-      if [ "$ESSENTIALS" = "true" ]; then
-        echo "Downloading Dynmap Essentials..."
-        wget -O $SPIGOT_HOME/plugins/Dynmap-Essentials-HEAD.jar http://mikeprimm.com/dynmap/builds/Dynmap-Essentials/Dynmap-Essentials-HEAD.jar
-      else
-        echo "Removing Dynmap Essential..."
-        rm -f $SPIGOT_HOME/plugins/Dynmap-Essentials-HEAD.jar
-      fi
-    fi
-  else
-    echo "Removing Dynmap..."
-    rm -f $SPIGOT_HOME/plugins/dynmap-HEAD.jar
-    rm -f $SPIGOT_HOME/plugins/dynmap-mobs-HEAD.jar
-    rm -f $SPIGOT_HOME/plugins/Dynmap-Essentials-HEAD.jar
-  fi
-fi
-
-if [ -n "$ESSENTIALS" ]; then
-  if [ "$ESSENTIALS" = "true" ]; then
-    echo "Downloading Essentials..."
-    wget -O $SPIGOT_HOME/plugins/Essentials-2.x-SNAPSHOT.jar https://hub.spigotmc.org/jenkins/job/Spigot-Essentials/lastStableBuild/artifact/Essentials/target/Essentials-2.x-SNAPSHOT.jar
-    if [ -n "$ESSENTIALSPROTECT" ]; then
-      if [ "$ESSENTIALSPROTECT" = "true" ]; then
-        echo "Downloading EssentialsProtect..."
-        wget -O $SPIGOT_HOME/plugins/EssentialsProtect-2.x-SNAPSHOT.jar https://hub.spigotmc.org/jenkins/job/Spigot-Essentials/lastStableBuild/artifact/EssentialsProtect/target/EssentialsProtect-2.x-SNAPSHOT.jar
-      else
-        echo "Removing EssentialsProtect..."
-        rm -f $SPIGOT_HOME/plugins/EssentialsProtect-2.x-SNAPSHOT.jar
-      fi
-      if [ -n "$ESSENTIALS_CREEPERBLOCKDMG" -a -f $SPIGOT_HOME/plugins/Essentials/config.yml ]; then
-        echo "Setting creeper block damage to $ESSENTIALS_CREEPERBLOCKDMG..."
-        sed -i "s/creeper-blockdamage: .*/creeper-blockdamage: $ESSENTIALS_CREEPERBLOCKDMG/" $SPIGOT_HOME/plugins/Essentials/config.yml
-      fi
-    fi
-  else
-    echo "Removing Essentials..."
-    rm -f $SPIGOT_HOME/plugins/Essentials-2.x-SNAPSHOT.jar
-    rm -f $SPIGOT_HOME/plugins/EssentialsProtect-2.x-SNAPSHOT.jar
-  fi
-fi
-
-if [ -n "$CLEARLAG" ]; then
-  if [ "$CLEARLAG" = "true" ]; then
-    echo "Downloading ClearLag..."
-    wget -O $SPIGOT_HOME/plugins/Clearlag.jar https://dev.bukkit.org/projects/clearlagg/files/latest
-  else
-    echo "Removing Clearlag..."
-    rm -f $SPIGOT_HOME/plugins/Clearlag.jar
-  fi
-fi
-
-if [ -n "$PERMISSIONSEX" ]; then
-  if [ "$PERMISSIONSEX" = "true" ]; then
-    echo "Downloading PermissionsEx..."
-    wget -O $SPIGOT_HOME/plugins/PermissionsEx.jar https://dev.bukkit.org/projects/permissionsex/files/latest
-  else
-    echo "Removing PermissionsEx..."
-    rm -f $SPIGOT_HOME/plugins/PermissionsEx.jar
-  fi
-fi
 
 if [ ! -f $SPIGOT_HOME/ops.txt ]
 then
