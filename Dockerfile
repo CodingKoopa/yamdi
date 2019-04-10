@@ -7,7 +7,6 @@ RUN apk upgrade --update && \
     apk add --update wget curl ca-certificates openssl bash git screen util-linux sudo shadow nss imagemagick && \
     update-ca-certificates
 
-ENV APP_NAME=server
 #default directory for SPIGOT-server
 ENV SPIGOT_DIRECTORY /opt/spigot
 ENV RUN_DIR /minecraft_run
