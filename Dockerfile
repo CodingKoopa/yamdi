@@ -1,12 +1,6 @@
 # Set the base image to the official OpenJDK image. 8 is an LTS release, with Alpine Linux support.
 FROM openjdk:8-alpine
 
-# Java Version and other ENV
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=112 \
-    JAVA_VERSION_BUILD=15 \
-    JAVA_PACKAGE=server-jre
-
 # Install dependencies
 # TODO: Some of these can probably be reduced.
 RUN apk upgrade --update && \
