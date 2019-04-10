@@ -11,6 +11,7 @@ ENV JAVA_VERSION_MAJOR=8 \
     LANG=C.UTF-8
 
 # Install dependencies
+# TODO: Some of these can probably be reduced.
 RUN apk upgrade --update && \
     apk add --update wget curl ca-certificates openssl bash git screen util-linux sudo shadow nss imagemagick && \
     update-ca-certificates
