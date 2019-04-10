@@ -160,3 +160,6 @@ Here, the device only has 2GB of RAM available. BuildTools needs at least approx
 
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
+
+## License
+This project is licensed under the MIT license.
