@@ -1,6 +1,5 @@
-# Set the base image to the official Alpine Linux image. This version is specified because the latest tag didn't pull
-# a functioning manifest list for aarch64.
-FROM alpine:3.8
+# Set the base image to the official OpenJDK image. 8 is an LTS release, with Alpine Linux support.
+FROM openjdk:8-alpine
 
 # Java Version and other ENV
 ENV JAVA_VERSION_MAJOR=8 \
@@ -16,9 +15,6 @@ ENV JAVA_VERSION_MAJOR=8 \
 RUN apk upgrade --update && \
     apk add --update wget curl ca-certificates openssl bash git screen util-linux sudo shadow nss imagemagick && \
     update-ca-certificates
-
-# Install Java8
-RUN apk add openjdk8-jre
 
 ENV APP_NAME=server
 #default directory for SPIGOT-server
