@@ -25,8 +25,5 @@ EXPOSE 25565
 EXPOSE 8123
 VOLUME ["/opt/spigot"]
 
-ENV MOTD A Minecraft Server Powered by Spigot & Docker
-ENV REV latest
-
 #set default command
 CMD trap 'exit' INT; /spigot_init.sh
