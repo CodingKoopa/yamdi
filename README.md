@@ -37,17 +37,17 @@ It is also worth noting that the OpenJDK base image is multiarch, so this should
 ### Sending Commands to Spigot
 YASDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
 ```sh
-docker exec spigot /spigot_cmd.sh $COMMAND
+docker exec spigot cmd $COMMAND
 ```
 ```sh
-docker-compose exec spigot /spigot_cmd.sh $COMMAND
+docker-compose exec spigot cmd $COMMAND
 ```
 A command that can be used here (see `help` for more commands) is `version`.
 ```sh
-docker exec spigot /spigot_cmd.sh version
+docker exec spigot cmd version
 ```
 ```sh
-docker-compose exec spigot /spigot_cmd.sh version
+docker-compose exec spigot cmd version
 ```
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
