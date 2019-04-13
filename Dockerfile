@@ -12,7 +12,7 @@ RUN apk upgrade --update --no-cache && \
 ENV SPIGOT_DIRECTORY /opt/spigot
 ENV SPIGOT_PLUGIN_DIRECTORY /opt/spigot-plugins
 # Set the directory for the command named pipe to be.
-ENV COMMAND_INPUT_FILE_PATH=/tmp/spigot-commmand-input
+ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
 
 # Add the Spigot launch Bash script to the image.
 ADD ./spigot.sh /spigot.sh
