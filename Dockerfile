@@ -17,8 +17,12 @@ ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
 
 # Add the Spigot launch Bash script to the image.
 ADD ./spigot /usr/bin/
+# Make the script exxecutable.
+RUN chmod +x /usr/bin/spigot
 # Add the Spigot command running script to the image.
 ADD ./cmd /usr/bin/
+# Make the script exxecutable.
+RUN chmod +x /usr/bin/cmd
 
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
