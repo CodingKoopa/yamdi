@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "$@" > "$COMMAND_INPUT_FILE_PATH"
+echo "$@" > "$COMMAND_INPUT_FILE"

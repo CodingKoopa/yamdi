@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-# Some variables are mandatory.
+declare -r SPIGOT_REVISION_JAR="$SPIGOT_DIRECTORY/spigot-$REV.jar"
+declare -r SPIGOT_RUN_JAR="$SPIGOT_DIRECTORY/spigot.jar"
+
 if [ -z "$REV" ]; then
     REV="latest"
 fi
@@ -13,7 +15,7 @@ if [ -z "$SPIGOT_MEMORY_AMOUNT" ]; then
 fi
 
 # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already exist.
-if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.jar ]; then
+if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
   echo "Building Spigot."
   # Build in a temporary directory.
   declare -r SPIGOT_BUILD_DIRECTORY=/tmp/spigot-build
@@ -25,29 +27,29 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.ja
   # shellcheck disable=SC2086
   java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} -jar BuildTools.jar --rev $REV
   # Copy the Spigot build to the Spigot directory.
-  cp spigot-*.jar "$SPIGOT_DIRECTORY/spigot-$REV.jar"
+  cp spigot-*.jar "$SPIGOT_REVISION_JAR"
   popd
   # Remove the build files to preserve space.
   rm -rf "$SPIGOT_BUILD_DIRECTORY"
+
   # Make a separate plugin directory.
   mkdir -p "$SPIGOT_PLUGIN_DIRECTORY"
   # Direct Spigot to the separate directory.
   ln -sf "$SPIGOT_PLUGIN_DIRECTORY" "$SPIGOT_DIRECTORY/plugins"
 fi
 
-# Remove any preexisting build.
-rm -f $SPIGOT_DIRECTORY/spigot.jar
 # Select the specified revision.
-ln -s $SPIGOT_DIRECTORY/spigot-$REV.jar $SPIGOT_DIRECTORY/spigot.jar
+ln -sf "$SPIGOT_REVISION_JAR" "$SPIGOT_RUN_JAR"
 
 # Make sure the command input file is clear.
-rm -f "$COMMAND_INPUT_FILE_PATH"
+rm -f "$COMMAND_INPUT_FILE"
 # Make a named pipe for sending commands to Spigot. It is important that the permissions are 700 because, if they were
 # world writeable, any user could run a Spigot command with administrator priviledges.
-mkfifo -m700 "$COMMAND_INPUT_FILE_PATH"
+mkfifo -m700 "$COMMAND_INPUT_FILE"
+
 # Enter the Spigot directory because the Minecraft server checks the current directory for configuration files.
-cd $SPIGOT_DIRECTORY/
+cd "$SPIGOT_DIRECTORY"
 # Start the launcher with the specified memory amounts.
 # shellcheck disable=SC2086
-java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar spigot.jar nogui \
-    < <(tail -f "$COMMAND_INPUT_FILE_PATH")
+java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar "$SPIGOT_RUN_JAR" nogui \
+    < <(tail -f "$COMMAND_INPUT_FILE")
