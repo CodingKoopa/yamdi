@@ -16,9 +16,9 @@ ENV SPIGOT_PLUGIN_DIRECTORY /opt/spigot-plugins
 ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
 
 # Add the Spigot launch Bash script to the image.
-ADD ./spigot.sh /spigot.sh
+ADD ./spigot /usr/bin/
 # Add the Spigot command running script to the image.
-ADD ./cmd.sh /cmd.sh
+ADD ./cmd /usr/bin/
 
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
@@ -27,4 +27,4 @@ EXPOSE 25565 8123
 VOLUME /opt/spigot /opt/spigot-config /opt/spigot-plugins
 
 # Set the container entrypoint to the startup script.
-ENTRYPOINT /spigot.sh
+ENTRYPOINT spigot
