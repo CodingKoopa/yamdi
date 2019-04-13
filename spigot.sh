@@ -22,6 +22,7 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f $SPIGOT_DIRECTORY/spigot-$REV.ja
   # Download the latest BuildTools JAR.
   wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
   # Run BuildTools with the specified RAM, for the specified revision.
+  # shellcheck disable=SC2086
   java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} -jar BuildTools.jar --rev $REV
   # Copy the Spigot build to the Spigot directory.
   cp spigot-*.jar "$SPIGOT_DIRECTORY/spigot-$REV.jar"
@@ -47,5 +48,6 @@ mkfifo -m700 "$COMMAND_INPUT_FILE_PATH"
 # Enter the Spigot directory because the Minecraft server checks the current directory for configuration files.
 cd $SPIGOT_DIRECTORY/
 # Start the launcher with the specified memory amounts.
+# shellcheck disable=SC2086
 java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar spigot.jar nogui \
     < <(tail -f "$COMMAND_INPUT_FILE_PATH")
