@@ -10,6 +10,7 @@ RUN apk upgrade --update --no-cache && \
 
 # Set the directory for the Spigot installation to be kept.
 ENV SPIGOT_DIRECTORY /opt/spigot
+ENV SPIGOT_CONFIG_DIRECTORY /opt/spigot-config
 ENV SPIGOT_PLUGIN_DIRECTORY /opt/spigot-plugins
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
@@ -17,13 +18,13 @@ ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
 # Add the Spigot launch Bash script to the image.
 ADD ./spigot.sh /spigot.sh
 # Add the Spigot command running script to the image.
-ADD ./spigot_cmd.sh /spigot_cmd.sh
+ADD ./cmd.sh /cmd.sh
 
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
 # Create a mount point for the Spigot installation directory and plugin directory.
-VOLUME /opt/spigot /opt/spigot-plugins
+VOLUME /opt/spigot /opt/spigot-config /opt/spigot-plugins
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT /spigot.sh
