@@ -5,13 +5,13 @@ declare -r SPIGOT_REVISION_JAR="$SPIGOT_DIRECTORY/spigot-$REV.jar"
 declare -r SPIGOT_RUN_JAR="$SPIGOT_DIRECTORY/spigot.jar"
 
 if [ -z "$REV" ]; then
-    REV="latest"
+  REV="latest"
 fi
 if [ -z "$BUILDTOOLS_MEMORY_AMOUNT" ]; then
-    BUILDTOOLS_MEMORY_AMOUNT="1024M"
+  BUILDTOOLS_MEMORY_AMOUNT="1024M"
 fi
 if [ -z "$SPIGOT_MEMORY_AMOUNT" ]; then
-    SPIGOT_MEMORY_AMOUNT="1024M"
+  SPIGOT_MEMORY_AMOUNT="1024M"
 fi
 
 # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already exist.
@@ -25,7 +25,8 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
   wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
   # Run BuildTools with the specified RAM, for the specified revision.
   # shellcheck disable=SC2086
-  java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} -jar BuildTools.jar --rev $REV
+  java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} \
+      -jar BuildTools.jar --rev $REV
   # Copy the Spigot build to the Spigot directory.
   cp spigot-*.jar "$SPIGOT_REVISION_JAR"
   popd
@@ -35,8 +36,8 @@ fi
 
 # Make a separate config directory.
 mkdir -p "$SPIGOT_CONFIG_DIRECTORY"
-# Configuration files are not put in a seperate directory, but are instead scattered around the working directory. So
-# that's a bit of an issue.
+# Configuration files are not put in a seperate directory, but are instead scattered around the
+# working directory. So that's a bit of an issue.
 declare -ar CONFIGURATION_FILES=(
   # EULA.
   "eula.txt"
@@ -64,23 +65,20 @@ for FILE in "${CONFIGURATION_FILES[@]}"; do
   ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE"
 done
 
-# Make a separate plugin directory.
-mkdir -p "$SPIGOT_PLUGIN_DIRECTORY"
-# Direct Spigot to the separate directory.
-ln -sf "$SPIGOT_PLUGIN_DIRECTORY" "$SPIGOT_DIRECTORY/plugins"
-
 # Select the specified revision.
 ln -sf "$SPIGOT_REVISION_JAR" "$SPIGOT_RUN_JAR"
 
 # Make sure the command input file is clear.
 rm -f "$COMMAND_INPUT_FILE"
-# Make a named pipe for sending commands to Spigot. It is important that the permissions are 700 because, if they were
-# world writeable, any user could run a Spigot command with administrator priviledges.
+# Make a named pipe for sending commands to Spigot. It is important that the permissions are 700
+# because, if they were world writeable, any user could run a Spigot command with administrator
+# priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
-# Enter the Spigot directory because the Minecraft server checks the current directory for configuration files.
+# Enter the Spigot directory because the Minecraft server checks the current directory for
+# configuration files.
 cd "$SPIGOT_DIRECTORY"
 # Start the launcher with the specified memory amounts.
 # shellcheck disable=SC2086
-java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar "$SPIGOT_RUN_JAR" nogui \
-    < <(tail -f "$COMMAND_INPUT_FILE")
+java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar "$SPIGOT_RUN_JAR" \
+    nogui --plugins $SPIGOT_PLUGIN_DIRECTORY < <(tail -f "$COMMAND_INPUT_FILE")
