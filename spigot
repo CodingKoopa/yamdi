@@ -32,42 +32,42 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
   # Remove the build files to preserve space.
   rm -rf "$SPIGOT_BUILD_DIRECTORY"
 
-  # Make a separate config directory.
-  mkdir -p "$SPIGOT_CONFIG_DIRECTORY"
-  # Configuration files are not put in a seperate directory, but are instead scattered around the working directory. So
-  # that's a bit of an issue.
-  declare -ar CONFIGURATION_FILES=(
-      # EULA.
-      "eula.txt"
-      # Vanilla server settings.
-      # See: https://minecraft.gamepedia.com/Server.properties
-      "server.properties"
-      # Spigot settings.
-      # See: https://www.spigotmc.org/wiki/spigot-configuration/
-      "spigot.yml"
-      # Bukkit settings.
-      # See: https://bukkit.gamepedia.com/Bukkit.yml
-      "bukkit.yml"
-      # Bukkit help page settings.
-      # https://bukkit.gamepedia.com/Help.yml
-      "help.yml"
-      # Bukkit command permissions.
-      # https://bukkit.gamepedia.com/Permissions.yml
-      "permissions.yml"
-      # Bukkit custom commands.
-      # See: https://bukkit.gamepedia.com/Commands.yml
-      "commands.yml"
-  )
-  for FILE in "${CONFIGURATION_FILES[@]}"; do
-    touch "$SPIGOT_CONFIG_DIRECTORY/$FILE"
-    ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE"
-  done
-
   # Make a separate plugin directory.
   mkdir -p "$SPIGOT_PLUGIN_DIRECTORY"
   # Direct Spigot to the separate directory.
   ln -sf "$SPIGOT_PLUGIN_DIRECTORY" "$SPIGOT_DIRECTORY/plugins"
 fi
+
+# Make a separate config directory.
+mkdir -p "$SPIGOT_CONFIG_DIRECTORY"
+# Configuration files are not put in a seperate directory, but are instead scattered around the working directory. So
+# that's a bit of an issue.
+declare -ar CONFIGURATION_FILES=(
+    # EULA.
+    "eula.txt"
+    # Vanilla server settings.
+    # See: https://minecraft.gamepedia.com/Server.properties
+    "server.properties"
+    # Spigot settings.
+    # See: https://www.spigotmc.org/wiki/spigot-configuration/
+    "spigot.yml"
+    # Bukkit settings.
+    # See: https://bukkit.gamepedia.com/Bukkit.yml
+    "bukkit.yml"
+    # Bukkit help page settings.
+    # https://bukkit.gamepedia.com/Help.yml
+    "help.yml"
+    # Bukkit command permissions.
+    # https://bukkit.gamepedia.com/Permissions.yml
+    "permissions.yml"
+    # Bukkit custom commands.
+    # See: https://bukkit.gamepedia.com/Commands.yml
+    "commands.yml"
+)
+for FILE in "${CONFIGURATION_FILES[@]}"; do
+touch "$SPIGOT_CONFIG_DIRECTORY/$FILE"
+ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE"
+done
 
 # Select the specified revision.
 ln -sf "$SPIGOT_REVISION_JAR" "$SPIGOT_RUN_JAR"
