@@ -38,30 +38,30 @@ mkdir -p "$SPIGOT_CONFIG_DIRECTORY"
 # Configuration files are not put in a seperate directory, but are instead scattered around the working directory. So
 # that's a bit of an issue.
 declare -ar CONFIGURATION_FILES=(
-    # EULA.
-    "eula.txt"
-    # Vanilla server settings.
-    # See: https://minecraft.gamepedia.com/Server.properties
-    "server.properties"
-    # Spigot settings.
-    # See: https://www.spigotmc.org/wiki/spigot-configuration/
-    "spigot.yml"
-    # Bukkit settings.
-    # See: https://bukkit.gamepedia.com/Bukkit.yml
-    "bukkit.yml"
-    # Bukkit help page settings.
-    # https://bukkit.gamepedia.com/Help.yml
-    "help.yml"
-    # Bukkit command permissions.
-    # https://bukkit.gamepedia.com/Permissions.yml
-    "permissions.yml"
-    # Bukkit custom commands.
-    # See: https://bukkit.gamepedia.com/Commands.yml
-    "commands.yml"
+  # EULA.
+  "eula.txt"
+  # Vanilla server settings.
+  # See: https://minecraft.gamepedia.com/Server.properties
+  "server.properties"
+  # Spigot settings.
+  # See: https://www.spigotmc.org/wiki/spigot-configuration/
+  "spigot.yml"
+  # Bukkit settings.
+  # See: https://bukkit.gamepedia.com/Bukkit.yml
+  "bukkit.yml"
+  # Bukkit help page settings.
+  # https://bukkit.gamepedia.com/Help.yml
+  "help.yml"
+  # Bukkit command permissions.
+  # https://bukkit.gamepedia.com/Permissions.yml
+  "permissions.yml"
+  # Bukkit custom commands.
+  # See: https://bukkit.gamepedia.com/Commands.yml
+  "commands.yml"
 )
 for FILE in "${CONFIGURATION_FILES[@]}"; do
-touch "$SPIGOT_CONFIG_DIRECTORY/$FILE"
-ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE"
+  touch "$SPIGOT_CONFIG_DIRECTORY/$FILE"
+  ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE"
 done
 
 # Make a separate plugin directory.
