@@ -1,6 +1,27 @@
 #!/bin/bash
 set -e
 
+function stop() {
+  # Print a message because otherwise, it is very difficult to tell that this trap is actually
+  # being triggered.
+  echo "Gracefully shutting down server."
+  # Send the "stop" command to the server.
+  cmd stop
+  # Wait for the Java process to exit.
+  wait
+}
+
+# Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
+# is pressed. Spigot handles this by quitting, without saving. SIGTERM is what is sent to a program
+# when "docker stop" or "docker-compose" is used. SIGTERM is also used when an active Docker
+# Compose session is quit with Ctrl+C (This does not work in regular Docker.).
+
+# SIGINT and SIGTERM are expected to implemented similarly. Spigot implements them by shutting down
+# the server, but without saving. The "stop" Bukkit command shuts down the server properly, and does
+# save everything, so here the signals are trapped, and will intervene to run the "stop" command.
+trap stop SIGINT
+trap stop SIGTERM
+
 declare -r SPIGOT_REVISION_JAR="$SPIGOT_DIRECTORY/spigot-$REV.jar"
 declare -r SPIGOT_RUN_JAR="$SPIGOT_DIRECTORY/spigot.jar"
 
@@ -80,7 +101,10 @@ mkfifo -m700 "$COMMAND_INPUT_FILE"
 # Enter the Spigot directory because the Minecraft server checks the current directory for
 # configuration files.
 cd "$SPIGOT_DIRECTORY"
-# Start the launcher with the specified memory amounts.
+# Start the launcher with the specified memory amounts. Execute it in the background, so that this
+# script can still recieve signals.
 # shellcheck disable=SC2086
 java $JVM_OPTS -Xmx${SPIGOT_MEMORY_AMOUNT} -Xms${SPIGOT_MEMORY_AMOUNT} -jar "$SPIGOT_RUN_JAR" \
-    nogui --plugins $SPIGOT_PLUGIN_DIRECTORY < <(tail -f "$COMMAND_INPUT_FILE")
+    nogui --plugins $SPIGOT_PLUGIN_DIRECTORY < <(tail -f "$COMMAND_INPUT_FILE") &
+# Don't exit this script before the Java process does.
+wait
