@@ -61,8 +61,10 @@ declare -ar CONFIGURATION_FILES=(
   "commands.yml"
 )
 for FILE in "${CONFIGURATION_FILES[@]}"; do
-  touch "$SPIGOT_CONFIG_DIRECTORY/$FILE" || true
-  ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE" || true
+  if [ ! -f $FILE ]; then
+    touch "$SPIGOT_CONFIG_DIRECTORY/$FILE" || true
+    ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE" || true
+  fi
 done
 
 # Select the specified revision.
