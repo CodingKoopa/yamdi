@@ -6,7 +6,7 @@ Yet Another Spigot Docker Image is a Docker image for running the Spigot Minecra
 - The code shouldn't do anything unnecessary.
 
 The last point is particularly relevant. The original setup offers functionality for specifying server properties via environment variables (which does work very well), as well as running it as a `minecraft` user with restricted permissions. This image has both of these things stripped out because, as a system administrator, you are expected to:
-- Use [bind mounts](https://docs.docker.com/storage/bind-mounts/) to bind the [server properties file](https://minecraft.gamepedia.com/Server.properties) and manually edit the configuration that way.
+- Use [bind mounts](https://docs.docker.com/storage/bind-mounts/) to bind the configuration volume and manually edit the configuration that way.
 - Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have Spigot run as an unprivledged user.
 
 An additional motivation for making things light and clean is that this image is particularly made to be very portable, that is, able to run on embedded devices like a Raspberry Pi as well as a traditional server.
@@ -34,6 +34,12 @@ services:
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
+### Spigot Data
+YASDI exposes three volumes:
+- `/opt/spigot`, the Spigot installation. This contains the Spigot `JAR`, some world-specific configurations, and world data.
+- `/opt/spigot-config`, the Spigot config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
+- `/opt/spigot-plugins`, the Spigot plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+
 ### Sending Commands to Spigot
 YASDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
 ```sh
@@ -51,10 +57,8 @@ docker-compose exec spigot cmd version
 ```
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
-### Spigot Data
-YASDI exposes two volumes:
-- `/opt/spigot`, the Spigot installation. This contains the Spigot `JAR`, all server-related configurations, and world data.
-- `/opt/spigot-plugins`, the Spigot plugins. This contains plugins that are to be loaded by Spigot.
+### Shutting Spigot Down
+YASDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved.
 
 ### JVM Configuration
 
