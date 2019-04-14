@@ -82,7 +82,7 @@ declare -ar CONFIGURATION_FILES=(
   "commands.yml"
 )
 for FILE in "${CONFIGURATION_FILES[@]}"; do
-  if [ ! -f $FILE ]; then
+  if [ ! -f "$FILE" ]; then
     touch "$SPIGOT_CONFIG_DIRECTORY/$FILE" || true
     ln -sf "$SPIGOT_CONFIG_DIRECTORY/$FILE" "$SPIGOT_DIRECTORY/$FILE" || true
   fi
