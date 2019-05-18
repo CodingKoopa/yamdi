@@ -23,7 +23,7 @@ docker run --env SERVER_TYPE=paper
 ```
 ```yml
 services:
-  mc-server:
+  yamdi:
     environment:
       SERVER_TYPE: "paper"
 ```
@@ -35,7 +35,7 @@ docker run --env REV=1.14.1
 ```
 ```yml
 services:
-  mc-server:
+  yamdi:
     environment:
       REV: "1.14.1"
 ```
@@ -44,18 +44,18 @@ For Paper, `PAPER_BUILD` (a build for a particular revision) can be set in the s
 ### Starting the Server
 Images for YAMDI are not provided, so it must be built:
 ```sh
-docker build . -t spigot
+docker build . -t yamdi
 ```
 ```yml
 services:
-  mc-server:
+  yamdi:
     build: .
 ```
 As the `Dockerfile` is (deliberately) placed in the root of this repository, this repository can somewhat cleanly be added as a submodule for another repo if you're using this in a larger setup.
 ```yml
 services:
-  mc-server:
-    build: ./mc-server
+  yamdi:
+    build: ./yamdi
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
@@ -69,7 +69,7 @@ docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount 
 ```
 ```yml
 services:
-  mc-server:
+  yamdi:
     volumes:
       - type: volume
         source: mc-server-data
@@ -114,7 +114,7 @@ docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env GAME_MEMORY_AMOUNT=1G
 ```
 ```yml
 services:
-  mc-server:
+  yamdi:
     environment:
       BUILDTOOLS_MEMORY_AMOUNT: "800M"
       GAME_MEMORY_AMOUNT: "1G"

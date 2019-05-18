@@ -20,9 +20,9 @@ ENV SERVER_PLUGIN_DIRECTORY /opt/server-plugins
 ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 
 # Add the server launch Bash script to the image.
-ADD ./server.sh /usr/bin/server
-# Make the script exxecutable.
-RUN chmod +x /usr/bin/server
+ADD ./yamdi.sh /usr/bin/yamdi
+# Make the script executable.
+RUN chmod +x /usr/bin/yamdi
 # Add the server command running script to the image.
 ADD ./cmd.sh /usr/bin/cmd
 # Make the script executable.
@@ -35,4 +35,4 @@ EXPOSE 25565 8123
 VOLUME /opt/server /opt/server-config /opt/server-plugins
 
 # Set the container entrypoint to the startup script.
-ENTRYPOINT ["/usr/bin/server"]
+ENTRYPOINT ["/usr/bin/yamdi"]
