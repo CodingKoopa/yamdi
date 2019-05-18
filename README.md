@@ -1,6 +1,6 @@
-# Yet Another Spigot Docker Image
+# Yet Another Minecraft Docker Image
 
-Yet Another Spigot Docker Image is a Docker image for running the Spigot Minecraft server software that aims to be as clean as possible while maintaining functionality. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
+Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server softwares that aims to be as clean as possible while maintaining functionality. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
 - The code for both the Docker image building and the script starting up Spigot should be understandable. Important design decisions should be properly documented.
 - The code should be concise, combining statements where it makes sense.
 - The code shouldn't do anything unnecessary.
@@ -16,32 +16,74 @@ These decisions were made because of how, ultimately, Docker does handle these t
 ## Usage
 In this sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`.
 
-### Starting Spigot
-Images for YASDI are not provided, so it must be built:
+### Server Type
+The type of server can be specified by setting the `SERVER_TYPE` environment variable. Currently supported values are `spigot` (default) and `paper`, case sensitive.
+```sh
+docker run --env SERVER_TYPE=paper
+```
+```yml
+services:
+  mc-server:
+    environment:
+      SERVER_TYPE: "paper"
+```
+
+### Server Version
+The target revision, or game version, can be adjusted by setting the `REV` variable either to `latest` (default) or a supported game version. Setting it to a version is recommended because of how plugins may not work on newer versions.
+```sh
+docker run --env REV=1.14.1
+```
+```yml
+services:
+  mc-server:
+    environment:
+      REV: "1.14.1"
+```
+For Paper, `PAPER_BUILD` (a build for a particular revision) can be set in the same way.
+
+### Starting the Server
+Images for YAMDI are not provided, so it must be built:
 ```sh
 docker build . -t spigot
 ```
 ```yml
 services:
-  spigot:
+  mc-server:
     build: .
 ```
 As the `Dockerfile` is (deliberately) placed in the root of this repository, this repository can somewhat cleanly be added as a submodule for another repo if you're using this in a larger setup.
 ```yml
 services:
-  spigot:
-    build: ./Spigot
+  mc-server:
+    build: ./mc-server
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
-### Spigot Data
-YASDI exposes three volumes:
-- `/opt/spigot`, the Spigot installation. This contains the Spigot `JAR`, some world-specific configurations, and world data.
-- `/opt/spigot-config`, the Spigot config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
-- `/opt/spigot-plugins`, the Spigot plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+### Server Data
+YAMDI exposes three volumes:
+- `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
+- `/opt/server-config`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
+- `/opt/server-plugins`, the server plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+```sh
+docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config --mount type=bind,source=./mc-plugins,target=/opt/server-plugins
+```
+```yml
+services:
+  mc-server:
+    volumes:
+      - type: volume
+        source: mc-server-data
+        target: /opt/server
+      - type: bind
+        source: ./mc-config
+        target: /opt/server-config
+      - type: bind
+        source: ./mc-plugins
+        target: /opt/server-plugins
+```
 
 ### Sending Commands to Spigot
-YASDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
+YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
 ```sh
 docker exec spigot cmd $COMMAND
 ```
@@ -58,7 +100,7 @@ docker-compose exec spigot cmd version
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
 ### Shutting Spigot Down
-YASDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved.
+YAMDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved.
 
 ### JVM Configuration
 
@@ -66,21 +108,23 @@ YASDI properly traps the SIGINT and SIGTERM signals (for more info on when these
 The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and Spigot.
 
 #### Memory Options
-The amount of memory to be used by the JVM for the BuildTools and Spigot can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `SPIGOT_MEMORY_AMOUNT` variables, for example:
+The amount of memory to be used by the JVM for the BuildTools and Spigot can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `GAME_MEMORY_AMOUNT` variables, for example:
 ```sh
-docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env SPIGOT_MEMORY_AMOUNT=1G
+docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env GAME_MEMORY_AMOUNT=1G
 ```
 ```yml
 services:
-  spigot:
+  mc-server:
     environment:
       BUILDTOOLS_MEMORY_AMOUNT: "800M"
-      SPIGOT_MEMORY_AMOUNT: "1G"
+      GAME_MEMORY_AMOUNT: "1G"
 ```
 Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for Spigot itself, two separate variables are provided.
 
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
+
+Thanks to [electronicboy](https://github.com/electronicboy/parchment-docker) for their work with running Paper in Docker.
 
 ## License
 This project is licensed under the MIT license.
