@@ -156,6 +156,8 @@ declare -ar CONFIGURATION_FILES=(
   # Bukkit custom commands.
   # See: https://bukkit.gamepedia.com/Commands.yml
   "commands.yml"
+  # Paper settings.
+  "paper.yml"
 )
 for FILE in "${CONFIGURATION_FILES[@]}"; do
   if [ ! -f "$FILE" ]; then
