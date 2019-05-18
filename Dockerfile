@@ -11,8 +11,6 @@ RUN apk upgrade --update --no-cache && \
     rm -rf /var/cache/apk/*
 
 # Set the directory for the server installation to be kept.
-ENV SERVER_TYPE spigot
-ENV REV latest
 ENV SERVER_DIRECTORY /opt/server
 ENV SERVER_CONFIG_DIRECTORY /opt/server-config
 ENV SERVER_PLUGIN_DIRECTORY /opt/server-plugins
