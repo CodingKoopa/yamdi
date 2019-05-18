@@ -42,7 +42,7 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/spigot.jar"
   declare -r SPIGOT_REVISION_JAR="$SERVER_DIRECTORY/spigot-$REV.jar"
-  declare -r SERVER_NAME="Spigot revision $REV"
+  declare -r SERVER_NAME="Spigot-$REV"
 
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already exist.
   if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
@@ -110,7 +110,7 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
     PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
   fi
 
-  declare -r SERVER_NAME="Paper revision $REV build $PAPER_BUILD"
+  declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
 
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     echo "Downloading $SERVER_NAME."
@@ -168,6 +168,38 @@ rm -f "$COMMAND_INPUT_FILE"
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
+# Append suggested JVM options unless required not to.
+if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
+  # Set the error file path to include the server info.
+  SUGGESTED_JVM_OPTS+=" -XX:ErrorFile=./$SERVER_NAME-error-pid%p.log"
+
+  # Enable experimental VM features, for the options we'll be setting. Although this is not listed
+  # in the documentation for "java", when I tested an experimental feature in a YAMDI container,
+  # this was necessary. These options are largely taken from this 
+  SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
+
+  # Reserve memory, to improve performance.
+  SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
+  # Disable explicit garbage collection, because some plugins try to manage their own memory and
+  # suck at it.
+  SUGGESTED_JVM_OPTS+=" -XX:+DisableExplicitGC"
+  # Adjust the max size of the new generation that will be set later.
+  SUGGESTED_JVM_OPTS+=" -XX:G1MaxNewSizePercent=80"
+  # Lower the garbage collection threshold, to make cleanups not as demanding.
+  SUGGESTED_JVM_OPTS+=" -XX:G1MixedGCLiveThresholdPercent=35"
+  # Raise the New Generation size to keep up with MC's allocations, because MC has many.
+  SUGGESTED_JVM_OPTS+=" -XX:G1NewSizePercent=50"
+  # Take 100ms at the most to collect garbage.
+  SUGGESTED_JVM_OPTS+=" -XX:MaxGCPauseMillis=100"
+  # Allow garbage collection to use multiple threads, for performance.
+  SUGGESTED_JVM_OPTS+=" -XX:+ParallelRefProcEnabled"
+  # Set the garbage collection target survivor ratio higher to use more of the survivor space
+  # before promoting it, because MC has steady allocations.
+  SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
+  # Allow large memory pages for performance.
+  SUGGESTED_JVM_OPTS+=" -XX:+UseLargePagesInMetaspace"
+fi
+
 # Enter the server directory because the Minecraft server checks the current directory for
 # configuration files.
 cd "$SERVER_DIRECTORY"
@@ -175,7 +207,8 @@ echo "Launching $SERVER_NAME."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
 # shellcheck disable=SC2086
-java $JVM_OPTS -Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} -jar "$SERVER_JAR" \
+java -Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $USE_SUGGESTED_JVM_OPTS $JVM_OPTS \
+    -jar "$SERVER_JAR" \
     nogui --plugins $SERVER_PLUGIN_DIRECTORY < <(tail -f "$COMMAND_INPUT_FILE") &
 # Don't exit this script before the Java process does.
 wait
