@@ -208,12 +208,12 @@ fi
 # Enter the server directory because the Minecraft server checks the current directory for
 # configuration files.
 cd "$SERVER_DIRECTORY"
-echo "Launching $SERVER_NAME."
+TOTAL_JVM_OPTS="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
+echo "Launching $SERVER_NAME with JVM options $TOTAL_JVM_OPTS."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
 # shellcheck disable=SC2086
-java -Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $USE_SUGGESTED_JVM_OPTS $JVM_OPTS \
-    -jar "$SERVER_JAR" \
-    nogui --plugins $SERVER_PLUGIN_DIRECTORY < <(tail -f "$COMMAND_INPUT_FILE") &
+java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui --plugins $SERVER_PLUGIN_DIRECTORY < \
+    <(tail -f "$COMMAND_INPUT_FILE") &
 # Don't exit this script before the Java process does.
 wait
