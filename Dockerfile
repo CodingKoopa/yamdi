@@ -2,24 +2,27 @@
 FROM openjdk:8-alpine
 
 # Install the dependencies and clean the cache.
-# - bash    Bash, for running the Spigot startup script.
+# - bash    Bash, for running the server startup script.
 # - git     Git, for BuildTools to clone the repositories.
+# - curl    Curl, for using the Paper build API.
+# - jq      jq, for parsing the Paper API response.
 RUN apk upgrade --update --no-cache && \
-    apk add --update bash git && \
+    apk add --update bash git curl jq && \
     rm -rf /var/cache/apk/*
 
-# Set the directory for the Spigot installation to be kept.
-ENV SPIGOT_DIRECTORY /opt/spigot
-ENV SPIGOT_CONFIG_DIRECTORY /opt/spigot-config
-ENV SPIGOT_PLUGIN_DIRECTORY /opt/spigot-plugins
+# Set the directory for the server installation to be kept.
+ENV SERVER_TYPE spigot
+ENV SERVER_DIRECTORY /opt/server
+ENV SERVER_CONFIG_DIRECTORY /opt/server-config
+ENV SERVER_PLUGIN_DIRECTORY /opt/server-plugins
 # Set the directory for the command named pipe to be.
-ENV COMMAND_INPUT_FILE=/tmp/spigot-commmand-input
+ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 
-# Add the Spigot launch Bash script to the image.
-ADD ./spigot.sh /usr/bin/spigot
+# Add the server launch Bash script to the image.
+ADD ./server.sh /usr/bin/server
 # Make the script exxecutable.
-RUN chmod +x /usr/bin/spigot
-# Add the Spigot command running script to the image.
+RUN chmod +x /usr/bin/server
+# Add the server command running script to the image.
 ADD ./cmd.sh /usr/bin/cmd
 # Make the script executable.
 RUN chmod +x /usr/bin/cmd
@@ -27,8 +30,8 @@ RUN chmod +x /usr/bin/cmd
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
-# Create a mount point for the Spigot installation directory and plugin directory.
-VOLUME /opt/spigot /opt/spigot-config /opt/spigot-plugins
+# Create a mount point for the server installation directory and plugin directory.
+VOLUME /opt/server /opt/server-config /opt/server-plugins
 
 # Set the container entrypoint to the startup script.
-ENTRYPOINT ["/usr/bin/spigot"]
+ENTRYPOINT ["/usr/bin/server"]
