@@ -42,6 +42,8 @@ if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
   declare -r SPIGOT_BUILD_DIRECTORY=/tmp/spigot-build
   mkdir -p "$SPIGOT_BUILD_DIRECTORY"
   pushd "$SPIGOT_BUILD_DIRECTORY"
+  # Remove any preexisting JARs from failed compilations.
+  rm BuildTools.jar
   # Download the latest BuildTools JAR.
   wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
   # Run BuildTools with the specified RAM, for the specified revision.
