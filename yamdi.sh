@@ -12,13 +12,14 @@ function stop() {
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
-# is pressed. The server handles this by quitting, without saving. SIGTERM is what is sent to a program
-# when "docker stop" or "docker-compose" is used. SIGTERM is also used when an active Docker
-# Compose session is quit with Ctrl+C (This does not work in regular Docker.).
+# is pressed. The server handles this by quitting, without saving. SIGTERM is what is sent to a
+# program when "docker stop" or "docker-compose" is used. SIGTERM is also used when an active
+# Docker Compose session is quit with Ctrl+C (This does not work in regular Docker.).
 
-# SIGINT and SIGTERM are expected to implemented similarly. The server implements them by shutting down
-# the server, but without saving. The "stop" Bukkit command shuts down the server properly, and does
-# save everything, so here the signals are trapped, and will intervene to run the "stop" command.
+# SIGINT and SIGTERM are expected to implemented similarly. The server implements them by shutting
+# down the server, but without saving. The "stop" Bukkit command shuts down the server properly, 
+# and does save everything, so here the signals are trapped, and will intervene to run the "stop" 
+# command.
 trap stop SIGINT
 trap stop SIGTERM
 
@@ -44,7 +45,8 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
   declare -r SPIGOT_REVISION_JAR="$SERVER_DIRECTORY/spigot-$REV.jar"
   declare -r SERVER_NAME="Spigot-$REV"
 
-  # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already exist.
+  # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
+  # exist.
   if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
     echo "Building $SERVER_NAME."
     # Build in a temporary directory.
@@ -54,7 +56,8 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
     # Remove any preexisting JARs from failed compilations.
     rm -f BuildTools.jar
     # Download the latest BuildTools JAR.
-    wget -q https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    wget -q https://hub.spigotmc.org/jenkins/job/\
+BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
     java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} \
@@ -163,8 +166,8 @@ done
 
 # Make sure the command input file is clear.
 rm -f "$COMMAND_INPUT_FILE"
-# Make a named pipe for sending commands to the server. It is important that the permissions are 700
-# because, if they were world writeable, any user could run a server command with administrator
+# Make a named pipe for sending commands to the server. It is important that the permissions are
+# 700 because, if they were world writeable, any user could run a server command with administrator
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
