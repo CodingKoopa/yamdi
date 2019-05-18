@@ -12,7 +12,9 @@ RUN apk upgrade --update --no-cache && \
 
 # Set the directory for the server installation to be kept.
 ENV SERVER_DIRECTORY /opt/server
+# Set the directory for the server configuration to be kept.
 ENV SERVER_CONFIG_DIRECTORY /opt/server-config
+# Set the directory for the server plugins to be kept.
 ENV SERVER_PLUGIN_DIRECTORY /opt/server-plugins
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
