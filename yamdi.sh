@@ -180,7 +180,7 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
 
   # Enable experimental VM features, for the options we'll be setting. Although this is not listed
   # in the documentation for "java", when I tested an experimental feature in a YAMDI container,
-  # this was necessary. These options are largely taken from this 
+  # this was necessary. These options are largely taken from here: https://mcflags.emc.gs/.
   SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
 
   # Reserve memory, to improve performance.
