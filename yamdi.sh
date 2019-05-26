@@ -82,7 +82,6 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
   echo "Paper server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/paper.jar"
-  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$REV.jar"
   if [ -z "$PAPER_BUILD" ]; then
     PAPER_BUILD="latest"
   fi
@@ -117,8 +116,8 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
     PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
   fi
 
+  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$REV-$PAPER_BUILD.jar"
   declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
-
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     echo "Downloading $SERVER_NAME."
     curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" > "$PAPER_REVISION_JAR"
