@@ -11,7 +11,7 @@ function stop() {
   # Wait for the Java process to exit.
   wait
   echo "Java process exited, quitting,"
-  return 0
+  exit 0
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
@@ -222,4 +222,4 @@ java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui --plugins $SERVER_PLUGIN_DIRECTORY
 # Don't exit this script before the Java process does.
 wait
 echo "Original Java process exited, quitting."
-return 0
+exit 0
