@@ -204,7 +204,7 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   # before promoting it, because MC has steady allocations.
   SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
   # Allow large memory pages for performance.
-  SUGGESTED_JVM_OPTS+=" -XX:+UseLargePagesInMetaspace"
+  # SUGGESTED_JVM_OPTS+=" -XX:+UseLargePagesInMetaspace"
   # Temporarily enable these, for troubleshooting.
   SUGGESTED_JVM_OPTS+=" -Dusing.aikars.flags=mcflags.emc.gs -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
 fi
