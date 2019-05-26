@@ -71,8 +71,9 @@ BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
     echo "$SERVER_NAME already built."
   fi
 
-  # Select the specified revision.
-  ln -sf "$SPIGOT_REVISION_JAR" "$SERVER_JAR"
+  # Select the specified revision. In some cases, ln's -f option doesn't work.
+  rm -rf "$SERVER_JAR"
+  ln -s "$SPIGOT_REVISION_JAR" "$SERVER_JAR"
 
 elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
   echo "Paper server selected."
@@ -122,7 +123,8 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
     echo "$SERVER_NAME already downloaded."
   fi
 
-  # Select the specified revision.
+  # Select the specified revision. In some cases, ln's -f option doesn't work.
+  rm -rf "$SERVER_JAR"
   ln -sf "$PAPER_REVISION_JAR" "$SERVER_JAR"
 fi
 
