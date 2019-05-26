@@ -102,7 +102,7 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
 
   if [ "$PAPER_BUILD" = "latest" ]; then
     echo "Resolving latest Paper build."
-    PARCHMENT_BUILD_JSON=$(curl -s https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD)
+    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD")
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
     if [ ! "null" = "$BUILD_JSON_ERROR" ]; then
@@ -117,7 +117,7 @@ elif [ "$FORCE_SPIGOT_REBUILD" = true ] || [ $SERVER_TYPE = "paper" ]; then
 
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     echo "Downloading $SERVER_NAME."
-    curl https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download > "$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" > "$PAPER_REVISION_JAR"
   else
     echo "$SERVER_NAME already downloaded."
   fi
