@@ -4,11 +4,14 @@ set -e
 function stop() {
   # Print a message because otherwise, it is very difficult to tell that this trap is actually
   # being triggered.
-  echo "Gracefully shutting down server."
+  echo "SIGINT or SIGTERM recieved. Sending stop command to server."
   # Send the "stop" command to the server.
   cmd stop
+  echo "Stop command sent. Waiting for Java process to exit."
   # Wait for the Java process to exit.
   wait
+  echo "Java process exited, quitting,"
+  return 0
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
@@ -217,3 +220,5 @@ java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui --plugins $SERVER_PLUGIN_DIRECTORY
     <(tail -f "$COMMAND_INPUT_FILE") &
 # Don't exit this script before the Java process does.
 wait
+echo "Original Java process exited, quitting."
+return 0
