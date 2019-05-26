@@ -203,6 +203,8 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
   # Allow large memory pages for performance.
   SUGGESTED_JVM_OPTS+=" -XX:+UseLargePagesInMetaspace"
+  # Temporarily enable these, for troubleshooting.
+  SUGGESTED_JVM_OPTS+=" -Dusing.aikars.flags=mcflags.emc.gs -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError"
 fi
 
 # Enter the server directory because the Minecraft server checks the current directory for
