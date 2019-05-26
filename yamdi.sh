@@ -188,6 +188,8 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   # this was necessary. These options are largely taken from here: https://mcflags.emc.gs/.
   SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
 
+  # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
+  SUGGESTED_JVM_OPTS+=" -XX:+UseG1GC"
   # Reserve memory, to improve performance.
   SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
   # Disable explicit garbage collection, because some plugins try to manage their own memory and
