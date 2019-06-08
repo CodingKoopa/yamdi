@@ -189,8 +189,9 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
 
   # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
   SUGGESTED_JVM_OPTS+=" -XX:+UseG1GC"
-  # Reserve memory, to improve performance.
-  SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
+  # Don't reserve memory, because this option seems to break and cause OOM errors when running in
+  # Docker.
+  # SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
   # Disable explicit garbage collection, because some plugins try to manage their own memory and
   # suck at it.
   SUGGESTED_JVM_OPTS+=" -XX:+DisableExplicitGC"
