@@ -64,6 +64,7 @@ YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
 - `/opt/server-config-vcs`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
 - `/opt/server-plugins-vcs`, the server plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+`/opt/server` must be mounted, both for server data to persist, and to accept the EULA. The other volumes are technically optional, but recommended for reasons that will be explained.
 ```sh
 docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config-vcs --mount type=bind,source=./mc-plugins,target=/opt/server-plugins-vcs
 ```
@@ -81,14 +82,33 @@ services:
         source: ./mc-plugins
         target: /opt/server-plugins-vcs
 ```
-The `/opt/server-config-vcs` and `/opt/server-plugins-vcs` volumes are particularly interesting, because YAMDI uses Git to manage these. When YAMDI is starting up, it initializes its own Git repository in each of the directories, and deploys to `/opt/server` from there. When the server is shutting down, YAMDI will print any changes that the server has made to the configuration files (but will not apply them to the host system!). This method has the following implications:
+The `/opt/server-config-vcs` and `/opt/server-plugins-vcs` volumes are particularly interesting, because YAMDI uses Git to manage these, if they are mounted (If not, then this feature will not be enabled.). When YAMDI is starting up, it initializes its own Git repository in each of the directories, and deploys to `/opt/server` from there. When the server is shutting down, YAMDI will print any changes that the server has made to the configuration files (but will not apply them to the host system!). This method has the following implications:
 - Files in `/opt/server` that are not in the VCS directory will be left as-is.
 - Files in `/opt/server` that have changed versions in the VCS directory will be deleted.
 - Files in `/opt/server` that have been deleted in the VCS directory will be deleted.
 - Permissions of files in the VCS directory will not be retained. For YAMDI's use case, this is actually disireably, because this will set the permissions of the files in a way that will ensure that the server, running as the same user that is running Git, will be able to modify the files without any problems.
-Since YAMDI is using its own Git directory, it will not collide with any preexisting Git repository, nor require any Git setup. However, if you are using Git, would be adviseable to add YAMDI's Git directory, `/mc-config/.git-yamdi` and `/mc-plugins/.git-yamdi` to your `.gitignore` to prevent them from being tracked.
+Since YAMDI is using its own Git directory, it will not collide with any preexisting Git repository, nor require any Git setup. However, if you are using Git, would be adviseable to add YAMDI's Git directories, `/mc-config/.git-yamdi` and `/mc-plugins/.git-yamdi` to your `.gitignore` to prevent them from being tracked. YAMDI uses the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html).
 
-YAMDI uses the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html).
+To start using YAMDI, first you should at least mount `/opt/server`, and let the server run and exit due to not having the EULA accepted, and then set `eula` to `true` in the docker volume. After rerunning the server, and letting it generate configuration files, you can then copy them to your preferred location, and bind them mount to YAMDI as shown in the above examples. **If you are using user namespace remapping, or any other method that will run YAMDI as a user that doesn't own the configuration/plugin directory, you must make the YAMDI Git directories.
+```
+mkdir ./mc-config/.git-yamdi ./mc-plugins/.git-yamdi
+chown 60001:60001 ./mc-config/.git-yamdi ./mc-plugins/.git-yamdi
+```
+When running with the bind mounts properly setup YAMDI will replace the generated configuration files with the new ones.
+
+After adding your configuration files, and letting YAMDI run with them, your configuration directory (similar to plugin directory) will look something like this:
+```
+bukkit.yml
+commands.yml
+eula.txt
+.git-yamdi
+help.yml
+paper.yml
+permissions.yml
+server.properties
+spigot.yml
+```
+For help with configuring these files for optimal performance, see [this](https://www.spigotmc.org/threads/guide-server-optimization%E2%9A%A1.283181/) thread.
 
 ### Sending Commands to Spigot
 YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
@@ -108,7 +128,7 @@ docker-compose exec spigot cmd version
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
 ### Shutting Spigot Down
-YAMDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved.
+YAMDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out.
 
 ### JVM Configuration
 

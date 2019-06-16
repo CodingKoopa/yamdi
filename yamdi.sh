@@ -13,6 +13,12 @@ function import-directory() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
 
+  # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty directory.
+  if [ -z "$(ls -A "$SOURCE_DIRECTORY")" ] || [ ! -d "$SOURCE_DIRECTORY" ]; then
+    echo "No files to import."
+    return 0
+  fi
+
   echo "Initializing Git repo."
   # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
   # reduces any conflict with a preexisting repo.
@@ -67,7 +73,11 @@ function get-directory-changes() {
 
   export GIT_DIR="$SOURCE_DIRECTORY/.git-yamdi"
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
-  git diff --color
+  if [ -d "$GIT_DIR" ]; then
+    git diff --color
+  else
+    echo "No Git repo found."
+  fi
 }
 
 # Exits YAMDI, waiting for Java to save and removing the Git repository. "wait" must be ran
@@ -79,9 +89,9 @@ function get-directory-changes() {
 function exit-script() {
   echo "Exiting script."
 
-  echo "New changes made by server to configuration files:"
+  echo "Getting changes made by server to configuration files."
   get-directory-changes "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
-  echo "New changes made by server to plugin files:"
+  echo "Getting changes made by server to plugin files."
   get-directory-changes "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
   exit 0
@@ -123,7 +133,7 @@ cd "$SERVER_DIRECTORY"
 
 echo "Importing server configuration files."
 import-directory "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
-echo "Import server plugin files."
+echo "Importing server plugin files."
 import-directory "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
 if [ -z "$SERVER_TYPE" ]; then
