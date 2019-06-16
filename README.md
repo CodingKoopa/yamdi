@@ -62,10 +62,10 @@ It is also worth noting that the OpenJDK base image is multiarch, so this should
 ### Server Data
 YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
-- `/opt/server-config`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
-- `/opt/server-plugins`, the server plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+- `/opt/server-config-vcs`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
+- `/opt/server-plugins-vcs`, the server plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
 ```sh
-docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config --mount type=bind,source=./mc-plugins,target=/opt/server-plugins
+docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config-vcs --mount type=bind,source=./mc-plugins,target=/opt/server-plugins-vcs
 ```
 ```yml
 services:
@@ -76,11 +76,15 @@ services:
         target: /opt/server
       - type: bind
         source: ./mc-config
-        target: /opt/server-config
+        target: /opt/server-config-vcs
       - type: bind
         source: ./mc-plugins
-        target: /opt/server-plugins
+        target: /opt/server-plugins-vcs
 ```
+The `/opt/server-config-vcs` and `/opt/server-plugins-vcs` volumes are particularly interesting, because YAMDI uses Git to manage these. When YAMDI is starting up, it initializes a temporary Git repository in each of the directories, and deploys to `/opt/server` from there. This method has the following implications:
+- Files in `/opt/server` that are not in the VCS directory will be left as-is.
+- Files in `/opt/server` that have changed versions in the VCS directory will be deleted.
+- Files in `/opt/server` that have been detected as being deleted from the VCS directory will be deleted.
 
 ### Sending Commands to Spigot
 YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.

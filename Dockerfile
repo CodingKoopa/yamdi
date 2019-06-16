@@ -12,10 +12,10 @@ RUN apk upgrade --update --no-cache && \
 
 # Set the directory for the server installation to be kept.
 ENV SERVER_DIRECTORY /opt/server
-# Set the directory for the server configuration to be kept.
-ENV SERVER_CONFIG_DIRECTORY /opt/server-config
-# Set the directory for the server plugins to be kept.
-ENV SERVER_PLUGIN_DIRECTORY /opt/server-plugins
+# Set the directory for the server configuration VCS to be kept.
+ENV SERVER_CONFIG_VCS_DIRECTORY /opt/server-config-vcs
+# Set the directory for the server plugin VCS to be kept.
+ENV SERVER_PLUGIN_VCS_DIRECTORY /opt/server-plugins-vcs
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 
@@ -32,7 +32,7 @@ RUN chmod +x /usr/bin/cmd
 EXPOSE 25565 8123
 
 # Create a mount point for the server installation directory and plugin directory.
-VOLUME /opt/server /opt/server-config /opt/server-plugins
+VOLUME /opt/server /opt/server-config-vcs /opt/server-plugins-vcs
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["/usr/bin/yamdi"]

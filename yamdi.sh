@@ -1,17 +1,106 @@
 #!/bin/bash
 set -e
 
+# Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
+# given directory, using Git. For more details on the checkout method used here, see:
+# https://gitolite.com/deploy.html
+# Arguments:
+#   Path to the source directory.
+#   Path to the target directory.
+# Returns:
+#   None.
+function import-directory() {
+  SOURCE_DIRECTORY=$1
+  TARGET_DIRECTORY=$2
+
+  echo "Initializing Git repo."
+  # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
+  # reduces any conflict with a preexisting repo.
+  export GIT_DIR="$SOURCE_DIRECTORY/.git-yamdi"
+  # For now, use the source directory as Git's working directory, to copy the initial changes.
+  export GIT_WORK_TREE="$SOURCE_DIRECTORY"
+  # Initialize the temporary directory, if it hasn't already been initialized.
+  git init -q
+
+  echo "Configuring Git repo."
+  # git commit --author doesn't seem to work correctly here, so set the author info in its own
+  # set of commands.
+  git config user.name "YAMDI, with love ♥"
+  git config user.email "codingkoopa@gmail.com"
+
+  echo "Making Git commit."
+  # Add all files from the directory from the stage. This also stages deletions.
+  git add -A
+  # Remove our temporary Git directory from the stage.
+  git reset -- "$GIT_DIR"
+  # Make a commit. This is necessary because otherwise, we can't really use this repo for anything.
+  # Procede even if failed because that probably just means there haven't been any configuration
+  # changes.
+  git commit -m "Automatically generated commit." || true
+
+  echo "Switching Git working directory to target."
+  # Pull the rug out from under Git - make it use the target directory.
+  export GIT_WORK_TREE="$TARGET_DIRECTORY"
+
+  # If the directory doesn't already exist, create it, and don't show the diff.
+  if [ ! -f "$TARGET_DIRECTORY" ]; then
+    echo "Making new directory."
+    mkdir -p "$TARGET_DIRECTORY/plugins"
+  else
+    echo "Changes that will be overwritten:"
+    git diff --color
+  fi
+
+  echo "Updating server directory."
+  git checkout -q -f master
+}
+
+# Given two directories setup by import-directory(), compare them for changes.
+# Arguments:
+#   Path to the source directory.
+#   Path to the target directory.
+# Returns:
+#   None.
+function get-directory-changes() {
+  SOURCE_DIRECTORY=$1
+  TARGET_DIRECTORY=$2
+
+  export GIT_DIR="$SOURCE_DIRECTORY/.git-yamdi"
+  export GIT_WORK_TREE="$TARGET_DIRECTORY"
+  git diff --color
+}
+
+# Exits YAMDI, waiting for Java to save and removing the Git repository. "wait" must be ran
+# separately, because this function will be ran in its own sub process.
+# Arguments:
+#   None.
+# Returns:
+#   None.
+function exit-script() {
+  echo "Exiting script."
+
+  echo "New changes made by server to configuration files:"
+  get-directory-changes "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
+  echo "New changes made by server to plugin files:"
+  get-directory-changes "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+
+  exit 0
+}
+
+# Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals.
+# Arguments:
+#   None.
+# Returns:
+#   None.
 function stop() {
   # Print a message because otherwise, it is very difficult to tell that this trap is actually
   # being triggered.
   echo "SIGINT or SIGTERM recieved. Sending stop command to server."
   # Send the "stop" command to the server.
   cmd stop
-  echo "Stop command sent. Waiting for Java process to exit."
-  # Wait for the Java process to exit.
+  echo "Waiting for Java process to exit."
   wait
-  echo "Java process exited, quitting,"
-  exit 0
+  exit-script
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
@@ -27,6 +116,15 @@ trap stop SIGINT
 trap stop SIGTERM
 
 echo "Starting up Yet Another Minecraft Docker Image."
+
+# Enter the server directory because we will use Git to update files here, and the Minecraft server
+# will check the current directory for configuration files.
+cd "$SERVER_DIRECTORY"
+
+echo "Importing server configuration files."
+import-directory "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
+echo "Import server plugin files."
+import-directory "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
 if [ -z "$SERVER_TYPE" ]; then
   SERVER_TYPE="spigot"
@@ -135,41 +233,6 @@ if [ ! -f "$SERVER_JAR" ]; then
   exit 1
 fi
 
-# Make a separate config directory.
-mkdir -p "$SERVER_CONFIG_DIRECTORY"
-# Configuration files are not put in a seperate directory, but are instead scattered around the
-# working directory. So that's a bit of an issue.
-declare -ar CONFIGURATION_FILES=(
-  # EULA.
-  "eula.txt"
-  # Vanilla server settings.
-  # See: https://minecraft.gamepedia.com/Server.properties
-  "server.properties"
-  # Spigot settings.
-  # See: https://www.spigotmc.org/wiki/spigot-configuration/
-  "spigot.yml"
-  # Bukkit settings.
-  # See: https://bukkit.gamepedia.com/Bukkit.yml
-  "bukkit.yml"
-  # Bukkit help page settings.
-  # https://bukkit.gamepedia.com/Help.yml
-  "help.yml"
-  # Bukkit command permissions.
-  # https://bukkit.gamepedia.com/Permissions.yml
-  "permissions.yml"
-  # Bukkit custom commands.
-  # See: https://bukkit.gamepedia.com/Commands.yml
-  "commands.yml"
-  # Paper settings.
-  "paper.yml"
-)
-for FILE in "${CONFIGURATION_FILES[@]}"; do
-  if [ ! -f "$FILE" ]; then
-    touch "$SERVER_CONFIG_DIRECTORY/$FILE" || true
-    ln -sf "$SERVER_CONFIG_DIRECTORY/$FILE" "$SERVER_DIRECTORY/$FILE" || true
-  fi
-done
-
 # Make sure the command input file is clear.
 rm -f "$COMMAND_INPUT_FILE"
 # Make a named pipe for sending commands to the server. It is important that the permissions are
@@ -210,17 +273,12 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
 fi
 
-# Enter the server directory because the Minecraft server checks the current directory for
-# configuration files.
-cd "$SERVER_DIRECTORY"
 TOTAL_JVM_OPTS="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
 echo "Launching $SERVER_NAME with JVM options $TOTAL_JVM_OPTS."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
 # shellcheck disable=SC2086
-java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui --plugins $SERVER_PLUGIN_DIRECTORY < \
-    <(tail -f "$COMMAND_INPUT_FILE") &
-# Don't exit this script before the Java process does.
+java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
+echo "Waiting for Java process to exit."
 wait
-echo "Original Java process exited, quitting."
-exit 0
+exit-script
