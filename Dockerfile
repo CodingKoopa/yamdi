@@ -19,15 +19,6 @@ ENV SERVER_PLUGIN_VCS_DIRECTORY /opt/server-plugins-vcs
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 
-# Add the server launch Bash script to the image.
-ADD ./yamdi.sh /usr/bin/yamdi
-# Make the script executable.
-RUN chmod +x /usr/bin/yamdi
-# Add the server command running script to the image.
-ADD ./cmd.sh /usr/bin/cmd
-# Make the script executable.
-RUN chmod +x /usr/bin/cmd
-
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
@@ -36,3 +27,12 @@ VOLUME /opt/server /opt/server-config-vcs /opt/server-plugins-vcs
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["/usr/bin/yamdi"]
+
+# Add the server launch Bash script to the image.
+ADD ./yamdi.sh /usr/bin/yamdi
+# Make the script executable.
+RUN chmod +x /usr/bin/yamdi
+# Add the server command running script to the image.
+ADD ./cmd.sh /usr/bin/cmd
+# Make the script executable.
+RUN chmod +x /usr/bin/cmd
