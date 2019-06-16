@@ -81,10 +81,14 @@ services:
         source: ./mc-plugins
         target: /opt/server-plugins-vcs
 ```
-The `/opt/server-config-vcs` and `/opt/server-plugins-vcs` volumes are particularly interesting, because YAMDI uses Git to manage these. When YAMDI is starting up, it initializes a temporary Git repository in each of the directories, and deploys to `/opt/server` from there. This method has the following implications:
+The `/opt/server-config-vcs` and `/opt/server-plugins-vcs` volumes are particularly interesting, because YAMDI uses Git to manage these. When YAMDI is starting up, it initializes its own Git repository in each of the directories, and deploys to `/opt/server` from there. When the server is shutting down, YAMDI will print any changes that the server has made to the configuration files (but will not apply them to the host system!). This method has the following implications:
 - Files in `/opt/server` that are not in the VCS directory will be left as-is.
 - Files in `/opt/server` that have changed versions in the VCS directory will be deleted.
-- Files in `/opt/server` that have been detected as being deleted from the VCS directory will be deleted.
+- Files in `/opt/server` that have been deleted in the VCS directory will be deleted.
+- Permissions of files in the VCS directory will not be retained. For YAMDI's use case, this is actually disireably, because this will set the permissions of the files in a way that will ensure that the server, running as the same user that is running Git, will be able to modify the files without any problems.
+Since YAMDI is using its own Git directory, it will not collide with any preexisting Git repository, nor require any Git setup. However, if you are using Git, would be adviseable to add YAMDI's Git directory, `/mc-config/.git-yamdi` and `/mc-plugins/.git-yamdi` to your `.gitignore` to prevent them from being tracked.
+
+YAMDI uses the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html).
 
 ### Sending Commands to Spigot
 YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
