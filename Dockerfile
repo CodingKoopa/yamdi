@@ -7,7 +7,11 @@ FROM openjdk:8-alpine
 # - curl    Curl, for using the Paper build API.
 # - jq      jq, for parsing the Paper API response.
 RUN apk upgrade --update --no-cache && \
-    apk add --update bash git curl jq && \
+    apk add --update \
+      bash \
+      git \
+      curl \
+      jq && \
     rm -rf /var/cache/apk/*
 
 #RUN yum upgrade -y && \
