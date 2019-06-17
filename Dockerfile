@@ -10,12 +10,15 @@ RUN apk upgrade --update --no-cache && \
     apk add --update bash git curl jq && \
     rm -rf /var/cache/apk/*
 
+#RUN yum upgrade -y && \
+#    yum install -y bash git curl jq && \
+
 # Set the directory for the server installation to be kept.
 ENV SERVER_DIRECTORY /opt/server
-# Set the directory for the server configuration VCS to be kept.
-ENV SERVER_CONFIG_VCS_DIRECTORY /opt/server-config-vcs
-# Set the directory for the server plugin VCS to be kept.
-ENV SERVER_PLUGIN_VCS_DIRECTORY /opt/server-plugins-vcs
+# Set the directory for the server host configuration to be kept.
+ENV SERVER_CONFIG_HOST_DIRECTORY /opt/server-config-host
+# Set the directory for the server host plugins to be kept.
+ENV SERVER_PLUGINS_HOST_DIRECTORY /opt/server-plugins-host
 # Set the directory for the command named pipe to be.
 ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 
@@ -23,7 +26,7 @@ ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
 EXPOSE 25565 8123
 
 # Create a mount point for the server installation directory and plugin directory.
-VOLUME /opt/server /opt/server-config-vcs /opt/server-plugins-vcs
+VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["/usr/bin/yamdi"]

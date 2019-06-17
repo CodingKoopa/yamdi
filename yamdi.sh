@@ -19,12 +19,16 @@ function import-directory() {
     return 0
   fi
 
+  echo "Making copy of host files."
+  declare -r SOURCE_DIRECTORY_VCS="$SOURCE_DIRECTORY-copy"
+  cp -R "$SOURCE_DIRECTORY" "$SOURCE_DIRECTORY_VCS"
+
   echo "Initializing Git repo."
   # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
   # reduces any conflict with a preexisting repo.
-  export GIT_DIR="$SOURCE_DIRECTORY/.git-yamdi"
+  export GIT_DIR="$SOURCE_DIRECTORY_VCS/.git-yamdi"
   # For now, use the source directory as Git's working directory, to copy the initial changes.
-  export GIT_WORK_TREE="$SOURCE_DIRECTORY"
+  export GIT_WORK_TREE="$SOURCE_DIRECTORY_VCS"
   # Initialize the temporary directory, if it hasn't already been initialized.
   git init -q
 
@@ -49,16 +53,20 @@ function import-directory() {
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
 
   # If the directory doesn't already exist, create it, and don't show the diff.
-  if [ ! -f "$TARGET_DIRECTORY" ]; then
+  if [ ! -d "$TARGET_DIRECTORY" ]; then
     echo "Making new directory."
-    mkdir -p "$TARGET_DIRECTORY/plugins"
+    mkdir -p "$TARGET_DIRECTORY"
   else
     echo "Changes that will be overwritten:"
-    git diff --color
+    # Right now, reverse the input so it makes more sense. Condense the summary because otherwise
+    # the full contents of new additions will be displayed.
+    git diff --color -R --compact-summary
   fi
 
   echo "Updating server directory."
-  git checkout -q -f master
+  # Update the directory with new changes. Procede if failed, because if no commit was made, then
+  # there won't be a valid master branch to use.
+  git checkout -q -f master || true
 }
 
 # Given two directories setup by import-directory(), compare them for changes.
@@ -71,7 +79,7 @@ function get-directory-changes() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
 
-  export GIT_DIR="$SOURCE_DIRECTORY/.git-yamdi"
+  export GIT_DIR="$SOURCE_DIRECTORY-copy/.git-yamdi"
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
   if [ -d "$GIT_DIR" ]; then
     git diff --color
@@ -92,7 +100,7 @@ function exit-script() {
   echo "Getting changes made by server to configuration files."
   get-directory-changes "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
   echo "Getting changes made by server to plugin files."
-  get-directory-changes "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+  get-directory-changes "$SERVER_PLUGINS_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
   exit 0
 }
@@ -132,9 +140,9 @@ echo "Starting up Yet Another Minecraft Docker Image."
 cd "$SERVER_DIRECTORY"
 
 echo "Importing server configuration files."
-import-directory "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
+import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 echo "Importing server plugin files."
-import-directory "$SERVER_PLUGIN_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
 if [ -z "$SERVER_TYPE" ]; then
   SERVER_TYPE="spigot"
