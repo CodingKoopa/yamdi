@@ -1,6 +1,22 @@
 #!/bin/bash
 set -e
 
+# Declares constant paths that are needed for operation.
+# Arguments:
+#   None.
+# Returns:
+#   None.
+function export-paths() {
+  # Set the directory for the server installation to be kept.
+  export SERVER_DIRECTORY="/opt/server"
+  # Set the directory for the server host configuration to be kept.
+  export SERVER_CONFIG_HOST_DIRECTORY="/opt/server-config-host"
+  # Set the directory for the server host plugins to be kept.
+  export SERVER_PLUGINS_HOST_DIRECTORY="/opt/server-plugins-host"
+  # Set the directory for the command named pipe to be.
+  export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
+}
+
 # Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
 # given directory, using Git. For more details on the checkout method used here, see:
 # https://gitolite.com/deploy.html
@@ -134,6 +150,8 @@ trap stop SIGINT
 trap stop SIGTERM
 
 echo "Starting up Yet Another Minecraft Docker Image."
+
+export-paths
 
 # Enter the server directory because we will use Git to update files here, and the Minecraft server
 # will check the current directory for configuration files.

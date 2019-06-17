@@ -14,15 +14,6 @@ RUN apk upgrade --update --no-cache && \
       jq && \
     rm -rf /var/cache/apk/*
 
-# Set the directory for the server installation to be kept.
-ENV SERVER_DIRECTORY /opt/server
-# Set the directory for the server host configuration to be kept.
-ENV SERVER_CONFIG_HOST_DIRECTORY /opt/server-config-host
-# Set the directory for the server host plugins to be kept.
-ENV SERVER_PLUGINS_HOST_DIRECTORY /opt/server-plugins-host
-# Set the directory for the command named pipe to be.
-ENV COMMAND_INPUT_FILE=/tmp/server-commmand-input
-
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
