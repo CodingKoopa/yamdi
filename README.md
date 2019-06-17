@@ -59,6 +59,13 @@ services:
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
+If using Docker Compose, it may also be desireable to have the server restart if it crashes.
+```yml
+services:
+  yamdi:
+    restart: on-failure
+```
+
 ### Server Data
 YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
@@ -110,25 +117,17 @@ spigot.yml
 ```
 For help with configuring these files for optimal performance, see [this](https://www.spigotmc.org/threads/guide-server-optimization%E2%9A%A1.283181/) thread.
 
-### Sending Commands to Spigot
-YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
+### Server Ports
+The Mineecraft Server port can be opened by exposing port `25565`.
 ```sh
-docker exec spigot cmd $COMMAND
+docker run --expose 25565
 ```
-```sh
-docker-compose exec spigot cmd $COMMAND
+```yml
+services:
+  yamdi:
+    ports:
+      - "25565:25565"
 ```
-A command that can be used here (see `help` for more commands) is `version`.
-```sh
-docker exec spigot cmd version
-```
-```sh
-docker-compose exec spigot cmd version
-```
-This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
-
-### Shutting Spigot Down
-YAMDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out.
 
 ### JVM Configuration
 
@@ -151,6 +150,26 @@ Here, the device only has 2GB of RAM available. BuildTools needs at least approx
 
 #### Experimental Options
 By default, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. This behavior can be disabled by setting `USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
+
+### Sending Commands to Spigot
+YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
+```sh
+docker exec spigot cmd $COMMAND
+```
+```sh
+docker-compose exec spigot cmd $COMMAND
+```
+A command that can be used here (see `help` for more commands) is `version`.
+```sh
+docker exec spigot cmd version
+```
+```sh
+docker-compose exec spigot cmd version
+```
+This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
+
+### Shutting Spigot Down
+YAMDI properly traps the SIGINT and SIGTERM signals (for more info on when these are passed, see the Spigot startup script), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out.
 
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
