@@ -23,11 +23,11 @@ VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["/usr/bin/yamdi"]
 
-# Add the server launch Bash script to the image.
-ADD ./yamdi.sh /usr/bin/yamdi
-# Make the script executable.
-RUN chmod +x /usr/bin/yamdi
 # Add the server command running script to the image.
 ADD ./cmd.sh /usr/bin/cmd
 # Make the script executable.
 RUN chmod +x /usr/bin/cmd
+# Add the server launch Bash script to the image.
+ADD ./yamdi.sh /usr/bin/yamdi
+# Make the script executable.
+RUN chmod +x /usr/bin/yamdi
