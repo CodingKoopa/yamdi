@@ -14,11 +14,11 @@ RUN apk upgrade --update --no-cache && \
       jq && \
     rm -rf /var/cache/apk/*
 
-# Expose the Minecraft server port and Dynmap web port.
-EXPOSE 25565 8123
-
 # Create a mount point for the server installation directory and plugin directory.
 VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
+
+# Expose the Minecraft server port and Dynmap web port.
+EXPOSE 25565 8123
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["/usr/bin/yamdi"]
