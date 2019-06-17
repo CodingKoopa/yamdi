@@ -14,9 +14,6 @@ RUN apk upgrade --update --no-cache && \
       jq && \
     rm -rf /var/cache/apk/*
 
-#RUN yum upgrade -y && \
-#    yum install -y bash git curl jq && \
-
 # Set the directory for the server installation to be kept.
 ENV SERVER_DIRECTORY /opt/server
 # Set the directory for the server host configuration to be kept.
