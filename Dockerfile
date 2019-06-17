@@ -7,12 +7,11 @@ FROM openjdk:8-alpine
 # - curl    Curl, for using the Paper build API.
 # - jq      jq, for parsing the Paper API response.
 RUN apk upgrade --update --no-cache && \
-    apk add --update \
+    apk add --update --no-cache \
       bash \
       git \
       curl \
       jq && \
-    rm -rf /var/cache/apk/*
 
 # Create a mount point for the server installation directory and plugin directory.
 VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
