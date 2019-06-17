@@ -95,7 +95,7 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
 BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
-    java $JVM_OPTS -Xmx${BUILDTOOLS_MEMORY_AMOUNT} -Xms${BUILDTOOLS_MEMORY_AMOUNT} \
+    java $JVM_OPTS -Xms${BUILDTOOLS_MEMORY_AMOUNT} -Xmx${BUILDTOOLS_MEMORY_AMOUNT} \
         -jar BuildTools.jar --rev $REV
     # Copy the Spigot build to the Spigot directory.
     cp spigot-*.jar "$SPIGOT_REVISION_JAR"
@@ -211,7 +211,7 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   fi
 fi
 
-TOTAL_JVM_OPTS="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
+TOTAL_JVM_OPTS="-Xms${GAME_MEMORY_AMOUNT} -Xmx${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
 echo "Launching $SERVER_NAME with JVM options $TOTAL_JVM_OPTS."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
