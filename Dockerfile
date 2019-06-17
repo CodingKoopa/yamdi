@@ -11,7 +11,7 @@ RUN apk upgrade --update --no-cache && \
       bash \
       git \
       curl \
-      jq && \
+      jq
 
 # Create a mount point for the server installation directory and plugin directory.
 VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
