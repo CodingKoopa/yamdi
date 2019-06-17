@@ -50,7 +50,7 @@ function import-directory() {
   # Add all files from the directory from the stage. This also stages deletions.
   git add -A
   # Remove our temporary Git directory from the stage.
-  git reset -- "$GIT_DIR"
+  git reset -q -- "$GIT_DIR"
   # Make a commit. This is necessary because otherwise, we can't really use this repo for anything.
   # Procede even if failed because that probably just means there haven't been any configuration
   # changes.
@@ -66,9 +66,15 @@ function import-directory() {
     mkdir -p "$TARGET_DIRECTORY"
   else
     echo "Changes that will be overwritten:"
-    # Right now, reverse the input so it makes more sense. Condense the summary because otherwise
-    # the full contents of new additions will be displayed.
-    git diff --color -R --compact-summary
+    # Right now, reverse the input so it makes more sense.
+    if [ "$DIST" = "oracle" ]; then
+      # Condensed summaries aren't available on the Git version in the repos for the Oracle Java
+      # image, so go with normal summaries.
+      git diff --color -R --summary
+    else
+      # Condense the summary because otherwise the full contents of new additions will be displayed.
+      git diff --color -R --compact-summary
+    fi
   fi
 
   echo "Updating server directory."

@@ -1,8 +1,8 @@
 # Set the base image to the AdoptOpenJDK OpenJDK 12 release JRE, with Alpine Linux.
-FROM adoptopenjdk/openjdk11:alpine-jre
+FROM store/oracle/serverjre:8
 
 # Specify the distributor.
-ENV DIST="adoptopenjdk"
+ENV DIST="oracle"
 
 # Specify the type of JVM being used.
 ENV JVM="hotspot"
@@ -12,8 +12,9 @@ ENV JVM="hotspot"
 # - git     Git, for BuildTools to clone the repositories.
 # - curl    Curl, for using the Paper build API.
 # - jq      jq, for parsing the Paper API response.
-RUN apk upgrade --update --no-cache && \
-    apk add --update --no-cache \
+# From inspecting the Oracle image, they use "yum install -y", without updating, so updating the
+# container packages likely isn't necessary here.
+RUN yum -y install \
       bash \
       git \
       curl \
