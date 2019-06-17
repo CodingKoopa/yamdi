@@ -11,9 +11,9 @@ function exit-script() {
   echo "Exiting script."
 
   echo "Getting changes made by server to configuration files."
-  get-directory-changes "$SERVER_CONFIG_VCS_DIRECTORY" "$SERVER_DIRECTORY"
+  get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
   echo "Getting changes made by server to plugin files."
-  get-directory-changes "$SERVER_PLUGINS_VCS_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+  get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
   exit 0
 }
