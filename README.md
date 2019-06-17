@@ -1,6 +1,6 @@
 # Yet Another Minecraft Docker Image
 
-Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server softwares that aims to be as clean as possible while maintaining functionality. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
+Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server softwares that aims to do everything securely and tactfully. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
 - The code for both the Docker image building and the script starting up Spigot should be understandable. Important design decisions should be properly documented.
 - The code should be concise, combining statements where it makes sense.
 - The code shouldn't do anything unnecessary.
@@ -9,9 +9,7 @@ The last point is particularly relevant. The original setup offers functionality
 - Use [bind mounts](https://docs.docker.com/storage/bind-mounts/) to bind the configuration volume and manually edit the configuration that way.
 - Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have Spigot run as an unprivledged user.
 
-An additional motivation for making things light and clean is that this image is particularly made to be very portable, that is, able to run on embedded devices like a Raspberry Pi as well as a traditional server.
-
-These decisions were made because of how, ultimately, Docker does handle these things better and/or than a container-level mechanism can. To reiterate, if you're an end-user-ish person looking for a setup that just works with little finicking, then I would recommend the aforementioned setup. If you are someone that does care about the underlying code and security, then this might be a good setup.
+These decisions were made because of how, ultimately, Docker does handle these things better and/or than a container-level mechanism can. To reiterate, if you're an end-user-ish person looking for a setup that just works with little finicking, then I would recommend the aforementioned setup. If you are someone that does care about the underlying code and security, then this might be a good setup. YAMDI is carefully designed to be secure, work in many different environments, and be customizeable.
 
 ## Usage
 In this sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`.
