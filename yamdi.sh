@@ -178,35 +178,37 @@ mkfifo -m700 "$COMMAND_INPUT_FILE"
 
 # Append suggested JVM options unless required not to.
 if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
-  # Set the error file path to include the server info.
-  SUGGESTED_JVM_OPTS+=" -XX:ErrorFile=./$SERVER_NAME-error-pid%p.log"
+  if [ "$JVM" = "hotspot" ]; then
+    # Set the error file path to include the server info.
+    SUGGESTED_JVM_OPTS+=" -XX:ErrorFile=./$SERVER_NAME-error-pid%p.log"
 
-  # Enable experimental VM features, for the options we'll be setting. Although this is not listed
-  # in the documentation for "java", when I tested an experimental feature in a YAMDI container,
-  # this was necessary. These options are largely taken from here: https://mcflags.emc.gs/.
-  SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
+    # Enable experimental VM features, for the options we'll be setting. Although this is not listed
+    # in the documentation for "java", when I tested an experimental feature in a YAMDI container,
+    # this was necessary. These options are largely taken from here: https://mcflags.emc.gs/.
+    SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
 
-  # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
-  SUGGESTED_JVM_OPTS+=" -XX:+UseG1GC"
-  # Don't reserve memory, because this option seems to break and cause OOM errors when running in
-  # Docker.
-  # SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
-  # Disable explicit garbage collection, because some plugins try to manage their own memory and
-  # suck at it.
-  SUGGESTED_JVM_OPTS+=" -XX:+DisableExplicitGC"
-  # Adjust the max size of the new generation that will be set later.
-  SUGGESTED_JVM_OPTS+=" -XX:G1MaxNewSizePercent=80"
-  # Lower the garbage collection threshold, to make cleanups not as demanding.
-  SUGGESTED_JVM_OPTS+=" -XX:G1MixedGCLiveThresholdPercent=35"
-  # Raise the New Generation size to keep up with MC's allocations, because MC has many.
-  SUGGESTED_JVM_OPTS+=" -XX:G1NewSizePercent=50"
-  # Take 100ms at the most to collect garbage.
-  SUGGESTED_JVM_OPTS+=" -XX:MaxGCPauseMillis=100"
-  # Allow garbage collection to use multiple threads, for performance.
-  SUGGESTED_JVM_OPTS+=" -XX:+ParallelRefProcEnabled"
-  # Set the garbage collection target survivor ratio higher to use more of the survivor space
-  # before promoting it, because MC has steady allocations.
-  SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
+    # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
+    SUGGESTED_JVM_OPTS+=" -XX:+UseG1GC"
+    # Don't reserve memory, because this option seems to break and cause OOM errors when running in
+    # Docker.
+    # SUGGESTED_JVM_OPTS+=" -XX:+AlwaysPreTouch"
+    # Disable explicit garbage collection, because some plugins try to manage their own memory and
+    # suck at it.
+    SUGGESTED_JVM_OPTS+=" -XX:+DisableExplicitGC"
+    # Adjust the max size of the new generation that will be set later.
+    SUGGESTED_JVM_OPTS+=" -XX:G1MaxNewSizePercent=80"
+    # Lower the garbage collection threshold, to make cleanups not as demanding.
+    SUGGESTED_JVM_OPTS+=" -XX:G1MixedGCLiveThresholdPercent=35"
+    # Raise the New Generation size to keep up with MC's allocations, because MC has many.
+    SUGGESTED_JVM_OPTS+=" -XX:G1NewSizePercent=50"
+    # Take 100ms at the most to collect garbage.
+    SUGGESTED_JVM_OPTS+=" -XX:MaxGCPauseMillis=100"
+    # Allow garbage collection to use multiple threads, for performance.
+    SUGGESTED_JVM_OPTS+=" -XX:+ParallelRefProcEnabled"
+    # Set the garbage collection target survivor ratio higher to use more of the survivor space
+    # before promoting it, because MC has steady allocations.
+    SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
+  fi
 fi
 
 TOTAL_JVM_OPTS="-Xmx${GAME_MEMORY_AMOUNT} -Xms${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
