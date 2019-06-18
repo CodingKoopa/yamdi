@@ -29,6 +29,9 @@ function import-directory() {
 
   echo "Making copy of host files."
   declare -r SOURCE_DIRECTORY_VCS="$SOURCE_DIRECTORY-copy"
+  # Ensure that the VCS directory isn't present to begin with, because if it is then the source
+  # directory will be copied inside of the VCS directory, effectively discarding any new changes.
+  rm -rf "$SOURCE_DIRECTORY_VCS"
   cp -R "$SOURCE_DIRECTORY" "$SOURCE_DIRECTORY_VCS"
 
   echo "Initializing Git repo."
