@@ -133,7 +133,7 @@ services:
 The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and Spigot.
 
 #### Memory Options
-The amount of memory to be used by the JVM for the BuildTools and Spigot can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `GAME_MEMORY_AMOUNT` variables, for example:
+The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `GAME_MEMORY_AMOUNT` variables, for example:
 ```sh
 docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env GAME_MEMORY_AMOUNT=1G
 ```
