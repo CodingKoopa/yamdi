@@ -190,5 +190,9 @@ Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https
 
 Thanks to [electronicboy](https://github.com/electronicboy/parchment-docker) for their work with running Paper in Docker.
 
+Thanks to [Aikar](https://aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft/) and [Tux](https://steinborn.me/posts/tuning-minecraft-openj9/) for optimizing Spigot and Paper.
+
+Thanks to [Flame Sage](https://github.com/chris062689) and [Byteflux](https://github.com/Byteflux) for help and guidance.
+
 ## License
 This project is licensed under the MIT license.
