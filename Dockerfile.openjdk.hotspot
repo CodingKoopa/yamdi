@@ -1,5 +1,5 @@
 # Set the base image to the AdoptOpenJDK OpenJDK 12 release JRE, with Alpine Linux.
-FROM adoptopenjdk/openjdk11:alpine-jre
+FROM adoptopenjdk/openjdk12:alpine-jre
 
 # Specify the distributor.
 ENV DIST="adoptopenjdk"
