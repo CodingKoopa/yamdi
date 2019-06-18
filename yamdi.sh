@@ -66,12 +66,6 @@ fi
 if [ -z "$REV" ]; then
   REV="latest"
 fi
-if [ -z "$BUILDTOOLS_MEMORY_AMOUNT" ]; then
-  BUILDTOOLS_MEMORY_AMOUNT="1024M"
-fi
-if [ -z "$GAME_MEMORY_AMOUNT" ]; then
-  GAME_MEMORY_AMOUNT="1024M"
-fi
 
 if [ "$SERVER_TYPE" = "spigot" ]; then
   echo "Spigot server selected."
@@ -93,10 +87,14 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
     # Download the latest BuildTools JAR.
     wget -q https://hub.spigotmc.org/jenkins/job/\
 BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+
+    BUILDTOOLS_MEMORY_OPTS=$(generate-memory-opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
+        "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
+    TOTAL_BUILDTOOLS_MEMORY_OPTS="$BUILDTOOLS_MEMORY_OPTS $JVM_OPTS"
+
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
-    java $JVM_OPTS -Xms${BUILDTOOLS_MEMORY_AMOUNT} -Xmx${BUILDTOOLS_MEMORY_AMOUNT} \
-        -jar BuildTools.jar --rev $REV
+    java $TOTAL_BUILDTOOLS_MEMORY_OPTS -jar BuildTools.jar --rev $REV
     # Copy the Spigot build to the Spigot directory.
     cp spigot-*.jar "$SPIGOT_REVISION_JAR"
     popd
@@ -176,6 +174,9 @@ rm -f "$COMMAND_INPUT_FILE"
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
+GAME_MEMORY_OPTS=$(generate-memory-opts "$GAME_MEMORY_AMOUNT_MIN" "$GAME_MEMORY_AMOUNT_MAX" \
+    "$GAME_MEMORY_AMOUNT")
+
 # Append suggested JVM options unless required not to.
 if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
   if [ "$JVM" = "hotspot" ]; then
@@ -208,15 +209,29 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Set the garbage collection target survivor ratio higher to use more of the survivor space
     # before promoting it, because MC has steady allocations.
     SUGGESTED_JVM_OPTS+=" -XX:TargetSurvivorRatio=90"
+  elif [ "$JVM" = "openj9" ]; then
+    # These options are largely taken from here:
+    # https://steinborn.me/posts/tuning-minecraft-openj9/.
+    # See the utility script for the generation of the nursery limits.
+
+    # Enable pausless garbage collection, for smaller pause times.
+    SUGGESTED_JVM_OPTS+=" -Xgc:concurrentScavenge"
+    # Reduce the amount of time spent collecting the nursery.
+    SUGGESTED_JVM_OPTS+=" -Xgc:dnssExpectedTimeRatioMaximum=3"
+    # Ensure that nursery objects aren't promoted to the nursery too quickly, since the server will
+    # be making many of them.
+    SUGGESTED_JVM_OPTS+=" -Xgc:scvNoAdaptiveTenure"
+    # Disable explicit garbage collection, for the same reason as in hotspot.
+    SUGGESTED_JVM_OPTS+=" -Xdisableexplicitgc"
   fi
 fi
 
-TOTAL_JVM_OPTS="-Xms${GAME_MEMORY_AMOUNT} -Xmx${GAME_MEMORY_AMOUNT} $SUGGESTED_JVM_OPTS $JVM_OPTS"
-echo "Launching $SERVER_NAME with JVM options $TOTAL_JVM_OPTS."
+TOTAL_GAME_JVM_OPTS="$GAME_MEMORY_OPTS $SUGGESTED_JVM_OPTS $JVM_OPTS"
+echo "Launching $SERVER_NAME with JVM options \"$TOTAL_GAME_JVM_OPTS\"."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
 # shellcheck disable=SC2086
-java $TOTAL_JVM_OPTS -jar "$SERVER_JAR" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
+java $TOTAL_GAME_JVM_OPTS -jar "$SERVER_JAR" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
 echo "Waiting for Java process to exit."
 wait
 exit-script

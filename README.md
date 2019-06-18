@@ -146,6 +146,10 @@ services:
 ```
 Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for Spigot itself, two separate variables are provided.
 
+These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desireable. However, `BUILDTOOLS_MEMORY_AMOUNT_MIN` and `BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
+
+If nothing is specified, YAMDI defaults to a safe 1GB for both.
+
 #### Experimental Options
 By default, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. This behavior can be disabled by setting `USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
 

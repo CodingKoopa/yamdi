@@ -101,3 +101,50 @@ function get-directory-changes() {
     echo "No Git repo found."
   fi
 }
+
+# Given a minimum, maximum and "both" value, generate a JVM memory option string. If both the
+# min and max and set, they will be use respectively. If only one is set, it will be used for
+# both.
+# Arguments:
+#   Number of minimum MB.
+#   Number of maximum MB.
+#   Number to be used for both minimum and maximum MB.
+# Returns:
+#   The generated JVM option string.
+function generate-memory-opts() {
+  MINIMUM="$1"
+  MAXIMUM="$2"
+  BOTH="$3"
+
+  if [ -n "$MINIMUM" ] && [ -z "$MAXIMUM" ]; then
+    OUTPUT="-Xms${MINIMUM} -Xmx${MINIMUM}"
+  elif [ -z "$MINIMUM" ] && [ -n "$MAXIMUM" ]; then
+    OUTPUT="-Xms${MAXIMUM} -Xmx${MAXIMUM}"
+  elif [ -n "$BOTH" ]; then
+    OUTPUT="-Xms${BOTH} -Xmx${BOTH}"
+  else
+    OUTPUT="-Xms1024M -Xmx1024M"
+  fi
+
+  # See the setting of most of these options, in the main script.
+  if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
+    if [ "$JVM" = "openj9" ]; then
+      if [ -n "$MAXIMUM" ]; then
+        UPPER_BOUND="$MAXIMUM"
+      elif [ -n "$BOTH" ]; then
+        UPPER_BOUND="$BOTH"
+      else
+        UPPER_BOUND="1024"
+      fi
+      # Strip out the letter indicating the storage unit.
+      UPPER_BOUND=${UPPER_BOUND//[!0-9]/}
+      # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short lived
+      # objects.
+      OUTPUT+=" -Xmns$(("$UPPER_BOUND" / 2))M"
+      # Set the nursery maximum to 80% of the heap size to allow the server to grow it.
+      OUTPUT+=" -Xmnx$(("$UPPER_BOUND" * 4 / 5))M"
+    fi
+  fi
+
+  echo "$OUTPUT"
+}
