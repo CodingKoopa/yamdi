@@ -57,6 +57,9 @@ cd "$SERVER_DIRECTORY"
 
 echo "Importing server configuration files."
 import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+# If this isn't done, then when the source directory has new JARs, the target will still have the
+# old ones.
+find "$SERVER_DIRECTORY/plugins" -maxdepth 1 -name "*.jar" -type f -delete
 echo "Importing server plugin files."
 import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
