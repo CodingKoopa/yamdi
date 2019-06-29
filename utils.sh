@@ -21,7 +21,8 @@ function import-directory() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
 
-  # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty directory.
+  # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty
+  # directory.
   if [ -z "$(ls -A "$SOURCE_DIRECTORY")" ] || [ ! -d "$SOURCE_DIRECTORY" ]; then
     echo "No files to import."
     return 0
@@ -75,7 +76,8 @@ function import-directory() {
       # image, so go with normal summaries.
       git diff --color -R --summary
     else
-      # Condense the summary because otherwise the full contents of new additions will be displayed.
+      # Condense the summary because otherwise the full contents of new additions will be
+      # displayed.
       git diff --color -R --compact-summary
     fi
   fi
@@ -141,8 +143,8 @@ function generate-memory-opts() {
       fi
       # Strip out the letter indicating the storage unit.
       UPPER_BOUND=${UPPER_BOUND//[!0-9]/}
-      # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short lived
-      # objects.
+      # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
+      # lived objects.
       OUTPUT+=" -Xmns$(("$UPPER_BOUND" / 2))M"
       # Set the nursery maximum to 80% of the heap size to allow the server to grow it.
       OUTPUT+=" -Xmnx$(("$UPPER_BOUND" * 4 / 5))M"

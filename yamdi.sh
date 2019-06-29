@@ -186,9 +186,10 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Set the error file path to include the server info.
     SUGGESTED_JVM_OPTS+=" -XX:ErrorFile=./$SERVER_NAME-error-pid%p.log"
 
-    # Enable experimental VM features, for the options we'll be setting. Although this is not listed
-    # in the documentation for "java", when I tested an experimental feature in a YAMDI container,
-    # this was necessary. These options are largely taken from here: https://mcflags.emc.gs/.
+    # Enable experimental VM features, for the options we'll be setting. Although this is not
+    # listed in the documentation for "java", when I tested an experimental feature in a YAMDI
+    # container, this was necessary. These options are largely taken from here:
+    # https://mcflags.emc.gs/.
     SUGGESTED_JVM_OPTS+=" -XX:+UnlockExperimentalVMOptions"
 
     # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
