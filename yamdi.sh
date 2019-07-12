@@ -57,6 +57,10 @@ cd "$SERVER_DIRECTORY"
 
 echo "Importing server configuration files."
 import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+# Ignore server properties unless explicitly told not to.
+if [ ! "$IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
+  git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties"
+fi
 # If this isn't done, then when the source directory has new JARs, the target will still have the
 # old ones.
 find "$SERVER_DIRECTORY/plugins" -maxdepth 1 -name "*.jar" -type f -delete

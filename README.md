@@ -115,6 +115,9 @@ spigot.yml
 ```
 For help with configuring these files for optimal performance, see [this](https://www.spigotmc.org/threads/guide-server-optimization%E2%9A%A1.283181/) thread.
 
+#### Ignore `server.properties`
+The `server.properties` configuration file is internally stored as a [`Map`](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/util/Map.html), therefore it does not have any ordering. As a result, the order of the file is random, and as such brings up false positives when put in a Git repo. This behavior can be disabled by setting `IGNORE_SERVER_PROPERTY_CHANGES` to false, although this shouldn't be done unless you have good reason to.
+
 ### Server Ports
 The Mineecraft Server port can be opened by exposing port `25565`.
 ```sh
