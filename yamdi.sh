@@ -4,18 +4,24 @@ set -e
 # Exits YAMDI, waiting for Java to save and removing the Git repository. "wait" must be ran
 # separately, because this function will be ran in its own sub process.
 # Arguments:
-#   None.
+#   The Java return code.
 # Returns:
 #   None.
 function exit-script() {
+  JAVA_RET=$1
+
   echo "Exiting script."
+
+  if [ "$JAVA_RET" -ne 0 ]; then
+    echo "Java process return code is $JAVA_RET, likely crashed."
+  fi
 
   echo "Getting changes made by server to configuration files."
   get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
   echo "Getting changes made by server to plugin files."
   get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
-  exit 0
+  exit "$JAVA_RET"
 }
 
 # Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals.
@@ -31,7 +37,7 @@ function stop() {
   cmd stop
   echo "Waiting for Java process to exit."
   wait
-  exit-script
+  exit-script $?
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
@@ -240,6 +246,12 @@ echo "Launching $SERVER_NAME with JVM options \"$TOTAL_GAME_JVM_OPTS\"."
 # script can still recieve signals.
 # shellcheck disable=SC2086
 java $TOTAL_GAME_JVM_OPTS -jar "$SERVER_JAR" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
-echo "Waiting for Java process to exit."
-wait
-exit-script
+JAVA_PID=$!
+echo "Waiting for Java process (PID $JAVA_PID) to exit."
+# Allow wait to return an error without making the whole script exit.
+set +e
+wait $JAVA_PID
+JAVA_RET=$?
+set -e
+echo "Java process exited (return $JAVA_RET)."
+exit-script $JAVA_RET

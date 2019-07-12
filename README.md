@@ -188,6 +188,16 @@ This should print something like `This server is running CraftBukkit version git
 ### Shutting Spigot Down
 YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker stop` / `docker-compose down` / `docker-compose stop` or sending `Ctrl` + `C` in a `docker-compose` session), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out, unless quitting via `Ctrl + C`, because then log output in the view will have already been stopped.
 
+Conversely, when the server shuts down, the exit code of YAMDI will be equivalent to the exit code of the Java process, therefore YAMDI is compatible with Docker restart techniques:
+```sh
+docker run --restart always
+```
+```yml
+services:
+  yamdi:
+    restart: on-failure
+```
+
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
 
