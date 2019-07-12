@@ -1,13 +1,13 @@
 # Yet Another Minecraft Docker Image
 
 Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server softwares that aims to do everything securely and tactfully. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
-- The code for both the Docker image building and the script starting up Spigot should be understandable. Important design decisions should be properly documented.
+- The code for both the Docker image building and the script starting up the server should be understandable. Important design decisions should be properly documented.
 - The code should be concise, combining statements where it makes sense.
 - The code shouldn't do anything unnecessary.
 
 The last point is particularly relevant. The original setup offers functionality for specifying server properties via environment variables (which does work very well), as well as running it as a `minecraft` user with restricted permissions. This image has both of these things stripped out because, as a system administrator, you are expected to:
 - Use [bind mounts](https://docs.docker.com/storage/bind-mounts/) to bind the configuration volume and manually edit the configuration that way.
-- Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have Spigot run as an unprivledged user.
+- Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have the server run as an unprivledged user.
 
 These decisions were made because of how, ultimately, Docker does handle these things better and/or than a container-level mechanism can. To reiterate, if you're an end-user-ish person looking for a setup that just works with little finicking, then I would recommend the aforementioned setup. If you are someone that does care about the underlying code and security, then this might be a good setup. YAMDI is carefully designed to be secure, work in many different environments, and be customizeable.
 
@@ -68,7 +68,7 @@ services:
 YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
 - `/opt/server-config-host`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
-- `/opt/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by Spigot, and their own configurations.
+- `/opt/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by the server, and their own configurations.
 `/opt/server` must be mounted, both for server data to persist, and to accept the EULA. The other volumes are technically optional, but recommended for reasons that will be explained.
 ```sh
 docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config-host --mount type=bind,source=./mc-plugins,target=/opt/server-plugins-host
@@ -145,7 +145,7 @@ Oracle Java 8 SE is the latest Oracle SE version, with the Hotspot VM. This is n
 ### JVM Configuration
 
 #### General Options
-The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and Spigot.
+The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and the server.
 
 #### Memory Options
 The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `GAME_MEMORY_AMOUNT` variables, for example:
@@ -159,7 +159,7 @@ services:
       BUILDTOOLS_MEMORY_AMOUNT: "800M"
       GAME_MEMORY_AMOUNT: "1G"
 ```
-Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for Spigot itself, two separate variables are provided.
+Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for the server itself, two separate variables are provided.
 
 These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desireable. However, `BUILDTOOLS_MEMORY_AMOUNT_MIN` and `BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
 
@@ -168,25 +168,25 @@ If nothing is specified, YAMDI defaults to a safe 1GB for both.
 #### Experimental Options
 By default, for Hotspot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
 
-### Sending Commands to Spigot
-YAMDI comes with an helper script (thanks @AshDevFr) to send commands to Spigot while it is running in another container.
+### Sending Commands to the Server
+YAMDI comes with an helper script (thanks @AshDevFr) to send commands to the server while it is running in another container.
 ```sh
-docker exec spigot cmd $COMMAND
+docker exec yamdi cmd $COMMAND
 ```
 ```sh
-docker-compose exec spigot cmd $COMMAND
+docker-compose exec yamdi cmd $COMMAND
 ```
 A command that can be used here (see `help` for more commands) is `version`.
 ```sh
-docker exec spigot cmd version
+docker exec yamdi cmd version
 ```
 ```sh
-docker-compose exec spigot cmd version
+docker-compose exec yamdi cmd version
 ```
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
-### Shutting Spigot Down
-YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker stop` / `docker-compose down` / `docker-compose stop` or sending `Ctrl` + `C` in a `docker-compose` session), and properly shuts down Spigot (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out, unless quitting via `Ctrl + C`, because then log output in the view will have already been stopped.
+### Shutting the Server Down
+YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker stop` / `docker-compose down` / `docker-compose stop` or sending `Ctrl` + `C` in a `docker-compose` session), and properly shuts down the server (saving worlds, shutting down plugins, etc.) when they are recieved. Additionally, any changes made to the configuration files by the server will be printed out, unless quitting via `Ctrl + C`, because then log output in the view will have already been stopped.
 
 Conversely, when the server shuts down, the exit code of YAMDI will be equivalent to the exit code of the Java process, therefore YAMDI is compatible with Docker restart techniques:
 ```sh
