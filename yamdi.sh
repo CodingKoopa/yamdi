@@ -16,9 +16,11 @@ function exit-script() {
     warning "Java process return code is $JAVA_RET, likely crashed. Not checking files for changes."
   else
     info "Checking server configuration files."
-    get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+    get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
+        "$SERVER_DIRECTORY/config.patch"
     info "Checking server plugin files."
-    get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+    get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins" \
+        "$SERVER_DIRECTORY/plugins.patch"
   fi
 
   exit "$JAVA_RET"

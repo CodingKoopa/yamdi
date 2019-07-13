@@ -139,19 +139,21 @@ function import-directory() {
 # Arguments:
 #   Path to the source directory.
 #   Path to the target directory.
+#   Path to output the patch to.
 # Returns:
 #   None.
 function get-directory-changes() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
+  PATCH_PATH=$3
 
   export GIT_DIR="$SOURCE_DIRECTORY-copy/.git-yamdi"
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
   if [ ! -d "$GIT_DIR" ]; then
     info "No Git repo found. No changes."
   else
-    info "Git repo found. Changes:"
-    git diff --color
+    info "Git repo found. Outputting changes to \"$PATCH_PATH\"."
+    git diff > "$PATCH_PATH"
   fi
 }
 
