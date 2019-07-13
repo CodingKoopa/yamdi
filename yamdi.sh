@@ -70,15 +70,28 @@ info "Starting Yet Another Minecraft Docker Image."
 # will check the current directory for configuration files.
 cd "$SERVER_DIRECTORY"
 
+# Remove files that aren't depended upon by any stage of this script.
+if [ "$CLEAN_FILES" = true ]; then
+  debug "Cleaning crash dumps and reports."
+  # Purge crash dumps. TODO: There are almost certainly more forms that could be included here.
+  rm -rf {heapdump,javacore,Snap}.*
+  # Purge crash reports and logs. With Docker, we have our own logging system.
+  rm -rf crash-reports logs
+fi
+
 info "Importing server configuration files."
 import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 # Ignore server properties unless explicitly told not to.
 if [ ! "$IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
   git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties"
 fi
+# If we aren't doing a clean, don't go any further than the root JARs.
+if [ ! "$CLEAN_FILES" = true ]; then
+  MAXDEPTH=(-maxdepth 1)
+fi
 # If this isn't done, then when the source directory has new JARs, the target will still have the
 # old ones.
-find "$SERVER_DIRECTORY/plugins" -maxdepth 1 -name "*.jar" -type f -delete
+find "$SERVER_DIRECTORY/plugins" "${MAXDEPTH[@]}" -name "*.jar" -type f -delete
 info "Importing server plugin files."
 import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
@@ -187,6 +200,11 @@ fi
 if [ ! -f "$SERVER_JAR" ]; then
   error "Error: Server JAR not found. This could be due to a build error, or a misconfiguration."
   exit 1
+fi
+
+# Perform server JAR cleanup.
+if [ "$CLEAN_FILES" = true ]; then
+  find "$SERVER_DIRECTORY" -maxdepth 1 \( -name "*.jar" ! -name "$(basename "$(readlink "$SERVER_JAR")")" \) -type f -delete
 fi
 
 # Make sure the command input file is clear.
