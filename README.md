@@ -198,6 +198,17 @@ services:
     restart: on-failure
 ```
 
+**Warning**: Although the server tends to be able to save and completely shutdown within Docker's 10-second grace period, in production, it's **highly** recommended to boost this grace period to avoid corruption in any case where the save takes longer than usual:
+```sh
+docker stop -t 300
+```
+```yml
+services:
+  yamdi:
+    stop_grace_period: 5m
+```
+Having said this, it's important to mention that, when `Ctrl` + `C` is sent in a `docker-compose` session, the log feed will always prematurely end. This gives the effect that the server has been stopped before it's gotten the chance to save, when really it's still running in the background.
+
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
 
