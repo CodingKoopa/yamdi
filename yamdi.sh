@@ -10,16 +10,16 @@ set -e
 function exit-script() {
   JAVA_RET=$1
 
-  echo "Exiting script."
+  info "Stopping Yet Another Minecraft Docker Image."
 
   if [ "$JAVA_RET" -ne 0 ]; then
-    echo "Java process return code is $JAVA_RET, likely crashed."
+    warning "Java process return code is $JAVA_RET, likely crashed. Not checking files for changes."
+  else
+    info "Checking server configuration files."
+    get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+    info "Checking server plugin files."
+    get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
   fi
-
-  echo "Getting changes made by server to configuration files."
-  get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
-  echo "Getting changes made by server to plugin files."
-  get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
   exit "$JAVA_RET"
 }
@@ -32,11 +32,18 @@ function exit-script() {
 function stop() {
   # Print a message because otherwise, it is very difficult to tell that this trap is actually
   # being triggered.
-  echo "SIGINT or SIGTERM recieved. Sending stop command to server."
+  info "SIGINT or SIGTERM recieved. Sending stop command to server."
   # Send the "stop" command to the server.
   cmd stop
-  echo "Waiting for Java process to exit."
-  wait
+  debug "Waiting for Java process to exit."
+  # JAVA_PID is exported after the Java process is started. If this function is called before then,
+  # it should just be empty, which is fine for wait, as without arguments it will wait for all
+  # background processes. This is still necessary though, because, through testing, it seems that
+  # when the PID is specified in the other wait command, this one hangs.
+  set +e
+  wait "$JAVA_PID"
+  JAVA_RET=$?
+  set -e
   exit-script $?
 }
 
@@ -52,16 +59,16 @@ function stop() {
 trap stop SIGINT
 trap stop SIGTERM
 
-echo "Starting up Yet Another Minecraft Docker Image."
-
 # shellcheck source=utils.sh
 source /usr/lib/utils
+
+info "Starting Yet Another Minecraft Docker Image."
 
 # Enter the server directory because we will use Git to update files here, and the Minecraft server
 # will check the current directory for configuration files.
 cd "$SERVER_DIRECTORY"
 
-echo "Importing server configuration files."
+info "Importing server configuration files."
 import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 # Ignore server properties unless explicitly told not to.
 if [ ! "$IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
@@ -70,7 +77,7 @@ fi
 # If this isn't done, then when the source directory has new JARs, the target will still have the
 # old ones.
 find "$SERVER_DIRECTORY/plugins" -maxdepth 1 -name "*.jar" -type f -delete
-echo "Importing server plugin files."
+info "Importing server plugin files."
 import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
 if [ -z "$SERVER_TYPE" ]; then
@@ -81,7 +88,7 @@ if [ -z "$REV" ]; then
 fi
 
 if [ "$SERVER_TYPE" = "spigot" ]; then
-  echo "Spigot server selected."
+  info "Spigot server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/spigot.jar"
   declare -r SPIGOT_REVISION_JAR="$SERVER_DIRECTORY/spigot-$REV.jar"
@@ -90,7 +97,7 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
   # exist.
   if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$SPIGOT_REVISION_JAR" ]; then
-    echo "Building $SERVER_NAME."
+    debug "Building $SERVER_NAME."
     # Build in a temporary directory.
     declare -r SPIGOT_BUILD_DIRECTORY=/tmp/spigot-build
     mkdir -p "$SPIGOT_BUILD_DIRECTORY"
@@ -114,7 +121,7 @@ BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
     # Remove the build files to preserve space.
     rm -rf "$SPIGOT_BUILD_DIRECTORY"
   else
-    echo "$SERVER_NAME already built."
+    debug "$SERVER_NAME already built."
   fi
 
   # Select the specified revision. In some cases, ln's -f option doesn't work.
@@ -122,7 +129,7 @@ BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
   ln -s "$SPIGOT_REVISION_JAR" "$SERVER_JAR"
 
 elif [ $SERVER_TYPE = "paper" ]; then
-  echo "Paper server selected."
+  info "Paper server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/paper.jar"
   if [ -z "$PAPER_BUILD" ]; then
@@ -133,41 +140,41 @@ elif [ $SERVER_TYPE = "paper" ]; then
   # manually find out the latest version using the API. When we do have the latest version, if a
   # "latest" build was specified (or omitted altogether) then we have to find out that too.
   if [ "$REV" = "latest" ]; then
-    echo "Resolving latest Paper revision."
+    debug "Resolving latest Paper revision."
 
     PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$SERVER_TYPE)
     # Handle errors returned by the API.
     VERSION_JSON_ERROR=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .error)
     if [ ! "null" = "$VERSION_JSON_ERROR" ]; then
-      echo "Error: Failed to fetch Paper versions. Curl error: \"$VERSION_JSON_ERROR\"."
+      error "Error: Failed to fetch Paper versions. Curl error: \"$VERSION_JSON_ERROR\"."
       exit 2
     fi
 
     REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s\#\"\#\#g)
   fi
-  echo "Paper revision: \"$REV\"."
+  debug "Paper revision: \"$REV\"."
 
   if [ "$PAPER_BUILD" = "latest" ]; then
-    echo "Resolving latest Paper build."
+    debug "Resolving latest Paper build."
     PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD")
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
     if [ ! "null" = "$BUILD_JSON_ERROR" ]; then
-      echo "Error: Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
+      error "Error: Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
       exit 2
     fi
 
     PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
   fi
-  echo "Paper build: \"$PAPER_BUILD\"."
+  debug "Paper build: \"$PAPER_BUILD\"."
 
   declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$REV-$PAPER_BUILD.jar"
   declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
-    echo "Downloading $SERVER_NAME."
+    debug "Downloading $SERVER_NAME."
     curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" > "$PAPER_REVISION_JAR"
   else
-    echo "$SERVER_NAME already downloaded."
+    debug "$SERVER_NAME already downloaded."
   fi
 
   # Select the specified revision. In some cases, ln's -f option doesn't work.
@@ -176,7 +183,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
 fi
 
 if [ ! -f "$SERVER_JAR" ]; then
-  echo "Error: Server JAR not found. This could be due to a build error, or a misconfiguration."
+  error "Error: Server JAR not found. This could be due to a build error, or a misconfiguration."
   exit 1
 fi
 
@@ -241,17 +248,17 @@ if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
 fi
 
 TOTAL_GAME_JVM_OPTS="$GAME_MEMORY_OPTS $SUGGESTED_JVM_OPTS $JVM_OPTS"
-echo "Launching $SERVER_NAME with JVM options \"$TOTAL_GAME_JVM_OPTS\"."
+info "Launching Java process for $SERVER_NAME with JVM options \"$TOTAL_GAME_JVM_OPTS\"."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
 # script can still recieve signals.
 # shellcheck disable=SC2086
 java $TOTAL_GAME_JVM_OPTS -jar "$SERVER_JAR" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
-JAVA_PID=$!
-echo "Waiting for Java process (PID $JAVA_PID) to exit."
+export JAVA_PID=$!
+debug "Waiting for Java process (PID $JAVA_PID) to exit."
 # Allow wait to return an error without making the whole script exit.
 set +e
-wait $JAVA_PID
+wait "$JAVA_PID"
 JAVA_RET=$?
 set -e
-echo "Java process exited (return $JAVA_RET)."
+debug "Java process exited (return $JAVA_RET)."
 exit-script $JAVA_RET

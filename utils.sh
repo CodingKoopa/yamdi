@@ -9,6 +9,48 @@ export SERVER_PLUGINS_HOST_DIRECTORY="/opt/server-plugins-host"
 # Set the directory for the command named pipe to be.
 export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 
+# Prints a debug message, if enabled.
+# Arguments:
+#   The message.
+# Returns:
+#   None.
+function debug()
+{
+  if [ "$DEBUG" = "true" ]; then
+    printf "[$(date +%R:%S) DEBUG]: [YAMDI] %s\n" "$*"
+  fi
+}
+
+# Prints an info message.
+# Arguments:
+#   The message.
+# Returns:
+#   None.
+function info()
+{
+  printf "[$(date +%R:%S) INFO]: [YAMDI] %s\n" "$*"
+}
+
+# Prints a warning message.
+# Arguments:
+#   The message.
+# Returns:
+#   None.
+function warning()
+{
+  printf "[$(date +%R:%S) WARNING]: [YAMDI] %s\n" "$*"
+}
+
+# Prints an error message.
+# Arguments:
+#   The message.
+# Returns:
+#   None.
+function error()
+{
+  printf "[$(date +%R:%S) ERROR]: [YAMDI] %s\n" "$*"
+}
+
 # Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
 # given directory, using Git. For more details on the checkout method used here, see:
 # https://gitolite.com/deploy.html
@@ -24,18 +66,18 @@ function import-directory() {
   # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty
   # directory.
   if [ -z "$(ls -A "$SOURCE_DIRECTORY")" ] || [ ! -d "$SOURCE_DIRECTORY" ]; then
-    echo "No files to import."
+    warning "No files to import."
     return 0
   fi
 
-  echo "Making copy of host files."
+  debug "Making copy of host files."
   declare -r SOURCE_DIRECTORY_VCS="$SOURCE_DIRECTORY-copy"
   # Ensure that the VCS directory isn't present to begin with, because if it is then the source
   # directory will be copied inside of the VCS directory, effectively discarding any new changes.
   rm -rf "$SOURCE_DIRECTORY_VCS"
   cp -R "$SOURCE_DIRECTORY" "$SOURCE_DIRECTORY_VCS"
 
-  echo "Initializing Git repo."
+  debug "Initializing Git repo."
   # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
   # reduces any conflict with a preexisting repo.
   export GIT_DIR="$SOURCE_DIRECTORY_VCS/.git-yamdi"
@@ -44,13 +86,13 @@ function import-directory() {
   # Initialize the temporary directory, if it hasn't already been initialized.
   git init -q
 
-  echo "Configuring Git repo."
+  debug "Configuring Git repo."
   # git commit --author doesn't seem to work correctly here, so set the author info in its own
   # set of commands.
   git config user.name "YAMDI, with love ♥"
   git config user.email "codingkoopa@gmail.com"
 
-  echo "Making Git commit."
+  debug "Making Git commit."
   # Add all files from the directory from the stage. This also stages deletions.
   git add -A
   # Remove our temporary Git directory from the stage.
@@ -58,19 +100,24 @@ function import-directory() {
   # Make a commit. This is necessary because otherwise, we can't really use this repo for anything.
   # Procede even if failed because that probably just means there haven't been any configuration
   # changes.
-  git commit -m "Automatically generated commit." || true
+  COMMAND="git commit -m \"Automatically generated commit.\""
+  if [ "$DEBUG" = "true" ]; then
+    eval "$COMMAND" || true
+  else
+    eval "$COMMAND" >/dev/null || true
+  fi
 
-  echo "Switching Git working directory to target."
+  debug "Switching Git working directory to target."
   # Pull the rug out from under Git - make it use the target directory.
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
 
   # If the directory doesn't already exist, create it, and don't show the diff.
   if [ ! -d "$TARGET_DIRECTORY" ]; then
-    echo "Making new directory."
+    info "Making new directory. No changes are being overwritten."
     mkdir -p "$TARGET_DIRECTORY"
   else
-    echo "Changes that will be overwritten:"
-    # Right now, reverse the input so it makes more sense.
+    info "Existing directory found. Changes that will be overwritten:"
+    # Right now, reverse the input so it makes more sense (-R).
     if [ "$DIST" = "oracle" ]; then
       # Condensed summaries aren't available on the Git version in the repos for the Oracle Java
       # image, so go with normal summaries.
@@ -82,7 +129,7 @@ function import-directory() {
     fi
   fi
 
-  echo "Updating server directory."
+  debug "Updating server directory."
   # Update the directory with new changes. Procede if failed, because if no commit was made, then
   # there won't be a valid master branch to use.
   git checkout -q -f master || true
@@ -100,10 +147,11 @@ function get-directory-changes() {
 
   export GIT_DIR="$SOURCE_DIRECTORY-copy/.git-yamdi"
   export GIT_WORK_TREE="$TARGET_DIRECTORY"
-  if [ -d "$GIT_DIR" ]; then
-    git diff --color
+  if [ ! -d "$GIT_DIR" ]; then
+    info "No Git repo found. No changes."
   else
-    echo "No Git repo found."
+    info "Git repo found. Changes:"
+    git diff --color
   fi
 }
 
