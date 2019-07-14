@@ -76,7 +76,7 @@ if [ "$CLEAN_FILES" = true ]; then
   # Purge crash dumps. TODO: There are almost certainly more forms that could be included here.
   rm -rf {heapdump,javacore,Snap}.*
   # Purge crash reports and logs. With Docker, we have our own logging system.
-  rm -rf crash-reports logs
+  rm -rf crash-reports logs ./*.log
 fi
 
 info "Importing server configuration files."
