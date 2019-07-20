@@ -52,8 +52,9 @@ function error()
 }
 
 # Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
-# given directory, using Git. For more details on the checkout method used here, see:
-# https://gitolite.com/deploy.html
+# given directory, using Git. It's very important that, if Git will be used after this function be
+# called, that `unset GIT_DIR GIT_WORK_TREE` is ran. For more details on the checkout method used
+# here, see: https://gitolite.com/deploy.html
 # Arguments:
 #   Path to the source directory.
 #   Path to the target directory.
