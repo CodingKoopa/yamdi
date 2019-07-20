@@ -85,13 +85,16 @@ import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 if [ ! "$IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
   git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties"
 fi
-# If we aren't doing a clean, don't go any further than the root JARs.
-if [ ! "$CLEAN_FILES" = true ]; then
-  MAXDEPTH=(-maxdepth 1)
+
+if [ -d "$SERVER_DIRECTORY/plugins" ]; then
+  # If we aren't doing a clean, don't go any further than the root JARs.
+  if [ ! "$CLEAN_FILES" = true ]; then
+    MAXDEPTH=(-maxdepth 1)
+  fi
+  # If this isn't done, then when the source directory has new JARs, the target will still have the
+  # old ones.
+  find "$SERVER_DIRECTORY/plugins" "${MAXDEPTH[@]}" -name "*.jar" -type f -delete
 fi
-# If this isn't done, then when the source directory has new JARs, the target will still have the
-# old ones.
-find "$SERVER_DIRECTORY/plugins" "${MAXDEPTH[@]}" -name "*.jar" -type f -delete
 info "Importing server plugin files."
 import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
