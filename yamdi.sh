@@ -151,6 +151,16 @@ elif [ $SERVER_TYPE = "paper" ]; then
     PAPER_BUILD="latest"
   fi
 
+  # Disable exit on error so that we can handle curl errors.
+  set +e
+  function handle_curl_errors() {
+    CURL_RET=$?
+    if [ "$CURL_RET" -ne 0 ]; then
+      error "Failed to connect to Paper servers. Curl error code: \"$CURL_RET\""
+      exit 2
+    fi
+  }
+
   # Unlike Spigot, the Paper launcher doesn't know what to do with a "latest" version, so here we
   # manually find out the latest version using the API. When we do have the latest version, if a
   # "latest" build was specified (or omitted altogether) then we have to find out that too.
@@ -158,10 +168,11 @@ elif [ $SERVER_TYPE = "paper" ]; then
     debug "Resolving latest Paper revision."
 
     PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$SERVER_TYPE)
+    handle_curl_errors
     # Handle errors returned by the API.
     VERSION_JSON_ERROR=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .error)
     if [ ! "null" = "$VERSION_JSON_ERROR" ]; then
-      error "Error: Failed to fetch Paper versions. Curl error: \"$VERSION_JSON_ERROR\"."
+      error "Failed to fetch Paper versions. Curl error: \"$VERSION_JSON_ERROR\"."
       exit 2
     fi
 
@@ -172,16 +183,19 @@ elif [ $SERVER_TYPE = "paper" ]; then
   if [ "$PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
     PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD")
+    handle_curl_errors
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
     if [ ! "null" = "$BUILD_JSON_ERROR" ]; then
-      error "Error: Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
+      error "Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
       exit 2
     fi
 
     PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
   fi
   debug "Paper build: \"$PAPER_BUILD\"."
+
+  set -e
 
   declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$REV-$PAPER_BUILD.jar"
   declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
