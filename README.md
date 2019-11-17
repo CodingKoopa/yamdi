@@ -1,18 +1,18 @@
 # Yet Another Minecraft Docker Image
 
-Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server softwares that aims to do everything securely and tactfully. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosphy in mind:
+Yet Another Minecraft Docker Image is a Docker image for running the Spigot and Paper Minecraft server software that aims to do everything securely and tactfully. This is a fork of [this](https://github.com/AshDevFr/docker-spigot/) setup, but with many changes made with this philosophy in mind:
 - The code for both the Docker image building and the script starting up the server should be understandable. Important design decisions should be properly documented.
 - The code should be concise, combining statements where it makes sense.
 - The code shouldn't do anything unnecessary.
 
 The last point is particularly relevant. The original setup offers functionality for specifying server properties via environment variables (which does work very well), as well as running it as a `minecraft` user with restricted permissions. This image has both of these things stripped out because, as a system administrator, you are expected to:
 - Use [bind mounts](https://docs.docker.com/storage/bind-mounts/) to bind the configuration volume and manually edit the configuration that way.
-- Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have the server run as an unprivledged user.
+- Use a [user namespace](https://docs.docker.com/engine/security/userns-remap/) to have the server run as an unprivileged user.
 
-These decisions were made because of how, ultimately, Docker does handle these things better and/or than a container-level mechanism can. To reiterate, if you're an end-user-ish person looking for a setup that just works with little finicking, then I would recommend the aforementioned setup. If you are someone that does care about the underlying code and security, then this might be a good setup. YAMDI is carefully designed to be secure, work in many different environments, and be customizeable.
+These decisions were made because of how, ultimately, Docker does handle these things better and/or than a container-level mechanism can. To reiterate, if you're an end-user type person looking for a setup that just works with little finicking, then I would recommend the aforementioned setup. If you are someone that does care about the underlying code and security, then this might be a good setup. YAMDI is carefully designed to be secure, work in many different environments, and be customizeable.
 
 ## Usage
-In this sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`. Reading through this manual is recommended, to take full advantage of what YAMDI has to offer.
+In these sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`. Reading through this manual is recommended, to take full advantage of what YAMDI has to offer.
 
 ### Server Type
 The type of server can be specified by setting the `SERVER_TYPE` environment variable. Currently supported values are `spigot` (default) and `paper`, case sensitive.
@@ -49,7 +49,7 @@ services:
   yamdi:
     build: .
 ```
-As the `Dockerfile` is (deliberately) placed in the root of this repository, this repository can somewhat cleanly be added as a submodule for another repo if you're using this in a larger setup.
+As the `Dockerfile` is (deliberately) placed in the root of this repository, this repository can somewhat cleanly be added as a submodule for another repository if you're using this in a larger setup.
 ```yml
 services:
   yamdi:
@@ -57,7 +57,7 @@ services:
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
-If using Docker Compose, it may also be desireable to have the server restart if it crashes.
+If using Docker Compose, it may also be desirable to have the server restart if it crashes.
 ```yml
 services:
   yamdi:
@@ -67,7 +67,7 @@ services:
 ### Server Data
 YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
-- `/opt/server-config-host`, the server config. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
+- `/opt/server-config-host`, the server configuration. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
 - `/opt/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by the server, and their own configurations.
 `/opt/server` must be mounted, both for server data to persist, and to accept the EULA. The other volumes are technically optional, but recommended for reasons that will be explained.
 ```sh
@@ -96,7 +96,7 @@ Given these details, there are multiple results and further specifications that 
 - Files in `/opt/server` that are not in the host directory will be left as-is.
 - Files in `/opt/server` that have changed versions in the host directory will be updated.
 - Files in `/opt/server` that have been deleted in the host directory will **not** be deleted. This is a limitation of how YAMDI's temporary Git directory works, in that it only tracks file creations. To remedy this, `JAR`s in the root server plugin directory will be removed before the import process, to avoid any duplicate plugins of different versions.
-- Permissions of files in the host directory will not be retained. The purpose/disireableness of this is that it makes the files safe for YAMDI to write to.
+- Permissions of files in the host directory will not be retained. The purpose/desirableness of this is that it makes the files safe for YAMDI to write to.
 - As a result of YAMDI is using its own Git directory, it will neither not collide with any preexisting Git repository, nor require any Git setup.
 
 To get started, first you should mount `/opt/server`, and let the server run and exit due to not having the EULA accepted, and then set `eula` to `true` in the docker volume. After rerunning the server, and letting it generate configuration files, you can then copy them to your preferred location, and bind them mount to YAMDI as shown in the above examples. When running with the bind mounts properly setup YAMDI will replace the generated configuration files with the new ones.
@@ -134,10 +134,10 @@ rm {config,plugins}.patch
 ```
 
 #### Ignore `server.properties`
-The `server.properties` configuration file is internally stored as a [`Map`](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/util/Map.html), therefore it does not have any ordering. As a result, the order of the file is random, and as such brings up false positives when put in a Git repo. This behavior can be disabled by setting `IGNORE_SERVER_PROPERTY_CHANGES` to false, although this shouldn't be done unless you have good reason to.
+The `server.properties` configuration file is internally stored as a [`Map`](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/util/Map.html), therefore it does not have any ordering. As a result, the order of the file is random, and as such brings up false positives when put in a Git repository. This behavior can be disabled by setting `IGNORE_SERVER_PROPERTY_CHANGES` to false, although this shouldn't be done unless you have good reason to.
 
 ### Server Ports
-The Mineecraft Server port can be opened by exposing port `25565`.
+The Minecraft Server port can be opened by exposing port `25565`.
 ```sh
 docker run --expose 25565
 ```
@@ -179,7 +179,7 @@ services:
 ```
 Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for the server itself, two separate variables are provided.
 
-These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desireable. However, `BUILDTOOLS_MEMORY_AMOUNT_MIN` and `BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
+These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desirable. However, `BUILDTOOLS_MEMORY_AMOUNT_MIN` and `BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
 
 If nothing is specified, YAMDI defaults to a safe 1GB for both.
 
@@ -204,7 +204,7 @@ docker-compose exec yamdi cmd version
 This should print something like `This server is running CraftBukkit version git-Spigot-f09662d-7c395d4 (MC: 1.13.2) (Implementing API version 1.13.2-R0.1-SNAPSHOT)` (It is supposed to say `CraftBukkit`.).
 
 ### Shutting the Server Down
-YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker stop` / `docker-compose down` / `docker-compose stop` or sending `Ctrl` + `C` in a `docker-compose` session), and properly shuts down the server (saving worlds, shutting down plugins, etc.) when they are recieved.
+YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker stop` / `docker-compose down` / `docker-compose stop` or sending `Ctrl` + `C` in a `docker-compose` session), and properly shuts down the server (saving worlds, shutting down plugins, etc.) when they are received.
 
 Conversely, when the server shuts down, the exit code of YAMDI will be equivalent to the exit code of the Java process, therefore YAMDI is compatible with Docker restart techniques:
 ```sh
