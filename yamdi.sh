@@ -46,7 +46,7 @@ function stop() {
   wait "$JAVA_PID"
   JAVA_RET=$?
   set -e
-  exit-script $?
+  exit_script $JAVA_RET
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
