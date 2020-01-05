@@ -1,13 +1,20 @@
 #!/bin/bash
 set -e
 
-# Exits YAMDI, waiting for Java to save and removing the Git repository. "wait" must be ran
-# separately, because this function will be ran in its own sub process.
+# Exits YAMDI, saving the patch for any changes that have been made to the configuration files by
+# the server. If the Java process seems to have crashed, the patch will not be created.
 # Arguments:
 #   The Java return code.
+# Globals Read:
+#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration directory.
+#   - SERVER_DIRECTORY: Location of the containerized server directory.
+# Arguments:
+#   - The Java return code.
+# Outputs:
+#   - Status messages.
 # Returns:
-#   None.
-function exit-script() {
+#   - The Java return code.
+function exit_script() {
   JAVA_RET=$1
 
   info "Stopping Yet Another Minecraft Docker Image."
@@ -16,21 +23,24 @@ function exit-script() {
     warning "Java process return code is $JAVA_RET, likely crashed. Not checking files for changes."
   else
     info "Checking server configuration files."
-    get-directory-changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
+    get_directory_changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
         "$SERVER_DIRECTORY/config.patch"
     info "Checking server plugin files."
-    get-directory-changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins" \
+    get_directory_changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins" \
         "$SERVER_DIRECTORY/plugins.patch"
   fi
 
   exit "$JAVA_RET"
 }
 
-# Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals.
-# Arguments:
-#   None.
+# Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals. This
+# function needs "utils.sh" to be sourced.
+# Globals Read:
+#   - JAVA_PID: The PID of the Java process.
+# Outputs:
+#   - Status messages.
 # Returns:
-#   None.
+#   - The Java return code.
 function stop() {
   # Print a message because otherwise, it is very difficult to tell that this trap is actually
   # being triggered.
@@ -80,7 +90,7 @@ if [ "$CLEAN_FILES" = true ]; then
 fi
 
 info "Importing server configuration files."
-import-directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+import_directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 # Ignore server properties unless explicitly told not to.
 if [ ! "$IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
   git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties"
@@ -96,7 +106,7 @@ if [ -d "$SERVER_DIRECTORY/plugins" ]; then
   find "$SERVER_DIRECTORY/plugins" "${MAXDEPTH[@]}" -name "*.jar" -type f -delete
 fi
 info "Importing server plugin files."
-import-directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+import_directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
 # This is necessary because of Spigot BuildTools needing to use Git.
 debug "Unsetting Git variables."
@@ -130,7 +140,7 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
     wget -q https://hub.spigotmc.org/jenkins/job/\
 BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
 
-    BUILDTOOLS_MEMORY_OPTS=$(generate-memory-opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
+    BUILDTOOLS_MEMORY_OPTS=$(generate_memory_opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
         "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
     TOTAL_BUILDTOOLS_MEMORY_OPTS="$BUILDTOOLS_MEMORY_OPTS $JVM_OPTS"
 
@@ -160,7 +170,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
 
   # Disable exit on error so that we can handle curl errors.
   set +e
-  function handle_curl_errors() {
+  handle_curl_errors() {
     CURL_RET=$?
     if [ "$CURL_RET" -ne 0 ]; then
       error "Failed to connect to Paper servers. Curl error code: \"$CURL_RET\""
@@ -235,7 +245,7 @@ rm -f "$COMMAND_INPUT_FILE"
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
-GAME_MEMORY_OPTS=$(generate-memory-opts "$GAME_MEMORY_AMOUNT_MIN" "$GAME_MEMORY_AMOUNT_MAX" \
+GAME_MEMORY_OPTS=$(generate_memory_opts "$GAME_MEMORY_AMOUNT_MIN" "$GAME_MEMORY_AMOUNT_MAX" \
     "$GAME_MEMORY_AMOUNT")
 
 # Append suggested JVM options unless required not to.
@@ -302,4 +312,4 @@ wait "$JAVA_PID"
 JAVA_RET=$?
 set -e
 debug "Java process exited (return $JAVA_RET)."
-exit-script $JAVA_RET
+exit_script $JAVA_RET
