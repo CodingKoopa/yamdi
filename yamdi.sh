@@ -24,10 +24,10 @@ function exit_script() {
   else
     info "Checking server configuration files."
     get_directory_changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
-        "$SERVER_DIRECTORY/config.patch"
+      "$SERVER_DIRECTORY/config.patch"
     info "Checking server plugin files."
     get_directory_changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins" \
-        "$SERVER_DIRECTORY/plugins.patch"
+      "$SERVER_DIRECTORY/plugins.patch"
   fi
 
   exit "$JAVA_RET"
@@ -65,8 +65,8 @@ function stop() {
 # Docker Compose session is quit with Ctrl+C (This does not work in regular Docker.).
 
 # SIGINT and SIGTERM are expected to implemented similarly. The server implements them by shutting
-# down the server, but without saving. The "stop" Bukkit command shuts down the server properly, 
-# and does save everything, so here the signals are trapped, and will intervene to run the "stop" 
+# down the server, but without saving. The "stop" Bukkit command shuts down the server properly,
+# and does save everything, so here the signals are trapped, and will intervene to run the "stop"
 # command.
 trap stop SIGINT
 trap stop SIGTERM
@@ -137,11 +137,10 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
     # Remove any preexisting JARs from failed compilations.
     rm -f BuildTools.jar
     # Download the latest BuildTools JAR.
-    wget -q https://hub.spigotmc.org/jenkins/job/\
-BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    wget -q https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
 
     BUILDTOOLS_MEMORY_OPTS=$(generate_memory_opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
-        "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
+      "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
     TOTAL_BUILDTOOLS_MEMORY_OPTS="$BUILDTOOLS_MEMORY_OPTS $JVM_OPTS"
 
     # Run BuildTools with the specified RAM, for the specified revision.
@@ -218,7 +217,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
   declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     debug "Downloading $SERVER_NAME."
-    curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" > "$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
   else
     debug "$SERVER_NAME already downloaded."
   fi
@@ -246,7 +245,7 @@ rm -f "$COMMAND_INPUT_FILE"
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
 GAME_MEMORY_OPTS=$(generate_memory_opts "$GAME_MEMORY_AMOUNT_MIN" "$GAME_MEMORY_AMOUNT_MAX" \
-    "$GAME_MEMORY_AMOUNT")
+  "$GAME_MEMORY_AMOUNT")
 
 # Append suggested JVM options unless required not to.
 if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then

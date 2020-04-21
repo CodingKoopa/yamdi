@@ -3,4 +3,4 @@
 # shellcheck source=utils.sh
 source /usr/lib/utils
 
-echo "$@" > "$COMMAND_INPUT_FILE"
+echo "$@" >"$COMMAND_INPUT_FILE"

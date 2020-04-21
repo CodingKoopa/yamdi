@@ -15,10 +15,10 @@ ENV JVM="hotspot"
 # From inspecting the Oracle image, they use "yum install -y", without updating, so updating the
 # container packages likely isn't necessary here.
 RUN yum -y install \
-      bash \
-      git \
-      curl \
-      jq
+  bash \
+  git \
+  curl \
+  jq
 
 # Create a mount point for the server installation directory and plugin directory.
 VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host

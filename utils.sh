@@ -14,8 +14,7 @@ export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 #   The message.
 # Outputs:
 #   The formatted message.
-function debug()
-{
+function debug() {
   if [ "$DEBUG" = "true" ]; then
     printf "[$(date +%R:%S) DEBUG]: [YAMDI] %s\n" "$*"
   fi
@@ -26,8 +25,7 @@ function debug()
 #   The message.
 # Outputs:
 #   The formatted message.
-function info()
-{
+function info() {
   printf "[$(date +%R:%S) INFO]: [YAMDI] %s\n" "$*"
 }
 
@@ -36,8 +34,7 @@ function info()
 #   The message.
 # Outputs:
 #   The formatted message.
-function warning()
-{
+function warning() {
   printf "[$(date +%R:%S) WARNING]: [YAMDI] %s\n" "$*"
 }
 
@@ -46,8 +43,7 @@ function warning()
 #   The message.
 # Outputs:
 #   The formatted message.
-function error()
-{
+function error() {
   printf "[$(date +%R:%S) ERROR]: [YAMDI] %s\n" "$*"
 }
 
@@ -161,7 +157,7 @@ function get_directory_changes() {
     info "No Git repo found. No changes."
   else
     info "Git repo found. Outputting changes to \"$PATCH_PATH\"."
-    git diff > "$PATCH_PATH"
+    git diff >"$PATCH_PATH"
   fi
 }
 
