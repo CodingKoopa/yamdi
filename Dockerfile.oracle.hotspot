@@ -1,4 +1,4 @@
-# Set the base image to the AdoptOpenJDK OpenJDK 12 release JRE, with Alpine Linux.
+# Set the base image to the Oracle Java 12 release JRE, with Alpine Linux.
 FROM store/oracle/serverjre:8
 
 # Specify the distributor.
