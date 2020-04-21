@@ -6,7 +6,7 @@ TAG_LONG=$(CI/Common/GetTagLong.sh)
 TAG_LONG_LATEST="$(CI/Common/GetTagLongLatest.sh)"
 
 # Log debug info.
-echo "Deploying Docker image  and $TAG_LONG_LATEST."
+echo "Deploying Docker image $TAG_LONG and $TAG_LONG_LATEST."
 
 CI/Common/Login.sh
 
