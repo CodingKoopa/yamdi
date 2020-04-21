@@ -32,6 +32,9 @@ analysis:shfmt:
   stage: analyze
   # Use the latest Alpine Linux shfmt Docker image.
   image: mvdan/shfmt:latest-alpine
+  rules:
+    - changes:
+        - CI/**/*.sh
   script:
     # Check that all Bash code has proper formatting.
     - shfmt -d .
@@ -41,6 +44,9 @@ analysis:shellcheck:
   stage: analyze
   # Use the latest stable shellchecl Docker image.
   image: koalaman/shellcheck-alpine:stable
+  rules:
+    - changes:
+        - CI/**/*.sh
   script:
     # Check that all Bash code is proper.
     - shellcheck -x *.sh
