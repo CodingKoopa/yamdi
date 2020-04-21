@@ -40,16 +40,21 @@ services:
 For Paper, `PAPER_BUILD` (a build for a particular revision) can be set in the same way.
 
 ### Starting the Server
-Images for YAMDI are not provided, so it must be built:
+Images for YAMDI are provided for `amd64`, `arm32v7`, and `arm64v8`. If there's another architecture you're interested in using, please file an issue. These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). There are a couple of important types of tags:
+- `latest`, which which the latest commit is tagged.
+- `stable`, which which the latest tagged commit is tagged.
 ```sh
-docker build . -t yamdi
+docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable
 ```
 ```yml
 services:
   yamdi:
-    build: .
+    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable
 ```
-As the `Dockerfile` is (deliberately) placed in the root of this repository, this repository can somewhat cleanly be added as a submodule for another repository if you're using this in a larger setup.
+You may also build YAMDI yourself. As the `Dockerfile` is placed in the root of this repository, this repository can be added as a submodule for another repository if you're using this in a larger setup.
+```sh
+docker build ./yamdi -t yamdi
+```
 ```yml
 services:
   yamdi:
