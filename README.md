@@ -62,7 +62,10 @@ services:
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
-If using Docker Compose, it may also be desirable to have the server restart if it crashes.
+It may also be desirable to have the server restart if it crashes.
+```sh
+docker run --restart on-failure
+```
 ```yml
 services:
   yamdi:
