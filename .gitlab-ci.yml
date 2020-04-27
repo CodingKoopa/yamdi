@@ -53,6 +53,7 @@ analysis:shellcheck:
 
 # Define the Docker AMD64 image building job.
 build:docker:amd64:
+  <<: *dind
   # Any Docker image building will be a part of the package building stage, so add it.
   stage: build
   artifacts:
@@ -67,6 +68,7 @@ build:docker:amd64:
 
 # Define the Docker AMD64 image deploying job.
 deploy:docker:amd64:
+  <<: *dind
   # Add to the deploying stage.
   stage: deploy
   dependencies:
