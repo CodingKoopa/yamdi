@@ -45,7 +45,8 @@ Images for YAMDI are provided for `amd64`. These prebuilt images can be obtained
 - `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
 - `latest-hotspot`: The latest commit of YAMDI, with the Hotspot JVM.
 - `latest-openj9`: The latest commit of YAMDI, with the OpenJ9 JVM.
-For more info on Hotspot and OpenJ9, see (Java Distributions)[#java-distributions].
+
+For more info on Hotspot and OpenJ9, see [Java Distributions](#java-distributions).
 ```sh
 docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
 ```
@@ -105,7 +106,8 @@ The `/opt/server-config-host` and `/opt/server-plugins-host` volumes are particu
 The technical details of how YAMDI implements this isn't strictly required for usage, but is educational to have an understanding of. When YAMDI is starting up, it will first copy the contents of the host directory bind mount to another location, within the temporary container filesystem. In some cases this is necessary because, in order for Git to function, even if r/w access to the files isn't needed, Git still requires it. This is necessary when user namespace remapping is being used, and the user running YAMDI does not have r/w access to the original files. In YAMDI's copy of the directory, a Git repository is established, and a commit is made containing the changes (Given the nature of an initial commit, this is every file creation.). Then, using the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html), YAMDI establishes a bare repository in `/opt/server` and deploys to there. Both during the deploy, and during shutdown, YAMDI will execute `git diff` (With the exception of when an initial run is detected, because then a diff would be overwhelming.). The former of the two `diff`s is condensed for brevity, and the latter is forwarded to a patch file in the volume, as to not spam the log.
 
 Given these details, there are multiple results and further specifications that should be understood:
-- When initially deploying, and shutting down, the changes between the server configuration, and the host configuration will be printed. The purpose of this is, respectively, to understand what changes will be made, and what changes the server has made to the files that you may want to consider adding to your configuration. This is especially useful when the server software has introduced a new configuration option. The pitfall here is that `server.properties` will constantly be updated with a timestamp, and reordering of its properties, and thus it is a false positive.
+- When initially deploying, and shutting down, the changes between the server configuration, and the host configuration will be printed. The purpose of this is, respectively, to understand what changes will be made, and what changes the server has made to the files that you may want to consider adding to your configuration. This is especially useful when the server software has introduced a new configuration option.
+  - A pitfall with this is that `server.properties` will constantly be updated with a timestamp, and reordering of its properties, and thus it is a false positive. This is mitigated with [Ignore `server.properties`](#ignore-serverproperties`)
 - Files in `/opt/server` that are not in the host directory will be left as-is.
 - Files in `/opt/server` that have changed versions in the host directory will be updated.
 - Files in `/opt/server` that have been deleted in the host directory will **not** be deleted. This is a limitation of how YAMDI's temporary Git directory works, in that it only tracks file creations. To remedy this, `JAR`s in the root server plugin directory will be removed before the import process, to avoid any duplicate plugins of different versions.
