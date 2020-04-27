@@ -74,7 +74,7 @@ trap stop SIGTERM
 # shellcheck source=utils.sh
 source /usr/lib/utils
 
-info "Starting Yet Another Minecraft Docker Image."
+info "Starting Yet Another Minecraft Docker Image v1.0.1."
 
 # Enter the server directory because we will use Git to update files here, and the Minecraft server
 # will check the current directory for configuration files.
