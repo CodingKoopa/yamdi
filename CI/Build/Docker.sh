@@ -30,8 +30,7 @@ build() {
 
   echo "Building image for $TARGET_ARCH as \"$vm_tag_long\"."
   # Build Docker images for the target architecture.
-  docker build --build-arg --cache-from "$vm_tag_long_latest" \
-    -t "$vm_tag_long" -f Dockerfile.openjdk."$vm" .
+  docker build --build-arg --cache-from "$vm_tag_long_latest" -t "$vm_tag_long" -f Dockerfile.openjdk."$vm" .
 
   image_path=Build/"$vm_tag_short".tar
   echo "Saving image to \"$image_path\"."
