@@ -40,25 +40,30 @@ services:
 For Paper, `PAPER_BUILD` (a build for a particular revision) can be set in the same way.
 
 ### Starting the Server
-Images for YAMDI are provided for `amd64`, `arm32v7`, and `arm64v8`. If there's another architecture you're interested in using, please file an issue. These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). There are a couple of important types of tags:
-- `latest`, which which the latest commit is tagged.
-- `stable`, which which the latest tagged commit is tagged.
+Images for YAMDI are provided for `amd64`. These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
+- `stable-hotspot`: The latest release of YAMDI, with the Hotspot JVM.
+- `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
+- `latest-hotspot`: The latest commit of YAMDI, with the Hotspot JVM.
+- `latest-openj9`: The latest commit of YAMDI, with the OpenJ9 JVM.
+For more info on Hotspot and OpenJ9, see (Java Distributions)[#java-distributions].
 ```sh
-docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable
+docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
 ```
 ```yml
 services:
   yamdi:
-    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable
+    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
 ```
-You may also build YAMDI yourself. As the `Dockerfile` is placed in the root of this repository, this repository can be added as a submodule for another repository if you're using this in a larger setup.
+You may also build YAMDI yourself. As the `Dockerfiles` is placed in the root of this repository, this repository could be added as a submodule for, say, a server dotfile repo.
 ```sh
-docker build ./yamdi -t yamdi
+docker build -t yamdi -f yamdi/Dockerfile.openjdk.hotspot ./yamdi
 ```
 ```yml
 services:
   yamdi:
-    build: ./yamdi
+    build:
+      context: ./yamdi
+      dockerfile: yamdi/Dockerfile.openjdk.hotspot
 ```
 It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
 
