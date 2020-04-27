@@ -6,6 +6,8 @@ tag_long_latest="$(CI/Common/GetTagLongLatest.sh)"
 tag_long=$(CI/Common/GetTagLong.sh)
 # Get a short tag without the registry URL, for saving the image to a local archive.
 tag_short=$(CI/Common/GetTagShort.sh)
+# Get a tag for the stable image.
+tag_long_stable=$CI_REGISTRY_IMAGE/$TARGET_ARCH:stable
 
 echo "Logging into GitLab Container Registry."
 # Log into the GitLab Container Registry.
@@ -16,11 +18,11 @@ CI/Common/Login.sh
 # - The JVM to deploy, with a correlating image.
 deploy() {
   vm=$1
-  vm_tag_long_latest="$tag_long_latest"-"$vm"
-  vm_tag_long="$tag_long"-"$vm"
-  vm_tag_short="$tag_short"-"$vm"
+  vm_tag_long_latest=$tag_long_latest-$vm
+  vm_tag_long=$tag_long-$vm
+  vm_tag_short=$tag_short-$vm
 
-  image_path=Build/"$vm_tag_short".tar
+  image_path=Build/$vm_tag_short.tar
   echo "Loading image from \"$image_path\"."
   # Load the built Docker image from the build directory.
   docker load --input "$image_path"
@@ -39,9 +41,9 @@ deploy() {
 
   # If a Git tag is present.
   if [ -n "$CI_COMMIT_TAG" ]; then
-    vm_tag_long_stable=$CI_REGISTRY_IMAGE/$TARGET_ARCH:stable-"$vm"
+    vm_tag_long_stable=$tag_long_stable-$vm
 
-    cho "Tagging image as \"stable\", \"$vm_tag_long_stable\"."
+    echo "Tagging image as \"stable\", \"$vm_tag_long_stable\"."
     # Tag the Docker image as the latest image.
     docker tag "$vm_tag_long" "$vm_tag_long_stable"
 
@@ -55,3 +57,17 @@ echo "Deploying YAMDI with Hotspot VM."
 deploy hotspot
 echo "Deploying YAMDI with OpenJ9 VM."
 deploy openj9
+
+echo "Tagging Hotspot as the default."
+docker tag "$tag_long"-hotspot "$tag_long"
+docker tag "$tag_long"-hotspot "$tag_long_latest"
+if [ -n "$CI_COMMIT_TAG" ]; then
+  docker tag "$tag_long"-hotspot "$tag_long_stable"
+fi
+
+echo "Pushing default tags."
+docker push "$tag_long"
+docker push "$tag_long_latest"
+if [ -n "$CI_COMMIT_TAG" ]; then
+  docker push "$tag_long_stable"
+fi

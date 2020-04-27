@@ -20,9 +20,9 @@ CI/Common/Login.sh
 # - The JVM to build, with a correlating Dockerfile.
 build() {
   vm=$1
-  vm_tag_long_latest="$tag_long_latest"-"$vm"
-  vm_tag_long="$tag_long"-"$vm"
-  vm_tag_short="$tag_short"-"$vm"
+  vm_tag_long_latest=$tag_long_latest-$vm
+  vm_tag_long=$tag_long-$vm
+  vm_tag_short=$tag_short-$vm
 
   echo "Pulling latest image \"$vm_tag_long_latest\" to use as cache."
   # Pull the last built Docker image to use as a cache. This may fail.
@@ -32,7 +32,7 @@ build() {
   # Build Docker images for the target architecture.
   docker build --cache-from "$vm_tag_long_latest" -t "$vm_tag_long" -f Dockerfile.openjdk."$vm" .
 
-  image_path=Build/"$vm_tag_short".tar
+  image_path=Build/$vm_tag_short.tar
   echo "Saving image to \"$image_path\"."
   # Save the built Docker image to the build directory.
   docker save --output "$image_path" "$vm_tag_long"
