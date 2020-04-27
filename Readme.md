@@ -80,7 +80,7 @@ services:
 ### Server Data
 YAMDI exposes three volumes:
 - `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
-- `/opt/server-config-host`, the server configuration. This contains server-related configurations. The configurations are handpicked by the startup script, and so it is possible that a configuration is left out of here.
+- `/opt/server-config-host`, the server configuration. This contains server-related configurations.
 - `/opt/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by the server, and their own configurations.
 `/opt/server` must be mounted, both for server data to persist, and to accept the EULA. The other volumes are technically optional, but recommended for reasons that will be explained.
 ```sh
