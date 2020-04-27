@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Get a tag, based off of the current Git commit hash.
 TAG_LONG=$(CI/Common/GetTagLong.sh)
