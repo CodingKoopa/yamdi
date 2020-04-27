@@ -1,40 +1,57 @@
 #!/bin/sh
 
-# Get a tag, based off of the current Git commit hash.
-TAG_LONG=$(CI/Common/GetTagLong.sh)
-# Get a tag, for the current "latest" image.
-TAG_LONG_LATEST="$(CI/Common/GetTagLongLatest.sh)"
+# Get a tag for the current "latest" image.
+tag_long_latest="$(CI/Common/GetTagLongLatest.sh)"
+# Get a full tag including the GitLab Registry URL. This will either end in a commit hash, or tag.
+tag_long=$(CI/Common/GetTagLong.sh)
+# Get a short tag without the registry URL, for saving the image to a local archive.
+tag_short=$(CI/Common/GetTagShort.sh)
 
-# Log debug info.
-echo "Deploying Docker image $TAG_LONG and $TAG_LONG_LATEST."
-
+echo "Logging into GitLab Container Registry."
+# Log into the GitLab Container Registry.
 CI/Common/Login.sh
 
-echo "Loading Docker image artifact."
-# Load the built Docker image from the build directory.
-docker load --input Build/"$(CI/Common/GetTagShort.sh)"-hotspot.tar
-docker load --input Build/"$(CI/Common/GetTagShort.sh)"-openj9.tar
-echo "Pushing Docker image for architecture \"$TARGET_ARCH\" to \"$TAG_LONG\"."
-# Push the Docker image to the registry.
-docker push "$TAG_LONG-hotspot"
-docker push "$TAG_LONG-openj9"
-echo "Tagging Docker image \"$TAG_LONG\" as \"$TAG_LONG_LATEST\"."
-# Tag the Docker image as the latest image.
-docker tag "$TAG_LONG-hotspot" "$TAG_LONG_LATEST-hotspot"
-docker tag "$TAG_LONG-openj9" "$TAG_LONG_LATEST-openj9"
-echo "Pushing Docker image for architecture \"$TARGET_ARCH\" to \"$TAG_LONG_LATEST\" (Latest)."
-# Push the latest tag to the registry.
-docker push "$TAG_LONG_LATEST-hotspot"
-docker push "$TAG_LONG_LATEST-openj9"
-# If a Git tag is present.
-if [ -n "$CI_COMMIT_TAG" ]; then
-  TAG_LONG_STABLE=$CI_REGISTRY_IMAGE/$TARGET_ARCH:stable
-  echo "Tagging Docker image \"$TAG_LONG\" as \"$TAG_LONG_STABLE\"."
-  # Tag the Docker image as the latest stable image.
-  docker tag "$TAG_LONG-hotspot" "$TAG_LONG_STABLE-hotspot"
-  docker tag "$TAG_LONG-openj9" "$TAG_LONG_STABLE-openj9"
-  echo "Pushing Docker image for architecture \"$TARGET_ARCH\" to \"$TAG_LONG_LATEST\" (Stable)."
-  # Push the stable tag to the registry.
-  docker push "$TAG_LONG_STABLE-hotspot"
-  docker push "$TAG_LONG_STABLE-openj9"
-fi
+# Deploys an image for a given VM.
+# Arguments:
+# - The JVM to deploy, with a correlating image.
+deploy() {
+  vm=$1
+  vm_tag_long_latest="$tag_long_latest"-"$vm"
+  vm_tag_long="$tag_long"-"$vm"
+  vm_tag_short="$tag_short"-"$vm"
+
+  image_path=Build/"$vm_tag_short".tar
+  echo "Loading image from \"$image_path\"."
+  # Load the built Docker image from the build directory.
+  docker load --input "$image_path"
+
+  echo "Pushing Docker image for \"$TARGET_ARCH\" to \"$vm_tag_long\"."
+  # Push the Docker image to the registry.
+  docker push "$vm_tag_long"
+
+  echo "Tagging image as \"latest\", \"$vm_tag_long_latest\"."
+  # Tag the Docker image as the latest image.
+  docker tag "$vm_tag_long" "$vm_tag_long_latest"
+
+  echo "Pushing \"latest\" tag."
+  # Push the latest tag to the registry.
+  docker push "$vm_tag_long_latest"
+
+  # If a Git tag is present.
+  if [ -n "$CI_COMMIT_TAG" ]; then
+    vm_tag_long_stable=$CI_REGISTRY_IMAGE/$TARGET_ARCH:stable-"$vm"
+
+    cho "Tagging image as \"stable\", \"$vm_tag_long_stable\"."
+    # Tag the Docker image as the latest image.
+    docker tag "$vm_tag_long" "$vm_tag_long_stable"
+
+    echo "Pushing \"stable\" tag."
+    # Push the latest tag to the registry.
+    docker push "$vm_tag_long_stable"
+  fi
+}
+
+echo "Deploying YAMDI with Hotspot VM."
+deploy hotspot
+echo "Deploying YAMDI with OpenJ9 VM."
+deploy openj9
