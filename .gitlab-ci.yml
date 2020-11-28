@@ -63,12 +63,12 @@ analysis:shellcheck:
       - Build/
   # Run the Docker build script.
   script: CI/Build/Docker.sh
-  needs:
-    # Require ShellCheck to pass before we build an image. We would like for the other analysis jobs
-    # to pass too, but they are stylistic.
-    - job: analysis:shellcheck
-      # The ShellCheck job does not have any artifacts that we need to download.
-      artifacts: false
+  # needs:
+  # Require ShellCheck to pass before we build an image. We would like for the other analysis jobs
+  # to pass too, but they are stylistic.
+  # - job: analysis:shellcheck
+  # The ShellCheck job does not have any artifacts that we need to download.
+  # artifacts: false
 
 # Define the Docker AMD64 image building job.
 build:docker:amd64:
