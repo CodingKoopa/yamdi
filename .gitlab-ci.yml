@@ -63,6 +63,12 @@ analysis:shellcheck:
       - Build/
   # Run the Docker build script.
   script: CI/Build/Docker.sh
+  needs:
+    # Require ShellCheck to pass before we build an image. We would like for the other analysis jobs
+    # to pass too, but they are stylistic.
+    - job: analysis:shellcheck
+      # The ShellCheck job does not have any artifacts that we need to download.
+      artifacts: false
 
 # Define the Docker AMD64 image building job.
 build:docker:amd64:
@@ -109,9 +115,8 @@ deploy:docker:amd64:
   variables:
     # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
     TARGET_ARCH: amd64
-  dependencies:
-    # Add the Docker AMD64 built image as a dependency.
-    - build:docker:amd64
+  # Require the AMD64 build job.
+  needs: [build:docker:amd64]
 
 # Define the Docker ARMv7 image deploying job.
 deploy:docker:arm32v7:
@@ -119,16 +124,14 @@ deploy:docker:arm32v7:
   variables:
     # Set the target architecture to ARMv7 32 bit.
     TARGET_ARCH: arm32v7
-  dependencies:
-    # Add the Docker ARMv7 built image as a dependency.
-    - build:docker:arm32v7
+  # Require the ARMv7 build job.
+  needs: [build:docker:arm32v7]
 
 # Define the Docker ARMv8 image deploying job.
 deploy:docker:arm64v8:
   <<: *docker_deploy
   variables:
-    # Set the target architecture to ARMv7 32 bit.
+    # Set the target architecture to ARMv8.
     TARGET_ARCH: arm64v8
-  dependencies:
-    # Add the Docker ARMv7 built image as a dependency.
-    - build:docker:arm64v8
+  # Require the ARMv8 build job.
+  needs: [build:docker:arm64v8]
