@@ -42,7 +42,7 @@ analysis:shfmt:
 analysis:shellcheck:
   # Add to the analysis stage.
   stage: analyze
-  # Use the latest stable shellchecl Docker image.
+  # Use the latest stable ShellCheck Docker image.
   image: koalaman/shellcheck-alpine:stable
   rules:
     - changes:
