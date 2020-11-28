@@ -6,7 +6,8 @@ set -e
 # Arguments:
 #   The Java return code.
 # Globals Read:
-#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration directory.
+#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration
+# directory.
 #   - SERVER_DIRECTORY: Location of the containerized server directory.
 # Arguments:
 #   - The Java return code.
@@ -137,7 +138,8 @@ if [ "$SERVER_TYPE" = "spigot" ]; then
     # Remove any preexisting JARs from failed compilations.
     rm -f BuildTools.jar
     # Download the latest BuildTools JAR.
-    wget -q https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    wget -q "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
+artifact/target/BuildTools.jar"
 
     BUILDTOOLS_MEMORY_OPTS=$(generate_memory_opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
       "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
@@ -234,7 +236,8 @@ fi
 
 # Perform server JAR cleanup.
 if [ "$CLEAN_FILES" = true ]; then
-  find "$SERVER_DIRECTORY" -maxdepth 1 \( -name "*.jar" ! -name "$(basename "$(readlink "$SERVER_JAR")")" \) -type f -delete
+  find "$SERVER_DIRECTORY" -maxdepth 1 \
+    \( -name "*.jar" ! -name "$(basename "$(readlink "$SERVER_JAR")")" \) -type f -delete
 fi
 
 # Make sure the command input file is clear.
