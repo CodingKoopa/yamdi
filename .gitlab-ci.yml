@@ -51,8 +51,9 @@ analysis:shellcheck:
     # Check that all Bash code is proper.
     - shellcheck -x *.sh
 
-# Define the Docker AMD64 image building job.
-build:docker:amd64:
+# Define the Docker image building anchor. Since there's already a Docker in Docker anchor, this
+# should only define elements needed for building.
+.build:docker: &docker_build
   <<: *dind
   # Any Docker image building will be a part of the package building stage, so add it.
   stage: build
@@ -60,20 +61,37 @@ build:docker:amd64:
     paths:
       # Save the built image.
       - Build/
-  variables:
-    # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
-    TARGET_ARCH: amd64
   # Run the Docker build script.
   script: CI/Build/Docker.sh
 
-# Define the Docker AMD64 image deploying job.
-deploy:docker:amd64:
+# Define the Docker AMD64 image building job.
+build:docker:amd64:
+  <<: *docker_build
+  variables:
+    # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
+    TARGET_ARCH: amd64
+
+# Define the Docker ARMv7 image building job.
+build:docker:arm32v7:
+  <<: *docker_build
+  variables:
+    # Set the target architecture to ARMv7 32 bit. This will be able to run on some embedded
+    # platforms, such as the Raspberry Pi 2 v1.1 model.
+    TARGET_ARCH: arm32v7
+
+# Define the Docker ARMv8 image building job.
+build:docker:arm64v8:
+  <<: *docker_build
+  variables:
+    # Set the target architecture to ARMv8 64 bit. This will be able to run on some embedded
+    # platforms, such as the Raspberry Pi 2 v1.2 model and the Raspberry Pi 3 models.
+    TARGET_ARCH: arm64v8
+
+# Define the Docker image deploying anchor.
+.deploy:docker: &docker_deploy
   <<: *dind
   # Add to the deploying stage.
   stage: deploy
-  dependencies:
-    # Add the Docker AMD64 built image as a dependency.
-    - build:docker:amd64
   variables:
     # Don't clone or fetch the Git repo, as the dependencies are all that's needed here.
     GIT_STRATEGY: none
@@ -82,8 +100,35 @@ deploy:docker:amd64:
     - master
     # Make sure tags are deployed.
     - tags
+  # Run the deploying script.
+  script: ./CI/Deploy/Docker.sh
+
+# Define the Docker AMD64 image deploying job.
+deploy:docker:amd64:
+  <<: *docker_deploy
   variables:
     # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
     TARGET_ARCH: amd64
-  # Run the deploying script.
-  script: CI/Deploy/Docker.sh
+  dependencies:
+    # Add the Docker AMD64 built image as a dependency.
+    - build:docker:amd64
+
+# Define the Docker ARMv7 image deploying job.
+deploy:docker:arm32v7:
+  <<: *docker_deploy
+  variables:
+    # Set the target architecture to ARMv7 32 bit.
+    TARGET_ARCH: arm32v7
+  dependencies:
+    # Add the Docker ARMv7 built image as a dependency.
+    - build:docker:arm32v7
+
+# Define the Docker ARMv8 image deploying job.
+deploy:docker:arm64v8:
+  <<: *docker_deploy
+  variables:
+    # Set the target architecture to ARMv7 32 bit.
+    TARGET_ARCH: arm64v8
+  dependencies:
+    # Add the Docker ARMv7 built image as a dependency.
+    - build:docker:arm64v8
