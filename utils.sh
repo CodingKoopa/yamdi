@@ -60,29 +60,29 @@ function error() {
 #   - GIT_DIR: Location of the Git directory.
 #   - GIT_WORK_TREE: Location of the Git work tree.
 function import_directory() {
-  SOURCE_DIRECTORY=$1
-  TARGET_DIRECTORY=$2
+  local -r source_directory=$1
+  local -r target_directory=$2
 
   # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty
   # directory.
-  if [ -z "$(ls -A "$SOURCE_DIRECTORY")" ] || [ ! -d "$SOURCE_DIRECTORY" ]; then
+  if [ -z "$(ls -A "$source_directory")" ] || [ ! -d "$source_directory" ]; then
     warning "No files to import."
     return 0
   fi
 
   debug "Making copy of host files."
-  declare -r SOURCE_DIRECTORY_VCS="$SOURCE_DIRECTORY-copy"
+  local -r source_directory_vcs="$source_directory-copy"
   # Ensure that the VCS directory isn't present to begin with, because if it is then the source
   # directory will be copied inside of the VCS directory, effectively discarding any new changes.
-  rm -rf "$SOURCE_DIRECTORY_VCS"
-  cp -R "$SOURCE_DIRECTORY" "$SOURCE_DIRECTORY_VCS"
+  rm -rf "$source_directory_vcs"
+  cp -R "$source_directory" "$source_directory_vcs"
 
   debug "Initializing Git repo."
   # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
   # reduces any conflict with a preexisting repo.
-  export GIT_DIR="$SOURCE_DIRECTORY_VCS/.git-yamdi"
+  export GIT_DIR="$source_directory_vcs/.git-yamdi"
   # For now, use the source directory as Git's working directory, to copy the initial changes.
-  export GIT_WORK_TREE="$SOURCE_DIRECTORY_VCS"
+  export GIT_WORK_TREE="$source_directory_vcs"
   # Initialize the temporary directory, if it hasn't already been initialized.
   git init -q
 
@@ -109,12 +109,12 @@ function import_directory() {
 
   debug "Switching Git working directory to target."
   # Pull the rug out from under Git - make it use the target directory.
-  export GIT_WORK_TREE="$TARGET_DIRECTORY"
+  export GIT_WORK_TREE="$target_directory"
 
   # If the directory doesn't already exist, create it, and don't show the diff.
-  if [ ! -d "$TARGET_DIRECTORY" ]; then
+  if [ ! -d "$target_directory" ]; then
     info "Making new directory. No changes are being overwritten."
-    mkdir -p "$TARGET_DIRECTORY"
+    mkdir -p "$target_directory"
   else
     info "Existing directory found. Changes that will be overwritten:"
     # Right now, reverse the input so it makes more sense (-R).
@@ -146,21 +146,18 @@ function import_directory() {
 #   - GIT_DIR: Location of the Git directory.
 #   - GIT_WORK_TREE: Location of the Git work tree.
 function get_directory_changes() {
-  SOURCE_DIRECTORY=$1
-  TARGET_DIRECTORY=$2
-  PATCH_PATH=$3
+  local -r source_directory=$1
+  local -r target_directory=$2
+  local -r patch_path=$3
 
-  export GIT_DIR="$SOURCE_DIRECTORY-copy/.git-yamdi"
-  export GIT_WORK_TREE="$TARGET_DIRECTORY"
+  export GIT_DIR="$source_directory-copy/.git-yamdi"
+  export GIT_WORK_TREE="$target_directory"
   if [ ! -d "$GIT_DIR" ]; then
     info "No Git repo found. No changes."
   else
-    info "Git repo found. Outputting changes to \"$PATCH_PATH\"."
-    git diff >"$PATCH_PATH"
+    info "Git repo found. Outputting changes to \"$patch_path\"."
+    git diff >"$patch_path"
   fi
-
-  # This isn't necessary but is probably still good practice.
-  unset GIT_DIR GIT_WORK_TREE
 }
 
 # Given a minimum, maximum and "both" value, generate a JVM memory option string. If both the
@@ -173,39 +170,42 @@ function get_directory_changes() {
 # Outputs:
 #   - The generated JVM option string.
 function generate_memory_opts() {
-  MINIMUM="$1"
-  MAXIMUM="$2"
-  BOTH="$3"
+  local -r minimum="$1"
+  local -r maximum="$2"
+  local -r both="$3"
 
-  if [ -n "$MINIMUM" ] && [ -z "$MAXIMUM" ]; then
-    OUTPUT="-Xms${MINIMUM} -Xmx${MINIMUM}"
-  elif [ -z "$MINIMUM" ] && [ -n "$MAXIMUM" ]; then
-    OUTPUT="-Xms${MAXIMUM} -Xmx${MAXIMUM}"
-  elif [ -n "$BOTH" ]; then
-    OUTPUT="-Xms${BOTH} -Xmx${BOTH}"
+  local output
+
+  if [ -n "$minimum" ] && [ -z "$maximum" ]; then
+    output="-Xms${minimum} -Xmx${minimum}"
+  elif [ -z "$minimum" ] && [ -n "$maximum" ]; then
+    output="-Xms${maximum} -Xmx${maximum}"
+  elif [ -n "$both" ]; then
+    output="-Xms${both} -Xmx${both}"
   else
-    OUTPUT="-Xms1024M -Xmx1024M"
+    output="-Xms1024M -Xmx1024M"
   fi
 
   # See the setting of most of these options, in the main script.
   if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     if [ "$JVM" = "openj9" ]; then
-      if [ -n "$MAXIMUM" ]; then
-        UPPER_BOUND="$MAXIMUM"
-      elif [ -n "$BOTH" ]; then
-        UPPER_BOUND="$BOTH"
+      local upper_bound
+      if [ -n "$maximum" ]; then
+        upper_bound="$maximum"
+      elif [ -n "$both" ]; then
+        upper_bound="$both"
       else
-        UPPER_BOUND="1024"
+        upper_bound="1024"
       fi
       # Strip out the letter indicating the storage unit.
-      UPPER_BOUND=${UPPER_BOUND//[!0-9]/}
+      upper_bound=${upper_bound//[!0-9]/}
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
       # lived objects.
-      OUTPUT+=" -Xmns$(("$UPPER_BOUND" / 2))M"
+      output+=" -Xmns$(("$upper_bound" / 2))M"
       # Set the nursery maximum to 80% of the heap size to allow the server to grow it.
-      OUTPUT+=" -Xmnx$(("$UPPER_BOUND" * 4 / 5))M"
+      output+=" -Xmnx$(("$upper_bound" * 4 / 5))M"
     fi
   fi
 
-  echo "$OUTPUT"
+  echo "$output"
 }
