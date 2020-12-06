@@ -51,7 +51,6 @@ function error() {
 # given directory, using Git. It's very important that, if Git will be used after this function be
 # called, that `unset GIT_DIR GIT_WORK_TREE` is ran. For more details on the checkout method used
 # here, see: https://gitolite.com/deploy.html
-# TODO: Why not just run the unset command here?
 # Arguments:
 #   - Path to the source directory.
 #   - Path to the target directory.
@@ -134,6 +133,10 @@ function import_directory() {
   # Update the directory with new changes. Procede if failed, because if no commit was made, then
   # there won't be a valid master branch to use.
   git checkout -q -f master || true
+
+  # This is necessary because of Spigot BuildTools needing to use Git.
+  debug "Unsetting Git variables."
+  unset GIT_DIR GIT_WORK_TREE
 }
 
 # Given two directories setup by import_directory(), compare them for changes.
@@ -159,6 +162,9 @@ function get_directory_changes() {
     info "Git repo found. Outputting changes to \"$PATCH_PATH\"."
     git diff >"$PATCH_PATH"
   fi
+
+  # This isn't necessary but is probably still good practice.
+  unset GIT_DIR GIT_WORK_TREE
 }
 
 # Given a minimum, maximum and "both" value, generate a JVM memory option string. If both the
