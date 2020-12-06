@@ -218,6 +218,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
     debug "Downloading $SERVER_NAME."
     curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD/download" \
       >"$PAPER_REVISION_JAR"
+    handle_curl_errors
   else
     debug "$SERVER_NAME already downloaded."
   fi
