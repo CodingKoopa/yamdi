@@ -109,14 +109,14 @@ import_directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 debug "Unsetting Git variables."
 unset GIT_DIR GIT_WORK_TREE
 
-if [ -z "$SERVER_TYPE" ]; then
-  SERVER_TYPE="spigot"
+if [ -z "$YAMDI_SERVER_TYPE" ]; then
+  YAMDI_SERVER_TYPE="spigot"
 fi
 if [ -z "$REV" ]; then
   REV="latest"
 fi
 
-if [ "$SERVER_TYPE" = "spigot" ]; then
+if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/spigot.jar"
@@ -157,7 +157,7 @@ artifact/target/BuildTools.jar"
   rm -rf "$SERVER_JAR"
   ln -s "$SPIGOT_REVISION_JAR" "$SERVER_JAR"
 
-elif [ $SERVER_TYPE = "paper" ]; then
+elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   info "Paper server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/paper.jar"
@@ -181,7 +181,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
   if [ "$REV" = "latest" ]; then
     debug "Resolving latest Paper revision."
 
-    PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$SERVER_TYPE)
+    PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$YAMDI_SERVER_TYPE)
     handle_curl_errors
     # Handle errors returned by the API.
     VERSION_JSON_ERROR=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .error)
@@ -196,7 +196,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
 
   if [ "$PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
-    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD")
+    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$REV/$PAPER_BUILD")
     handle_curl_errors
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
@@ -215,7 +215,7 @@ elif [ $SERVER_TYPE = "paper" ]; then
   declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     debug "Downloading $SERVER_NAME."
-    curl "https://papermc.io/api/v1/$SERVER_TYPE/$REV/$PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$REV/$PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
   else
     debug "$SERVER_NAME already downloaded."
   fi

@@ -15,15 +15,15 @@ These decisions were made because of how, ultimately, Docker does handle these t
 In these sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`. Reading through this manual is recommended, to take full advantage of what YAMDI has to offer.
 
 ### Server Type
-The type of server can be specified by setting the `SERVER_TYPE` environment variable. Currently supported values are `spigot` (default) and `paper`, case sensitive.
+The type of server can be specified by setting the `YAMDI_SERVER_TYPE` environment variable. Currently supported values are `spigot` (default) and `paper`, case sensitive.
 ```sh
-docker run --env SERVER_TYPE=paper
+docker run --env YAMDI_SERVER_TYPE=paper
 ```
 ```yml
 services:
   yamdi:
     environment:
-      SERVER_TYPE: "paper"
+      YAMDI_SERVER_TYPE: "paper"
 ```
 
 ### Server Version
