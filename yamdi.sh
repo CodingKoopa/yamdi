@@ -181,41 +181,55 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   if [ "$YAMDI_REV" = "latest" ]; then
     debug "Resolving latest Paper revision."
 
-    PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$YAMDI_SERVER_TYPE)
+    VERSIONS_JSON=$(curl -s https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE)
     handle_curl_errors
     # Handle errors returned by the API.
-    VERSION_JSON_ERROR=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .error)
+    VERSION_JSON_ERROR=$(echo "$VERSIONS_JSON" | jq .error)
     if [ ! "null" = "$VERSION_JSON_ERROR" ]; then
       error "Failed to fetch Paper versions. Curl error: \"$VERSION_JSON_ERROR\"."
       exit 2
     fi
 
-    YAMDI_REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s/\"//g)
+    YAMDI_REV=$(echo "$VERSIONS_JSON" | jq .versions[-1] | sed s/\"//g)
   fi
   debug "Paper revision: \"$YAMDI_REV\"."
 
   if [ "$YAMDI_PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
-    PARCHMENT_BUILD_JSON=$(curl -s \
-      "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD")
+    BUILDS_JSON=$(curl -s \
+      "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_REV")
     handle_curl_errors
     # Handle errors returned by the API.
-    BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
-    if [ ! "null" = "$BUILD_JSON_ERROR" ]; then
-      error "Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
+    BUILDS_JSON_ERROR=$(echo "$BUILDS_JSON" | jq .error)
+    if [ ! "null" = "$BUILDS_JSON_ERROR" ]; then
+      error "Failed to fetch Paper build info. Curl error: \"$BUILDS_JSON_ERROR\"."
       exit 2
     fi
 
-    YAMDI_PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s/\"//g)
+    YAMDI_PAPER_BUILD=$(echo "$BUILDS_JSON" | jq .builds[-1] | sed s/\"//g)
   fi
   debug "Paper build: \"$YAMDI_PAPER_BUILD\"."
 
-  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$YAMDI_REV-$YAMDI_PAPER_BUILD.jar"
+  debug "Resolving Paper build name."
+  BUILD_JSON=$(curl -s "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/\
+versions/$YAMDI_REV/builds/$YAMDI_PAPER_BUILD")
+  # Handle errors returned by the API.
+  BUILD_JSON_ERROR=$(echo "$BUILD_JSON" | jq .error)
+  if [ ! "null" = "$BUILD_JSON_ERROR" ]; then
+    error "Failed to fetch Paper build info. Curl error: \"$BUILD_JSON_ERROR\"."
+    exit 2
+  fi
+
+  paper_build_jar_name=$(echo "$BUILD_JSON" | jq .downloads.application.name | sed s/\"//g)
+  declare -r paper_build_jar_name
+
+  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/\
+$YAMDI_SERVER_TYPE-$YAMDI_REV-$YAMDI_PAPER_BUILD.jar"
   declare -r SERVER_NAME="Paper-$YAMDI_REV-$YAMDI_PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     debug "Downloading $SERVER_NAME."
-    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD/download" \
-      >"$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_REV/builds/\
+$YAMDI_PAPER_BUILD/downloads/$paper_build_jar_name" >"$PAPER_REVISION_JAR"
     handle_curl_errors
   else
     debug "$SERVER_NAME already downloaded."
