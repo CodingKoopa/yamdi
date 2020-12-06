@@ -23,9 +23,8 @@ analysis:ec:
   stage: analyze
   # Use the latest ec Docker image.
   image: mstruebing/editorconfig-checker:latest
-  script:
-    # Check that all text complies with the EditorConfig file.
-    - ec
+  # Check that all text complies with the EditorConfig file.
+  script: ec
 
 analysis:shfmt:
   # Add to the analysis stage.
