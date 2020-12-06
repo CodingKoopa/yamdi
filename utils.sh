@@ -15,7 +15,7 @@ export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 # Outputs:
 #   - The formatted message.
 function debug() {
-  if [ "$DEBUG" = "true" ]; then
+  if [ "$YAMDI_DEBUG" = "true" ]; then
     printf "[$(date +%R:%S) DEBUG]: [YAMDI] %s\n" "$*"
   fi
 }
@@ -102,7 +102,7 @@ function import_directory() {
   # Procede even if failed because that probably just means there haven't been any configuration
   # changes.
   COMMAND="git commit -m \"Automatically generated commit.\""
-  if [ "$DEBUG" = "true" ]; then
+  if [ "$YAMDI_DEBUG" = "true" ]; then
     eval "$COMMAND" || true
   else
     eval "$COMMAND" >/dev/null || true

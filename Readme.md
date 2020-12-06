@@ -242,6 +242,19 @@ services:
 ```
 Having said this, it's important to mention that, when `Ctrl` + `C` is sent in a `docker-compose` session, the log feed will always prematurely end. This gives the effect that the server has been stopped before it's gotten the chance to save, when really it's still running in the background.
 
+### Debug Mode
+YAMDI can be made to print debug messages from itself by setting the `YAMDI_DEBUG` variable.
+
+```sh
+docker run --env YAMDI_DEBUG=true
+```
+```yml
+services:
+  yamdi:
+    environment:
+      YAMDI_DEBUG: "true"
+```
+
 ## Credits
 Thanks to [AshDevFr](https://github.com/AshDevFr/docker-spigot/), [nimmis](https://github.com/nimmis/docker-spigot), and [itzg](https://github.com/itzg/dockerfiles/tree/master/minecraft-server) for their work with running Spigot in Docker.
 
