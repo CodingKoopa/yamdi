@@ -190,7 +190,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
       exit 2
     fi
 
-    YAMDI_REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s\#\"\#\#g)
+    YAMDI_REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s/\"//g)
   fi
   debug "Paper revision: \"$YAMDI_REV\"."
 
@@ -206,7 +206,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
       exit 2
     fi
 
-    YAMDI_PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
+    YAMDI_PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s/\"//g)
   fi
   debug "Paper build: \"$YAMDI_PAPER_BUILD\"."
 
