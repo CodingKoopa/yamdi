@@ -17,14 +17,13 @@ login() {
   echo "$CI_JOB_TOKEN" | docker login "$CI_REGISTRY" -u gitlab-ci-token --password-stdin
 }
 
-# Gets the tag of the image currently being built. This is used not to push or pull from the
-# registry, but just to give the image within the artifact a unique but reproducible name.
+# Gets the tag of the image currently being built.
 # Outputs:
 #   - The tag.
 # Variables Read:
 #   - TARGET_ARCH: The architecture to build for, such as "amd64".
-#   - CI_COMMIT_TAG: The tag of this commit (optional).
-#   - CI_COMMIT_SHA: The hash of this commit.
+#   - CI_COMMIT_TAG: The tag of this commit (optional if hash is specified).
+#   - CI_COMMIT_SHA: The hash of this commit (optional if tag is specified).
 get_tag() {
   # Tag images with the architecture they're for, to begin with.
   short_tag=$TARGET_ARCH
@@ -42,8 +41,7 @@ get_tag() {
   echo "$short_tag"
 }
 
-# Gets the full tag of the image currently being built, including the registry URL. This is used to
-# push or pull images.
+# Gets the full tag of the image currently being built, including the registry URL.
 # Outputs:
 #   - The full tag.
 # Variables Read:
