@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# shellcheck source=CI/common.sh
+. CI/common.sh
+
 tag=$(get_tag)
 tag_full=$(get_tag_full)
 tag_full_latest=$(get_tag_full_latest)
