@@ -199,7 +199,7 @@ These variables will be assuming that you want to set the maximum and minimum me
 If nothing is specified, YAMDI defaults to a safe 1GB for both.
 
 #### Experimental Options
-By default, for Hotspot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
+By default, for Hotspot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `YAMDI)YAMDI_USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
 
 ### Sending Commands to the Server
 YAMDI comes with an helper script (thanks @AshDevFr) to send commands to the server while it is running in another container.

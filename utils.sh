@@ -186,7 +186,7 @@ function generate_memory_opts() {
   fi
 
   # See the setting of most of these options, in the main script.
-  if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
+  if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     if [ "$JVM" = "openj9" ]; then
       if [ -n "$MAXIMUM" ]; then
         UPPER_BOUND="$MAXIMUM"

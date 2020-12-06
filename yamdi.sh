@@ -249,7 +249,7 @@ GAME_MEMORY_OPTS=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" \
   "$YAMDI_GAME_MEMORY_AMOUNT_MAX" "$YAMDI_GAME_MEMORY_AMOUNT")
 
 # Append suggested JVM options unless required not to.
-if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
+if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
   if [ "$JVM" = "hotspot" ]; then
     # Set the error file path to include the server info.
     SUGGESTED_JVM_OPTS+=" -XX:ErrorFile=./$SERVER_NAME-error-pid%p.log"
