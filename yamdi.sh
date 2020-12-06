@@ -80,7 +80,7 @@ cd "$SERVER_DIRECTORY"
 # Remove files that aren't depended upon by any stage of this script.
 if [ "$YAMDI_CLEAN_FILES" = true ]; then
   debug "Cleaning crash dumps and reports."
-  # Purge crash dumps. TODO: There are almost certainly more forms that could be included here.
+  # Purge crash dumps.
   rm -rf {heapdump,javacore,Snap}.*
   # Purge crash reports and logs. With Docker, we have our own logging system.
   rm -rf crash-reports logs ./*.log
