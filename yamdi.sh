@@ -113,7 +113,7 @@ if [ -z "$YAMDI_SERVER_TYPE" ]; then
   YAMDI_SERVER_TYPE="spigot"
 fi
 if [ -z "$YAMDI_REV" ]; then
-  REV="latest"
+  YAMDI_REV="latest"
 fi
 
 if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
@@ -190,7 +190,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
       exit 2
     fi
 
-    REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s\#\"\#\#g)
+    YAMDI_REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s\#\"\#\#g)
   fi
   debug "Paper revision: \"$YAMDI_REV\"."
 
