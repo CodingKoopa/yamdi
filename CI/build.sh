@@ -29,11 +29,11 @@ build() {
   _echo "Pulling latest image \"$tag_full_latest_vm\" to use as cache."
   docker pull "$tag_full_latest_vm" || true
 
-  _echo "Building image for $TARGET_ARCH as \"$tag_full\"."
+  _echo "Building image for $TARGET_ARCH as \"$tag_full_vm\"."
   docker build --cache-from "$tag_full_latest_vm" -t "$tag_full_vm" -f Dockerfile.openjdk."$vm" .
 
   _echo "Saving image to \"$image_path\"."
-  docker save --output "$image_path" "$tag_full"
+  docker save --output "$image_path" "$tag_full_vm"
 }
 
 _echo "Building with Hotspot VM."
