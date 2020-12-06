@@ -112,7 +112,7 @@ unset GIT_DIR GIT_WORK_TREE
 if [ -z "$YAMDI_SERVER_TYPE" ]; then
   YAMDI_SERVER_TYPE="spigot"
 fi
-if [ -z "$REV" ]; then
+if [ -z "$YAMDI_REV" ]; then
   REV="latest"
 fi
 
@@ -120,8 +120,8 @@ if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/spigot.jar"
-  declare -r SPIGOT_REVISION_JAR="$SERVER_DIRECTORY/spigot-$REV.jar"
-  declare -r SERVER_NAME="Spigot-$REV"
+  declare -r SPIGOT_REVISION_JAR="$SERVER_DIRECTORY/spigot-$YAMDI_REV.jar"
+  declare -r SERVER_NAME="Spigot-$YAMDI_REV"
 
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
   # exist.
@@ -143,7 +143,7 @@ artifact/target/BuildTools.jar"
 
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
-    java $TOTAL_BUILDTOOLS_MEMORY_OPTS -jar BuildTools.jar --rev $REV
+    java $TOTAL_BUILDTOOLS_MEMORY_OPTS -jar BuildTools.jar --rev $YAMDI_REV
     # Copy the Spigot build to the Spigot directory.
     cp spigot-*.jar "$SPIGOT_REVISION_JAR"
     popd
@@ -161,8 +161,8 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   info "Paper server selected."
 
   declare -r SERVER_JAR="$SERVER_DIRECTORY/paper.jar"
-  if [ -z "$PAPER_BUILD" ]; then
-    PAPER_BUILD="latest"
+  if [ -z "$YAMDI_PAPER_BUILD" ]; then
+    YAMDI_PAPER_BUILD="latest"
   fi
 
   # Disable exit on error so that we can handle curl errors.
@@ -178,7 +178,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   # Unlike Spigot, the Paper launcher doesn't know what to do with a "latest" version, so here we
   # manually find out the latest version using the API. When we do have the latest version, if a
   # "latest" build was specified (or omitted altogether) then we have to find out that too.
-  if [ "$REV" = "latest" ]; then
+  if [ "$YAMDI_REV" = "latest" ]; then
     debug "Resolving latest Paper revision."
 
     PARCHMENT_VERSIONS_JSON=$(curl -s https://papermc.io/api/v1/$YAMDI_SERVER_TYPE)
@@ -192,11 +192,11 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
 
     REV=$(echo "$PARCHMENT_VERSIONS_JSON" | jq .versions[0] | sed s\#\"\#\#g)
   fi
-  debug "Paper revision: \"$REV\"."
+  debug "Paper revision: \"$YAMDI_REV\"."
 
-  if [ "$PAPER_BUILD" = "latest" ]; then
+  if [ "$YAMDI_PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
-    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$REV/$PAPER_BUILD")
+    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD")
     handle_curl_errors
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
@@ -205,17 +205,17 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
       exit 2
     fi
 
-    PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
+    YAMDI_PAPER_BUILD=$(echo "$PARCHMENT_BUILD_JSON" | jq .build | sed s\#\"\#\#g)
   fi
-  debug "Paper build: \"$PAPER_BUILD\"."
+  debug "Paper build: \"$YAMDI_PAPER_BUILD\"."
 
   set -e
 
-  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$REV-$PAPER_BUILD.jar"
-  declare -r SERVER_NAME="Paper-$REV-$PAPER_BUILD"
+  declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$YAMDI_REV-$YAMDI_PAPER_BUILD.jar"
+  declare -r SERVER_NAME="Paper-$YAMDI_REV-$YAMDI_PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     debug "Downloading $SERVER_NAME."
-    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$REV/$PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
   else
     debug "$SERVER_NAME already downloaded."
   fi

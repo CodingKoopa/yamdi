@@ -37,7 +37,7 @@ services:
     environment:
       YAMDI_REV: "1.14.1"
 ```
-For Paper, `PAPER_BUILD` (a build for a particular revision) can be set in the same way.
+For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in the same way.
 
 ### Starting the Server
 Images for YAMDI are provided for `amd64`. These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
