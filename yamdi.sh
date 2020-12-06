@@ -137,8 +137,8 @@ if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
     wget -q "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
 artifact/target/BuildTools.jar"
 
-    BUILDTOOLS_MEMORY_OPTS=$(generate_memory_opts "$BUILDTOOLS_MEMORY_AMOUNT_MIN" \
-      "$BUILDTOOLS_MEMORY_AMOUNT_MAX" "$BUILDTOOLS_MEMORY_AMOUNT")
+    BUILDTOOLS_MEMORY_OPTS=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
+      "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT")
     TOTAL_BUILDTOOLS_MEMORY_OPTS="$BUILDTOOLS_MEMORY_OPTS $JVM_OPTS"
 
     # Run BuildTools with the specified RAM, for the specified revision.
@@ -243,8 +243,8 @@ rm -f "$COMMAND_INPUT_FILE"
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
-GAME_MEMORY_OPTS=$(generate_memory_opts "$GAME_MEMORY_AMOUNT_MIN" "$GAME_MEMORY_AMOUNT_MAX" \
-  "$GAME_MEMORY_AMOUNT")
+GAME_MEMORY_OPTS=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" "$YAMDI_GAME_MEMORY_AMOUNT_MAX" \
+  "$YAMDI_GAME_MEMORY_AMOUNT")
 
 # Append suggested JVM options unless required not to.
 if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then

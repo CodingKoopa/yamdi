@@ -181,20 +181,20 @@ Oracle Java 8 SE is the latest Oracle SE version, with the Hotspot VM. This is n
 The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and the server.
 
 #### Memory Options
-The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `BUILDTOOLS_MEMORY_AMOUNT` and `GAME_MEMORY_AMOUNT` variables, for example:
+The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `YAMDI_BUILDTOOLS_MEMORY_AMOUNT` and `YAMDI_GAME_MEMORY_AMOUNT` variables, for example:
 ```sh
-docker run --env BUILDTOOLS_MEMORY_AMOUNT=800M --env GAME_MEMORY_AMOUNT=1G
+docker run --env YAMDI_BUILDTOOLS_MEMORY_AMOUNT=800M --env YAMDI_GAME_MEMORY_AMOUNT=1G
 ```
 ```yml
 services:
   yamdi:
     environment:
-      BUILDTOOLS_MEMORY_AMOUNT: "800M"
-      GAME_MEMORY_AMOUNT: "1G"
+      YAMDI_BUILDTOOLS_MEMORY_AMOUNT: "800M"
+      YAMDI_GAME_MEMORY_AMOUNT: "1G"
 ```
 Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for the server itself, two separate variables are provided.
 
-These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desirable. However, `BUILDTOOLS_MEMORY_AMOUNT_MIN` and `BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
+These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desirable. However, `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN` and `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `YAMDI_GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
 
 If nothing is specified, YAMDI defaults to a safe 1GB for both.
 
