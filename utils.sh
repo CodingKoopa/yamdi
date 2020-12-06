@@ -133,10 +133,6 @@ function import_directory() {
   # Update the directory with new changes. Procede if failed, because if no commit was made, then
   # there won't be a valid master branch to use.
   git checkout -q -f master || true
-
-  # This is necessary because of Spigot BuildTools needing to use Git.
-  debug "Unsetting Git variables."
-  unset GIT_DIR GIT_WORK_TREE
 }
 
 # Given two directories setup by import_directory(), compare them for changes.

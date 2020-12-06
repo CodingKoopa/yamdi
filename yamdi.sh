@@ -105,6 +105,10 @@ fi
 info "Importing server plugin files."
 import_directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
 
+# This is necessary because of Spigot BuildTools needing to use Git.
+debug "Unsetting Git variables."
+unset GIT_DIR GIT_WORK_TREE
+
 if [ -z "$YAMDI_SERVER_TYPE" ]; then
   YAMDI_SERVER_TYPE="spigot"
 fi
