@@ -49,11 +49,13 @@ deploy() {
     fi
   fi
 
-  _echo "Pushing Docker image for \"$TARGET_ARCH\" to \"$tag_full_vm\"."
-  docker push "$tag_full_vm"
 }
 
 _echo "Deploying YAMDI with Hotspot VM."
 deploy hotspot
 _echo "Deploying YAMDI with OpenJ9 VM."
 deploy openj9
+
+image=$CI_REGISTRY_IMAGE/$TARGET_ARCH
+_echo "Pushing all tags for \"$TARGET_ARCH\" to \"$image\"."
+docker push "$image"
