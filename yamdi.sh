@@ -4,17 +4,15 @@ set -e
 # Exits YAMDI, saving the patch for any changes that have been made to the configuration files by
 # the server. If the Java process seems to have crashed, the patch will not be created.
 # Arguments:
-#   The Java return code.
-# Globals Read:
-#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration
-# directory.
-#   - SERVER_DIRECTORY: Location of the containerized server directory.
-# Arguments:
 #   - The Java return code.
 # Outputs:
 #   - Status messages.
 # Returns:
-#   - The Java return code.
+#   - The same Java return code.
+# Variables Read:
+#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration
+# directory.
+#   - SERVER_DIRECTORY: Location of the containerized server directory.
 function exit_script() {
   JAVA_RET=$1
 
@@ -36,12 +34,10 @@ function exit_script() {
 
 # Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals. This
 # function needs "utils.sh" to be sourced.
-# Globals Read:
-#   - JAVA_PID: The PID of the Java process.
 # Outputs:
 #   - Status messages.
-# Returns:
-#   - The Java return code.
+# Variables Read:
+#   - JAVA_PID: The PID of the Java process.
 function stop() {
   # Print a message because otherwise, it is very difficult to tell that this trap is actually
   # being triggered.

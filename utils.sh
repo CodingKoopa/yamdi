@@ -11,9 +11,9 @@ export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 
 # Prints a debug message, if enabled.
 # Arguments:
-#   The message.
+#   - The message.
 # Outputs:
-#   The formatted message.
+#   - The formatted message.
 function debug() {
   if [ "$DEBUG" = "true" ]; then
     printf "[$(date +%R:%S) DEBUG]: [YAMDI] %s\n" "$*"
@@ -22,27 +22,27 @@ function debug() {
 
 # Prints an info message.
 # Arguments:
-#   The message.
+#   - The message.
 # Outputs:
-#   The formatted message.
+#   - The formatted message.
 function info() {
   printf "[$(date +%R:%S) INFO]: [YAMDI] %s\n" "$*"
 }
 
 # Prints a warning message.
 # Arguments:
-#   The message.
+#   - The message.
 # Outputs:
-#   The formatted message.
+#   - The formatted message.
 function warning() {
   printf "[$(date +%R:%S) WARNING]: [YAMDI] %s\n" "$*"
 }
 
 # Prints an error message.
 # Arguments:
-#   The message.
+#   - The message.
 # Outputs:
-#   The formatted message.
+#   - The formatted message.
 function error() {
   printf "[$(date +%R:%S) ERROR]: [YAMDI] %s\n" "$*"
 }
@@ -52,14 +52,14 @@ function error() {
 # called, that `unset GIT_DIR GIT_WORK_TREE` is ran. For more details on the checkout method used
 # here, see: https://gitolite.com/deploy.html
 # TODO: Why not just run the unset command here?
-# Globals Exported:
-#   GIT_DIR: Location of the Git directory.
-#   GIT_WORK_TREE: Location of the Git work tree.
 # Arguments:
-#   Path to the source directory.
-#   Path to the target directory.
+#   - Path to the source directory.
+#   - Path to the target directory.
 # Outputs:
-#   Status messages.
+#   - Status messages.
+# Variables Exported:
+#   - GIT_DIR: Location of the Git directory.
+#   - GIT_WORK_TREE: Location of the Git work tree.
 function import_directory() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
@@ -137,15 +137,15 @@ function import_directory() {
 }
 
 # Given two directories setup by import_directory(), compare them for changes.
-# Globals Exported:
-#   GIT_DIR: Location of the Git directory.
-#   GIT_WORK_TREE: Location of the Git work tree.
 # Arguments:
-#   Path to the source directory.
-#   Path to the target directory.
-#   Path to output the patch to.
+#   - Path to the source directory.
+#   - Path to the target directory.
+#   - Path to output the patch to.
 # Outputs:
-#   Status messages.
+#   - Status messages.
+# Variables Exported:
+#   - GIT_DIR: Location of the Git directory.
+#   - GIT_WORK_TREE: Location of the Git work tree.
 function get_directory_changes() {
   SOURCE_DIRECTORY=$1
   TARGET_DIRECTORY=$2
@@ -165,11 +165,11 @@ function get_directory_changes() {
 # min and max and set, they will be use respectively. If only one is set, it will be used for
 # both.
 # Arguments:
-#   Number of minimum MB.
-#   Number of maximum MB.
-#   Number to be used for both minimum and maximum MB.
+#   - Number of minimum MB.
+#   - Number of maximum MB.
+#   - Number to be used for both minimum and maximum MB.
 # Outputs:
-#   The generated JVM option string.
+#   - The generated JVM option string.
 function generate_memory_opts() {
   MINIMUM="$1"
   MAXIMUM="$2"
