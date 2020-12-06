@@ -78,7 +78,7 @@ info "Starting Yet Another Minecraft Docker Image v1.0.1."
 cd "$SERVER_DIRECTORY"
 
 # Remove files that aren't depended upon by any stage of this script.
-if [ "$CLEAN_FILES" = true ]; then
+if [ "$YAMDI_CLEAN_FILES" = true ]; then
   debug "Cleaning crash dumps and reports."
   # Purge crash dumps. TODO: There are almost certainly more forms that could be included here.
   rm -rf {heapdump,javacore,Snap}.*
@@ -95,7 +95,7 @@ fi
 
 if [ -d "$SERVER_DIRECTORY/plugins" ]; then
   # If we aren't doing a clean, don't go any further than the root JARs.
-  if [ ! "$CLEAN_FILES" = true ]; then
+  if [ ! "$YAMDI_CLEAN_FILES" = true ]; then
     MAXDEPTH=(-maxdepth 1)
   fi
   # If this isn't done, then when the source directory has new JARs, the target will still have the
@@ -233,7 +233,7 @@ if [ ! -f "$SERVER_JAR" ]; then
 fi
 
 # Perform server JAR cleanup.
-if [ "$CLEAN_FILES" = true ]; then
+if [ "$YAMDI_CLEAN_FILES" = true ]; then
   find "$SERVER_DIRECTORY" -maxdepth 1 \
     \( -name "*.jar" ! -name "$(basename "$(readlink "$SERVER_JAR")")" \) -type f -delete
 fi

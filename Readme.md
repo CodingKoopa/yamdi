@@ -242,9 +242,20 @@ services:
 ```
 Having said this, it's important to mention that, when `Ctrl` + `C` is sent in a `docker-compose` session, the log feed will always prematurely end. This gives the effect that the server has been stopped before it's gotten the chance to save, when really it's still running in the background.
 
+### File Cleaning
+YAMDI can be made to clean unneeded files by setting the `YAMDI_CLEAN_FILES` variable. This purges crash dumps and crash logs.
+```sh
+docker run --env YAMDI_CLEAN_FILES=true
+```
+```yml
+services:
+  yamdi:
+    environment:
+      YAMDI_CLEAN_FILES: "true"
+```
+
 ### Debug Mode
 YAMDI can be made to print debug messages from itself by setting the `YAMDI_DEBUG` variable.
-
 ```sh
 docker run --env YAMDI_DEBUG=true
 ```
