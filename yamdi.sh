@@ -196,7 +196,8 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
 
   if [ "$YAMDI_PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
-    PARCHMENT_BUILD_JSON=$(curl -s "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD")
+    PARCHMENT_BUILD_JSON=$(curl -s \
+      "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD")
     handle_curl_errors
     # Handle errors returned by the API.
     BUILD_JSON_ERROR=$(echo "$PARCHMENT_BUILD_JSON" | jq .error)
@@ -215,7 +216,8 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   declare -r SERVER_NAME="Paper-$YAMDI_REV-$YAMDI_PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
     debug "Downloading $SERVER_NAME."
-    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD/download" >"$PAPER_REVISION_JAR"
+    curl "https://papermc.io/api/v1/$YAMDI_SERVER_TYPE/$YAMDI_REV/$YAMDI_PAPER_BUILD/download" \
+      >"$PAPER_REVISION_JAR"
   else
     debug "$SERVER_NAME already downloaded."
   fi
@@ -243,8 +245,8 @@ rm -f "$COMMAND_INPUT_FILE"
 # priviledges.
 mkfifo -m700 "$COMMAND_INPUT_FILE"
 
-GAME_MEMORY_OPTS=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" "$YAMDI_GAME_MEMORY_AMOUNT_MAX" \
-  "$YAMDI_GAME_MEMORY_AMOUNT")
+GAME_MEMORY_OPTS=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" \
+  "$YAMDI_GAME_MEMORY_AMOUNT_MAX" "$YAMDI_GAME_MEMORY_AMOUNT")
 
 # Append suggested JVM options unless required not to.
 if [ ! "$USE_SUGGESTED_JVM_OPTS" = false ]; then
