@@ -210,8 +210,6 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   fi
   debug "Paper build: \"$YAMDI_PAPER_BUILD\"."
 
-  set -e
-
   declare -r PAPER_REVISION_JAR="$SERVER_DIRECTORY/paper-$YAMDI_REV-$YAMDI_PAPER_BUILD.jar"
   declare -r SERVER_NAME="Paper-$YAMDI_REV-$YAMDI_PAPER_BUILD"
   if [ ! -f "$PAPER_REVISION_JAR" ]; then
