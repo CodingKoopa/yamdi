@@ -1,4 +1,4 @@
-# define the Docker in Docker anchor.
+# Define the Docker in Docker anchor.
 .dind: &dind
   variables:
     # Set the Docker host to the network connection to the dind service instead of the usual socket.
@@ -34,10 +34,12 @@ analysis:shfmt:
   image: mvdan/shfmt:latest-alpine
   rules:
     - changes:
-        - CI/**/*.sh
-  script:
-    # Check that all Bash code has proper formatting.
-    - shfmt -d .
+        # Watch for changes in the YAMDI scripts.
+        - "*.sh"
+        # Watch for changes in the CI scripts.
+        - "CI/**/*.sh"
+  # Check that all Bash code has proper formatting.
+  script: shfmt -d .
 
 analysis:shellcheck:
   # Add to the analysis stage.
@@ -46,10 +48,12 @@ analysis:shellcheck:
   image: koalaman/shellcheck-alpine:stable
   rules:
     - changes:
-        - CI/**/*.sh
-  script:
-    # Check that all Bash code is proper.
-    - shellcheck -x *.sh
+        # Watch for changes in the YAMDI scripts.
+        - "*.sh"
+        # Watch for changes in the CI scripts.
+        - "CI/**/*.sh"
+  # Check that all Bash code is proper.
+  script: shellcheck -x *.sh
 
 # Define the Docker image building anchor. Since there's already a Docker in Docker anchor, this
 # should only define elements needed for building.
@@ -58,11 +62,10 @@ analysis:shellcheck:
   # Any Docker image building will be a part of the package building stage, so add it.
   stage: build
   artifacts:
-    paths:
-      # Save the built image.
-      - Build/
+    # Save the built image.
+    paths: [Build/]
   # Run the Docker build script.
-  script: CI/Build/Docker.sh
+  script: CI/build.sh
 
 # Define the Docker AMD64 image building job.
 build:docker:amd64:
@@ -101,7 +104,7 @@ build:docker:arm64v8:
     # Make sure tags are deployed.
     - tags
   # Run the deploying script.
-  script: ./CI/Deploy/Docker.sh
+  script: ./CI/deploy.sh
 
 # Define the Docker AMD64 image deploying job.
 deploy:docker:amd64:
