@@ -66,7 +66,7 @@ services:
       context: ./yamdi
       dockerfile: yamdi/Dockerfile.openjdk.hotspot
 ```
-It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. You can build for a platform other than the host by setting the `TARGET_ARCH` variable, e.g. `--build-arg TARGET_ARCH="arm64v8"`.
+It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. To build for a platform other than `amd64`, you must set the `TARGET_ARCH` variable, e.g. `--build-arg TARGET_ARCH="arm64v8"`.
 
 It may also be desirable to have the server restart if it crashes.
 ```sh
