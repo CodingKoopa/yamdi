@@ -40,7 +40,7 @@ services:
 For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in the same way.
 
 ### Starting the Server
-Images for YAMDI are provided for `amd64`. These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
+Images for YAMDI are provided for `amd64`, `arm32v7`,  and `arm64v8` (`arm64`, `aarch64`). These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
 - `stable-hotspot`: The latest release of YAMDI, with the Hotspot JVM.
 - `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
 - `latest-hotspot`: The latest commit of YAMDI, with the Hotspot JVM.
@@ -55,7 +55,7 @@ services:
   yamdi:
     image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
 ```
-You may also build YAMDI yourself. As the `Dockerfiles` is placed in the root of this repository, this repository could be added as a submodule for, say, a server dotfile repo.
+You may also build YAMDI yourself. As the `Dockerfile`s are placed in the root of this repository, this repository could be added as a submodule for, say, a server dotfile repo.
 ```sh
 docker build -t yamdi -f yamdi/Dockerfile.openjdk.hotspot ./yamdi
 ```
@@ -66,7 +66,7 @@ services:
       context: ./yamdi
       dockerfile: yamdi/Dockerfile.openjdk.hotspot
 ```
-It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms.
+It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. You can build for a platform other than the host by setting the `TARGET_ARCH` variable, e.g. `--build-arg TARGET_ARCH="arm64v8"`.
 
 It may also be desirable to have the server restart if it crashes.
 ```sh
