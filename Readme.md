@@ -173,7 +173,7 @@ OpenJDK 12 Hotspot is the latest OpenJDK version, with the [Hotspot VM](https://
 OpenJDK 12 OpenJ9 is the latest OpenJDK version, with the [OpenJ9 VM](https://www.eclipse.org/openj9/). OpenJ9 is the newer VM, that that has better memory usage (among other improvements). If better performance is needed, use this. This is buildable as `Dockerfile.openjdk.openj9`. The Java build is provided by [AdoptOpenJDK](https://adoptopenjdk.net/).
 
 #### Oracle Java 8 SE
-Oracle Java 8 SE is the latest Oracle SE version, with the Hotspot VM. This is not recommended, unless you have *very* good reason to be using it. This is buildable as `Dockerfile.oracle.hotspot`. The Java build is provided by [Oracle](https://www.oracle.com/).
+Oracle Java 8 SE is the latest Oracle SE version, with the Hotspot VM. This is not recommended, unless you have *very* good reason to be using it. This is buildable as `Dockerfile.oraclejdk.hotspot`. The Java build is provided by [Oracle](https://www.oracle.com/).
 
 ### JVM Configuration
 
