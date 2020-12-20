@@ -117,16 +117,15 @@ function import_directory() {
     mkdir -p "$target_directory"
   else
     info "Existing directory found. Changes that will be overwritten:"
-    # Right now, reverse the input so it makes more sense (-R).
-    if [ "$YAMDI_DIST" = "oracle" ]; then
-      # Condensed summaries aren't available on the Git version in the repos for the Oracle Java
-      # image, so go with normal summaries.
-      git diff --color -R --summary
-    else
-      # Condense the summary because otherwise the full contents of new additions will be
-      # displayed.
-      git diff --color -R --compact-summary
-    fi
+    # Try to condense the summary because otherwise the full contents of new additions will be
+    # displayed. Right now, reverse the output, so it makes more sense.
+    #
+    # As of writing, the Oracle JDK image is based off of Oracle Linux 7.9, which ships [1]
+    # Git version 1.8.3.1, and only seems to be receiving security updates. The Git developers
+    # simply did not add "--compact-summary" to any release ntoes, but it seems [2] to have been
+    # added in version 2.17.0. As such, we need to be able to fell back if --compact-summary is not
+    # available.
+    git diff --color -R --compact-summary 2>/dev/null || git diff --color -R --summary
   fi
 
   debug "Updating server directory."

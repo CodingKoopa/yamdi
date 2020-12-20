@@ -4,8 +4,8 @@ ARG TARGET_ARCH=amd64
 # Set the base image to the AdoptOpenJDK OpenJDK 12 release JRE, with Alpine Linux.
 FROM ${TARGET_ARCH}/adoptopenjdk/openjdk12:alpine-jre
 
-# Specify the distributor.
-ENV YAMDI_DIST="adoptopenjdk"
+# Specify the distribution.
+ENV YAMDI_OS="alpine"
 
 # Specify the type of JVM being used.
 ENV YAMDI_JVM="hotspot"

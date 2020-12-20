@@ -5,7 +5,7 @@ ARG TARGET_ARCH=amd64
 FROM ${TARGET_ARCH}/adoptopenjdk/openjdk12-openj9:alpine-jre
 
 # Specify the distributor.
-ENV YAMDI_DIST="adoptopenjdk"
+ENV YAMDI_OS="adoptopenjdk"
 
 # Specify the type of JVM being used.
 ENV YAMDI_JVM="openj9"
