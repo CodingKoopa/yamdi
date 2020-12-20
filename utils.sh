@@ -118,7 +118,7 @@ function import_directory() {
   else
     info "Existing directory found. Changes that will be overwritten:"
     # Right now, reverse the input so it makes more sense (-R).
-    if [ "$DIST" = "oracle" ]; then
+    if [ "$YAMDI_DIST" = "oracle" ]; then
       # Condensed summaries aren't available on the Git version in the repos for the Oracle Java
       # image, so go with normal summaries.
       git diff --color -R --summary
@@ -188,7 +188,7 @@ function generate_memory_opts() {
 
   # See the setting of most of these options, in the main script.
   if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
-    if [ "$JVM" = "openj9" ]; then
+    if [ "$YAMDI_JVM" = "openj9" ]; then
       local upper_bound
       if [ -n "$maximum" ]; then
         upper_bound="$maximum"

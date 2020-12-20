@@ -273,7 +273,7 @@ declare -r game_memory_opts
 
 # Append suggested JVM options unless required not to.
 if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
-  if [ "$JVM" = "hotspot" ]; then
+  if [ "$YAMDI_JVM" = "hotspot" ]; then
     # Set the error file path to include the server info.
     suggested_jvm_opts+=" -XX:ErrorFile=./$server_name-error-pid%p.log"
 
@@ -304,7 +304,7 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Set the garbage collection target survivor ratio higher to use more of the survivor space
     # before promoting it, because MC has steady allocations.
     suggested_jvm_opts+=" -XX:TargetSurvivorRatio=90"
-  elif [ "$JVM" = "openj9" ]; then
+  elif [ "$YAMDI_JVM" = "openj9" ]; then
     # These options are largely taken from here:
     # https://steinborn.me/posts/tuning-minecraft-openj9/.
     # See the utility script for the generation of the nursery limits.

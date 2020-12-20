@@ -5,10 +5,10 @@ ARG TARGET_ARCH=amd64
 FROM ${TARGET_ARCH}/adoptopenjdk/openjdk12-openj9:alpine-jre
 
 # Specify the distributor.
-ENV DIST="adoptopenjdk"
+ENV YAMDI_DIST="adoptopenjdk"
 
 # Specify the type of JVM being used.
-ENV JVM="openj9"
+ENV YAMDI_JVM="openj9"
 
 # Install the dependencies and clean the cache.
 # - bash    Bash, for running the server startup script.

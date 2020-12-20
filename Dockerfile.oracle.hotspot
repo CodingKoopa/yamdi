@@ -2,10 +2,10 @@
 FROM store/oracle/serverjre:8
 
 # Specify the distributor.
-ENV DIST="oracle"
+ENV YAMDI_DIST="oracle"
 
 # Specify the type of JVM being used.
-ENV JVM="hotspot"
+ENV YAMDI_JVM="hotspot"
 
 # Install the dependencies and clean the cache.
 # - bash    Bash, for running the server startup script.
