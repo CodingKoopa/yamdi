@@ -90,7 +90,8 @@ info "Importing server configuration files."
 import_directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
 # Ignore server properties unless explicitly told not to.
 if [ ! "$YAMDI_IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
-  git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties"
+  # Allow this to fail, for the case in which we haven't setup a host config directory.
+  git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties" 2>/dev/null || true
 fi
 
 if [ -d "$SERVER_DIRECTORY/plugins" ]; then
