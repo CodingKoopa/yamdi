@@ -57,14 +57,14 @@ If a function has cases in which it returns a non-0 exit code, they must be docu
 If a function reads any variables, they must be documented. Example:
 ```bash
 # Variables Read:
-#   - DRY_RUN: Whether to actually perform actions.
+#   - dry_run: Whether to actually perform actions.
 ```
 
 #### Variables Written
 If a function writes to any variables, they must be documented. Example:
 ```bash
 # Variables Written:
-#   - INSTALL_HOME: Location of the home directory of the current install user.
+#   - install_home: Location of the home directory of the current install user.
 ```
 
 #### Variables Exported
