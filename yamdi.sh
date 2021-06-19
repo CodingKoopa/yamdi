@@ -138,7 +138,7 @@ if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
     # Remove any preexisting JARs from failed compilations.
     rm -f BuildTools.jar
     # Download the latest BuildTools JAR.
-    wget -q "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
+    curl -O "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
 artifact/target/BuildTools.jar"
 
     buildtools_memory_opts=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
