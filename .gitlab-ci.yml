@@ -1,5 +1,5 @@
 # Define the Docker in Docker anchor.
-.dind: &dind
+.dind:
   variables:
     # Set the Docker host to the network connection to the dind service instead of the usual socket.
     DOCKER_HOST: tcp://docker:2375/
@@ -57,7 +57,7 @@ analysis:shellcheck:
 # Define the Docker image building anchor. Since there's already a Docker in Docker anchor, this
 # should only define elements needed for building.
 .build:docker: &docker_build
-  <<: *dind
+  extends: .dind
   # Any Docker image building will be a part of the package building stage, so add it.
   stage: build
   artifacts:
@@ -91,7 +91,7 @@ build:docker:arm64v8:
 
 # Define the Docker image deploying anchor.
 .deploy:docker: &docker_deploy
-  <<: *dind
+  extends: .dind
   # Add to the deploying stage.
   stage: deploy
   variables:
