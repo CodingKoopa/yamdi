@@ -98,9 +98,7 @@ build:docker:arm64v8:
     # Don't clone or fetch the Git repo, as the dependencies are all that's needed here.
     GIT_STRATEGY: none
   only:
-    # Only deploy on the "master" branch.
-    - master
-    # Make sure tags are deployed.
+    # Only deploy for tags.
     - tags
   # Run the deploying script.
   script: ./CI/deploy.sh
