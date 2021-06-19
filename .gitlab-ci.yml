@@ -36,7 +36,7 @@ analysis:shfmt:
         # Watch for changes in the YAMDI scripts.
         - "*.sh"
         # Watch for changes in the CI scripts.
-        - "CI/**/*.sh"
+        - "CI/*.sh"
   # Check that all Bash code has proper formatting.
   script: shfmt -d .
 
