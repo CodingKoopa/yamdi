@@ -16,11 +16,13 @@ set -e
 function exit_script() {
   local -r java_ret=$1
 
-  info "Stopping Yet Another Minecraft Docker Image."
+  info "Exiting Yet Another Minecraft Docker Image."
 
   if [ "$java_ret" -ne 0 ]; then
     warning "Java process return code is $java_ret, likely crashed. Not checking files for changes."
   else
+    info "Java process return is 0, this is good. Checking files for changes."
+
     info "Checking server configuration files."
     get_directory_changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
       "$SERVER_DIRECTORY/config.patch"
@@ -39,21 +41,21 @@ function exit_script() {
 # Variables Read:
 #   - JAVA_PID: The PID of the Java process.
 function stop() {
-  # Print a message because otherwise, it is very difficult to tell that this trap is actually
-  # being triggered.
-  info "SIGINT or SIGTERM recieved. Sending stop command to server."
-  # Send the "stop" command to the server.
-  cmd stop
-  debug "Waiting for Java process to exit."
-  # JAVA_PID is exported after the Java process is started. If this function is called before then,
-  # it should just be empty, which is fine for wait, as without arguments it will wait for all
-  # background processes. This is still necessary though, because, through testing, it seems that
-  # when the PID is specified in the other wait command, this one hangs.
-  set +e
-  wait "$JAVA_PID"
-  local -r java_ret=$?
-  set -e
-  exit_script $java_ret
+  info "SIGINT or SIGTERM recieved."
+  if [[ -n $JAVA_PID ]]; then
+    info "Server is running with PID $JAVA_PID, sending stop command."
+    # Send the "stop" command to the server.
+    cmd stop
+    info "Waiting for Java process to exit."
+    set +e
+    wait "$JAVA_PID"
+    local -r java_ret=$?
+    set -e
+    exit_script $java_ret
+  else
+    info "It looks like the server was never started. Exiting without further action."
+    exit 0
+  fi
 }
 
 # Handle the SIGINT and SIGTERM signals. SIGINT is what is normally sent to a program when Ctrl+C
@@ -330,7 +332,7 @@ info "Launching Java process for $server_name with JVM options \"$total_game_jvm
 # shellcheck disable=SC2086
 java $total_game_jvm_opts -jar "$server_jar" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
 export JAVA_PID=$!
-debug "Waiting for Java process (PID $JAVA_PID) to exit."
+info "Waiting for Java process (PID $JAVA_PID) to exit."
 # Allow wait to return an error without making the whole script exit.
 set +e
 wait "$JAVA_PID"
