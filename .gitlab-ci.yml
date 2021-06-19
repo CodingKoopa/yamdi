@@ -1,4 +1,4 @@
-# Define the Docker in Docker anchor.
+# Define the Docker in Docker template.
 .dind:
   variables:
     # Set the Docker host to the network connection to the dind service instead of the usual socket.
