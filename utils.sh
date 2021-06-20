@@ -120,11 +120,15 @@ function import_directory() {
     # Try to condense the summary because otherwise the full contents of new additions will be
     # displayed. Right now, reverse the output, so it makes more sense.
     #
-    # As of writing, the Oracle JDK image is based off of Oracle Linux 7.9, which ships [1]
+    # As of writing, the Oracle JDK 11 image is based off of Oracle Linux 7.9 [1], which ships [2]
     # Git version 1.8.3.1, and only seems to be receiving security updates. The Git developers
-    # simply did not add "--compact-summary" to any release ntoes, but it seems [2] to have been
+    # simply did not add "--compact-summary" to any release notes, but it seems [3] to have been
     # added in version 2.17.0. As such, we need to be able to fell back if --compact-summary is not
     # available.
+    #
+    # [1] 7.7 for the Oracle JDK 8 image.
+    # [2] https://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/index.html
+    # [3] https://github.com/git/git/commit/ddf88fa6166473be15822739e0a12aad4edfbbc5
     git diff --color -R --compact-summary 2>/dev/null || git diff --color -R --summary
   fi
 
