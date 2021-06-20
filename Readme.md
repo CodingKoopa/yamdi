@@ -14,6 +14,119 @@ These decisions were made because of how, ultimately, Docker does handle these t
 ## Usage
 In these sections, excerpts from both a Bash command line with Docker and a [Docker Compose](https://docs.docker.com/compose/overview/) `yml` configuration, with `version: "3.7"`. Reading through this manual is recommended, to take full advantage of what YAMDI has to offer.
 
+### Starting the Server
+
+#### Choosing an Image
+There are a couple of options for the YAMDI image to use:
+- Use a prebuilt image with a preselected common Java base image.
+- Build YAMDI yourself with whichever Java base image you want.
+
+##### Prebuilt YAMDI (OUTDATED)
+Images for YAMDI are provided for `amd64`, `arm32v7`,  and `arm64v8` (`arm64`, `aarch64`). These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
+- `stable-hotspot`: The latest release of YAMDI, with the HotSpot JVM.
+- `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
+- `latest-hotspot`: The latest commit of YAMDI, with the HotSpot JVM.
+- `latest-openj9`: The latest commit of YAMDI, with the OpenJ9 JVM.
+
+For more info on HotSpot and OpenJ9, see [Java Distributions](#java-distributions).
+```sh
+docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
+```
+```yml
+services:
+  yamdi:
+    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
+```
+```yml
+services:
+  yamdi:
+    build:
+      context: ./yamdi
+      dockerfile: yamdi/Dockerfile.openjdk.hotspot
+```
+It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. To build for a platform other than `amd64`, you must set the `YAMDI_TARGET_ARCH` variable, e.g. `--build-arg YAMDI_TARGET_ARCH="arm64v8"`.
+
+It may also be desirable to have the server restart if it crashes.
+```sh
+docker run --restart on-failure
+```
+```yml
+services:
+  yamdi:
+    restart: on-failure
+```
+
+##### Building YAMDI
+
+###### Obtaining the Source Code
+In order to build a YAMDI image, you need a copy of this repository. If you don't have one, you can clone it with Git:
+```sh
+git clone https://gitlab.com/CodingKoopa/yamdi.git
+```
+Or, perhaps you're in a more limited environment that doesn't have Git:
+```sh
+curl -O https://gitlab.com/CodingKoopa/yamdi/-/archive/master/yamdi-master.tar.gz
+tar xzf yamdi-master.tar.gz
+```
+Or, maybe you prefer wget:
+```sh
+wget https://gitlab.com/CodingKoopa/yamdi/-/archive/master/yamdi-master.tar.gz
+tar xzf yamdi-master.tar.gz
+```
+
+If you would rather use a tagged release (if unsure, you don't), rather than the latest code, you can switch to it if using Git:
+```sh
+git checkout tags/1.0.3
+```
+Or, if using wget or curl, download the source code tarball from the [releases page](https://gitlab.com/CodingKoopa/yamdi/-/releases):
+```sh
+curl -O https://gitlab.com/CodingKoopa/yamdi/-/archive/v1.0.0/yamdi-v1.0.0.tar.gz
+tar xzf yamdi-v1.0.0.tar.gz
+```
+With wget:
+```sh
+wget https://gitlab.com/CodingKoopa/yamdi/-/archive/v1.0.0/yamdi-v1.0.0.tar.gz
+tar xzf yamdi-v1.0.0.tar.gz
+```
+
+###### Building the Image
+The image is built using the `docker build` command. To build an image and tag it as `yamdi` so that it's not a dangling image:
+```sh
+docker build -t yamdi .
+```
+```yaml
+services:
+  yamdi:
+    build:
+      context: .
+      image: yamdi
+```
+
+As the `Dockerfile`s are placed in the root of this repository, this repository could be added as a submodule for, say, a server dotfile repo, and then built like so:
+```sh
+docker build -t yamdi -f yamdi/Dockerfile ./yamdi
+```
+```yaml
+services:
+  yamdi:
+    build:
+      context: ./yamdi
+      dockerfile: yamdi/Dockerfile.openjdk.hotspot
+      image: yamdi
+```
+
+The YAMDI Dockerfile is designed to adapt to whatever base image you give it. You can specify what base image you want to use by setting the `YAMDI_BASE_IMAGE` build-time variable to the full tag referring to the Java image you want to use. To see a vast documentation of your options, see [JavaDistributions.md](JavaDistributions.md).
+```sh
+docker build --build-arg YAMDI_IMAGE=adoptopenjdk/openjdk16:alpine-jre
+```
+```yaml
+services:
+  yamdi:
+    build:
+      args:
+      - YAMDI_IMAGE=adoptopenjdk/openjdk16:alpine-jre
+```
+
 ### Server Type
 The type of server can be specified by setting the `YAMDI_SERVER_TYPE` environment variable. Currently supported values are `spigot` (default) and `paper`, case sensitive.
 ```sh
@@ -38,45 +151,6 @@ services:
       YAMDI_REV: "1.14.1"
 ```
 For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in the same way.
-
-### Starting the Server
-Images for YAMDI are provided for `amd64`, `arm32v7`,  and `arm64v8` (`arm64`, `aarch64`). These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
-- `stable-hotspot`: The latest release of YAMDI, with the Hotspot JVM.
-- `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
-- `latest-hotspot`: The latest commit of YAMDI, with the Hotspot JVM.
-- `latest-openj9`: The latest commit of YAMDI, with the OpenJ9 JVM.
-
-For more info on Hotspot and OpenJ9, see [Java Distributions](#java-distributions).
-```sh
-docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
-```
-```yml
-services:
-  yamdi:
-    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
-```
-You may also build YAMDI yourself. As the `Dockerfile`s are placed in the root of this repository, this repository could be added as a submodule for, say, a server dotfile repo.
-```sh
-docker build -t yamdi -f yamdi/Dockerfile.openjdk.hotspot ./yamdi
-```
-```yml
-services:
-  yamdi:
-    build:
-      context: ./yamdi
-      dockerfile: yamdi/Dockerfile.openjdk.hotspot
-```
-It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. To build for a platform other than `amd64`, you must set the `TARGET_ARCH` variable, e.g. `--build-arg TARGET_ARCH="arm64v8"`.
-
-It may also be desirable to have the server restart if it crashes.
-```sh
-docker run --restart on-failure
-```
-```yml
-services:
-  yamdi:
-    restart: on-failure
-```
 
 ### Server Data
 YAMDI exposes three volumes:
@@ -163,18 +237,6 @@ services:
       - "25565:25565"
 ```
 
-### Java Distributions
-YAMDI provides support for a few different Java distributions.
-
-#### OpenJDK 12 Hotspot (Default)
-OpenJDK 12 Hotspot is the latest OpenJDK version, with the [Hotspot VM](https://openjdk.java.net/groups/hotspot/). Hotspot is the well established VM, that has been thoroughly used over many years. If unsure, use this. This is buildable as `Dockerfile.openjdk.hotspot`, or just `Dockerfile`. The Java build is provided by [AdoptOpenJDK](https://adoptopenjdk.net/).
-
-#### OpenJDK 12 OpenJ9
-OpenJDK 12 OpenJ9 is the latest OpenJDK version, with the [OpenJ9 VM](https://www.eclipse.org/openj9/). OpenJ9 is the newer VM, that that has better memory usage (among other improvements). If better performance is needed, use this. This is buildable as `Dockerfile.openjdk.openj9`. The Java build is provided by [AdoptOpenJDK](https://adoptopenjdk.net/).
-
-#### Oracle Java 8 SE
-Oracle Java 8 SE is the latest Oracle SE version, with the Hotspot VM. This is not recommended, unless you have *very* good reason to be using it. This is buildable as `Dockerfile.oraclejdk.hotspot`. The Java build is provided by [Oracle](https://www.oracle.com/).
-
 ### JVM Configuration
 
 #### General Options
@@ -199,7 +261,7 @@ These variables will be assuming that you want to set the maximum and minimum me
 If nothing is specified, YAMDI defaults to a safe 1GB for both.
 
 #### Experimental Options
-By default, for Hotspot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `YAMDI)YAMDI_USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
+By default, for HotSpot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `YAMDI)YAMDI_USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
 
 ### Sending Commands to the Server
 YAMDI comes with an helper script (thanks @AshDevFr) to send commands to the server while it is running in another container.
