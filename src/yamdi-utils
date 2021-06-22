@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Set the directory for the server installation to be kept.
-export SERVER_DIRECTORY="/opt/server"
+export SERVER_DIRECTORY="/opt/yamdi/user/server"
 # Set the directory for the server host configuration to be kept.
-export SERVER_CONFIG_HOST_DIRECTORY="/opt/server-config-host"
+export SERVER_CONFIG_HOST_DIRECTORY="/opt/yamdi/server-config-host"
 # Set the directory for the server host plugins to be kept.
-export SERVER_PLUGINS_HOST_DIRECTORY="/opt/server-plugins-host"
+export SERVER_PLUGINS_HOST_DIRECTORY="/opt/yamdi/server-plugins-host"
 # Set the directory for the command named pipe to be.
 export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 

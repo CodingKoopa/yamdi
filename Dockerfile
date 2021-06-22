@@ -43,16 +43,19 @@ RUN \
   fi
 
 # Create a mount point for the server installation directory and plugin directory.
-VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
+VOLUME /opt/yamdi/user/server /opt/yamdi/server-config-host /opt/yamdi/server-plugins-host
 
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
-# Set the container entrypoint to the startup script. We don't use exec here because the shell
-# script swalling signals is actually desired behavior, as it sets up traps that will gracefully
-# shut down the server running in the child process.
+# Append the YAMDI directory to the path to make it accessible.
+ENV PATH=/opt/yamdi:$PATH
+
+# Set the container entrypoint to the startup script.
 ENTRYPOINT ["yamdi"]
 
-# Copy the scripts into the binary directory. Technically, yamdi-utils is a library, and belongs in
-# /usr/lib/, but that would require another layer to make happen.
-COPY yamdi cmd yamdi-utils /usr/bin/
+USER nonroot
+
+# Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
+# developing YAMDI.
+COPY yamdi cmd yamdi-utils /opt/yamdi/

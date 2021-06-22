@@ -1,6 +1,6 @@
 #!/bin/bash
 
 # shellcheck source=src/yamdi-utils
-source /usr/bin/yamdi-utils
+source yamdi-utils
 
 echo "$@" >"$COMMAND_INPUT_FILE"

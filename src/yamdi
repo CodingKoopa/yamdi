@@ -71,7 +71,7 @@ trap stop SIGINT
 trap stop SIGTERM
 
 # shellcheck source=src/yamdi-utils
-source /usr/bin/yamdi-utils
+source yamdi-utils
 
 info "Starting Yet Another Minecraft Docker Image v1.0.2."
 
