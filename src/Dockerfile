@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.2
+
 # Set a reasonable default value for the base image.
 ARG YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:alpine-jre
 
@@ -46,7 +48,9 @@ VOLUME /opt/server /opt/server-config-host /opt/server-plugins-host
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
-# Set the container entrypoint to the startup script.
+# Set the container entrypoint to the startup script. We don't use exec here because the shell
+# script swalling signals is actually desired behavior, as it sets up traps that will gracefully
+# shut down the server running in the child process.
 ENTRYPOINT ["/usr/bin/yamdi"]
 
 # Copy the server command running script to the image.
