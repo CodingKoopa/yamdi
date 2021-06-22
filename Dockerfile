@@ -9,7 +9,7 @@ FROM ${YAMDI_BASE_IMAGE}
 # Install the dependencies:
 # - bash    Bash, for running the server startup script.
 # - git     Git, for BuildTools to clone the repositories.
-# - curl    Curl, for using the Paper build API.
+# - curl    Curl, for downloading Spigot BuildTools and using the Paper build API.
 # - jq      jq, for parsing the Paper API response.
 #
 # For each of the package manager tests, we use the ">" redirector as opposed to the "&>" because sh
