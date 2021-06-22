@@ -51,17 +51,8 @@ EXPOSE 25565 8123
 # Set the container entrypoint to the startup script. We don't use exec here because the shell
 # script swalling signals is actually desired behavior, as it sets up traps that will gracefully
 # shut down the server running in the child process.
-ENTRYPOINT ["/usr/bin/yamdi"]
+ENTRYPOINT ["yamdi"]
 
-# Copy the server command running script to the image.
-COPY ./cmd.sh /usr/bin/cmd
-# Make the script executable.
-RUN chmod +x /usr/bin/cmd
-# Copy the utility function script to the image.
-COPY ./utils.sh /usr/lib/utils
-# Make the script executable.
-RUN chmod +x /usr/lib/utils
-# Copy the server launch Bash script to the image.
-COPY ./yamdi.sh /usr/bin/yamdi
-# Make the script executable.
-RUN chmod +x /usr/bin/yamdi
+# Copy the scripts into the binary directory. Technically, yamdi-utils is a library, and belongs in
+# /usr/lib/, but that would require another layer to make happen.
+COPY yamdi cmd yamdi-utils /usr/bin/
