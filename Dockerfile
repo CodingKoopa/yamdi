@@ -86,6 +86,13 @@ RUN \
   mkdir --parents /opt/yamdi/user && \
   chown nonroot:nonroot /opt/yamdi/user
 
+# Change to the non-root user when running the container.
+USER nonroot
+
+# Run from the server directory because we will use Git to update files here, and the Minecraft
+# server will check the current directory for configuration files.
+WORKDIR /opt/yamdi/user/server
+
 # Create a mount point for the server installation directory and plugin directory.
 VOLUME /opt/yamdi/user/server /opt/yamdi/server-config-host /opt/yamdi/server-plugins-host
 
@@ -97,13 +104,6 @@ ENV PATH=/opt/yamdi:$PATH
 
 # Set the container entrypoint to the startup script.
 ENTRYPOINT ["yamdi"]
-
-# Run from the server directory because we will use Git to update files here, and the Minecraft
-# server will check the current directory for configuration files.
-WORKDIR /opt/yamdi/user/server
-
-# Change to the non-root user when running the container.
-USER nonroot
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
