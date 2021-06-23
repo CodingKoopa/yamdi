@@ -86,10 +86,13 @@ RUN \
   # owned by root.
   \
   mkdir --parents /opt/yamdi/user/server && \
+  # The presence of this file indicates that no volume has been mounted here, which is really bad
+  # because it means that server data will not persist.
+  touch /opt/yamdi/user/server/volume-not-mounted && \
   chown -R nonroot:nonroot /opt/yamdi/user
 
 # Copy the Git configuration into the non-root user's home directory.
-COPY --chown=nonroot:nonroot .gitconfig /home/nonroot/
+COPY --chown=nonroot:nonroot src/.gitconfig /home/nonroot/
 
 # Change to the non-root user when running the container.
 USER nonroot
