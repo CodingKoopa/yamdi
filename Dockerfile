@@ -88,6 +88,9 @@ RUN \
   mkdir --parents /opt/yamdi/user/server && \
   chown -R nonroot:nonroot /opt/yamdi/user
 
+# Copy the Git configuration into the non-root user's home directory.
+COPY --chown=nonroot:nonroot .gitconfig /home/nonroot/
+
 # Change to the non-root user when running the container.
 USER nonroot
 

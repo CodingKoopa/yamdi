@@ -86,12 +86,6 @@ function import_directory() {
   # Initialize the temporary directory, if it hasn't already been initialized.
   git init -q
 
-  debug "Configuring Git repo."
-  # git commit --author doesn't seem to work correctly here, so set the author info in its own
-  # set of commands.
-  git config user.name "YAMDI, with love ♥"
-  git config user.email "codingkoopa@gmail.com"
-
   debug "Making Git commit."
   # Add all files from the directory from the stage. This also stages deletions.
   git add -A
