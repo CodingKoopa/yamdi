@@ -75,10 +75,6 @@ source yamdi-utils
 
 info "Starting Yet Another Minecraft Docker Image v1.0.2."
 
-# Enter the server directory because we will use Git to update files here, and the Minecraft server
-# will check the current directory for configuration files.
-cd "$SERVER_DIRECTORY"
-
 # Remove files that aren't depended upon by any stage of this script.
 if [ "$YAMDI_CLEAN_FILES" = true ]; then
   debug "Cleaning crash dumps and reports."
