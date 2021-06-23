@@ -1,0 +1,3 @@
+# Minimize the build context by only including the files that are destined for the image.
+*
+!src

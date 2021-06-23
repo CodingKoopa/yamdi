@@ -115,4 +115,4 @@ ENTRYPOINT ["yamdi"]
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
-COPY yamdi cmd yamdi-utils /opt/yamdi/
+COPY src/yamdi src/cmd src/yamdi-utils /opt/yamdi/
