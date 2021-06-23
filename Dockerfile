@@ -81,10 +81,12 @@ RUN \
   return 1; \
   fi && \
   \
-  # Create the user subdirectory that the non-root user will be using.
+  # Create the user subdirectory that the non-root user will be using. It's necessary to create and
+  # own the "server" subdirectory ahead of time because, by default, the volume will be mounted and
+  # owned by root.
   \
-  mkdir --parents /opt/yamdi/user && \
-  chown nonroot:nonroot /opt/yamdi/user
+  mkdir --parents /opt/yamdi/user/server && \
+  chown -R nonroot:nonroot /opt/yamdi/user
 
 # Change to the non-root user when running the container.
 USER nonroot
