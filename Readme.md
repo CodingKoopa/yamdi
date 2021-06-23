@@ -111,20 +111,20 @@ services:
   yamdi:
     build:
       context: ./yamdi
-      dockerfile: yamdi/Dockerfile.openjdk.hotspot
+      dockerfile: yamdi/Dockerfile
       image: yamdi
 ```
 
 The YAMDI Dockerfile is designed to adapt to whatever base image you give it. You can specify what base image you want to use by setting the `YAMDI_BASE_IMAGE` build-time variable to the full tag referring to the Java image you want to use. To see a vast documentation of your options, see [JavaDistributions.md](JavaDistributions.md).
 ```sh
-docker build --build-arg YAMDI_IMAGE=adoptopenjdk/openjdk16:alpine-jre
+docker build --build-arg YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:alpine-jre
 ```
 ```yaml
 services:
   yamdi:
     build:
       args:
-      - YAMDI_IMAGE=adoptopenjdk/openjdk16:alpine-jre
+      - YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:alpine-jre
 ```
 
 ### Server Type
@@ -154,12 +154,16 @@ For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in
 
 ### Server Data
 YAMDI exposes three volumes:
-- `/opt/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
-- `/opt/server-config-host`, the server configuration. This contains server-related configurations.
-- `/opt/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by the server, and their own configurations.
-`/opt/server` must be mounted, both for server data to persist, and to accept the EULA. The other volumes are technically optional, but recommended for reasons that will be explained.
+- `/opt/yamdi/user/server`, the server installation. This contains the server `JAR`, some world-specific configurations, and world data.
+- `/opt/yamdi/server-config-host`, the server configuration. This contains server-related configurations.
+- `/opt/yamdi/server-plugins-host`, the server plugins. This contains plugins that are to be loaded by the server, and their own configurations.
+
+`/opt/yamdi/user/server` must be mounted in order for server data to persist. YAMDI enforces this, but [Docker's default behavior of copying files from the container into an empty volume](https://docs.docker.com/storage/#tips-for-using-bind-mounts-or-volumes) breaks this detection, thus we specify the `nocopy` volume option.
+
+The other volumes are technically optional, but recommended for reasons that will be explained.
+
 ```sh
-docker run --mount type=volume,source=mc-server-data,target=/opt/server --mount type=bind,source=./mc-config,target=/opt/server-config-host --mount type=bind,source=./mc-plugins,target=/opt/server-plugins-host
+docker run --mount type=volume,source=mc-server-data,target=/opt/server,volume-opt=nocopy=true --mount type=bind,source=./mc-config,target=/opt/server-config-host --mount type=bind,source=./mc-plugins,target=/opt/server-plugins-host
 ```
 ```yml
 services:
@@ -167,28 +171,30 @@ services:
     volumes:
       - type: volume
         source: mc-server-data
-        target: /opt/server
+        target: /opt/yamdi/user/server
+        volume:
+          nocopy: true
       - type: bind
         source: ./mc-config
-        target: /opt/server-config-host
+        target: /opt/yamdi/server-config-host
       - type: bind
         source: ./mc-plugins
-        target: /opt/server-plugins-host
+        target: /opt/yamdi/server-plugins-host
 ```
-The `/opt/server-config-host` and `/opt/server-plugins-host` volumes are particularly interesting. If they are mounted, then YAMDI will use Git to deploy them to `/opt/server`.
+The `/opt/yamdi/server-config-host` and `/opt/yamdi/server-plugins-host` volumes are particularly interesting. If they are mounted, then YAMDI will use Git to deploy them to `/opt/yamdi/user/server`.
 
-The technical details of how YAMDI implements this isn't strictly required for usage, but is educational to have an understanding of. When YAMDI is starting up, it will first copy the contents of the host directory bind mount to another location, within the temporary container filesystem. In some cases this is necessary because, in order for Git to function, even if r/w access to the files isn't needed, Git still requires it. This is necessary when user namespace remapping is being used, and the user running YAMDI does not have r/w access to the original files. In YAMDI's copy of the directory, a Git repository is established, and a commit is made containing the changes (Given the nature of an initial commit, this is every file creation.). Then, using the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html), YAMDI establishes a bare repository in `/opt/server` and deploys to there. Both during the deploy, and during shutdown, YAMDI will execute `git diff` (With the exception of when an initial run is detected, because then a diff would be overwhelming.). The former of the two `diff`s is condensed for brevity, and the latter is forwarded to a patch file in the volume, as to not spam the log.
+The technical details of how YAMDI implements this isn't strictly required for usage, but is educational to have an understanding of. When YAMDI is starting up, it will first copy the contents of the host directory bind mount to another location, within the temporary container filesystem. In some cases this is necessary because, in order for Git to function, even if r/w access to the files isn't needed, Git still requires it. This is necessary when user namespace remapping is being used, and the user running YAMDI does not have r/w access to the original files. In YAMDI's copy of the directory, a Git repository is established, and a commit is made containing the changes (Given the nature of an initial commit, this is every file creation.). Then, using the `git checkout` deploy technique from [here](https://gitolite.com/deploy.html), YAMDI establishes a bare repository in `/opt/yamdi/user/server` and deploys to there. Both during the deploy, and during shutdown, YAMDI will execute `git diff` (With the exception of when an initial run is detected, because then a diff would be overwhelming.). The former of the two `diff`s is condensed for brevity, and the latter is forwarded to a patch file in the volume, as to not spam the log.
 
 Given these details, there are multiple results and further specifications that should be understood:
 - When initially deploying, and shutting down, the changes between the server configuration, and the host configuration will be printed. The purpose of this is, respectively, to understand what changes will be made, and what changes the server has made to the files that you may want to consider adding to your configuration. This is especially useful when the server software has introduced a new configuration option.
   - A pitfall with this is that `server.properties` will constantly be updated with a timestamp, and reordering of its properties, and thus it is a false positive. This is mitigated with [Ignore `server.properties`](#ignore-serverproperties`)
-- Files in `/opt/server` that are not in the host directory will be left as-is.
-- Files in `/opt/server` that have changed versions in the host directory will be updated.
-- Files in `/opt/server` that have been deleted in the host directory will **not** be deleted. This is a limitation of how YAMDI's temporary Git directory works, in that it only tracks file creations. To remedy this, `JAR`s in the root server plugin directory will be removed before the import process, to avoid any duplicate plugins of different versions.
+- Files in `/opt/yamdi/user/server` that are not in the host directory will be left as-is.
+- Files in `/opt/yamdi/user/server` that have changed versions in the host directory will be updated.
+- Files in `/opt/yamdi/user/server` that have been deleted in the host directory will **not** be deleted. This is a limitation of how YAMDI's temporary Git directory works, in that it only tracks file creations. To remedy this, `JAR`s in the root server plugin directory will be removed before the import process, to avoid any duplicate plugins of different versions.
 - Permissions of files in the host directory will not be retained. The purpose/desirableness of this is that it makes the files safe for YAMDI to write to.
 - As a result of YAMDI is using its own Git directory, it will neither not collide with any preexisting Git repository, nor require any Git setup.
 
-To get started, first you should mount `/opt/server`, and let the server run and exit due to not having the EULA accepted, and then set `eula` to `true` in the docker volume. After rerunning the server, and letting it generate configuration files, you can then copy them to your preferred location, and bind them mount to YAMDI as shown in the above examples. When running with the bind mounts properly setup YAMDI will replace the generated configuration files with the new ones.
+To get started, first you should mount `/opt/yamdi/user/server`, and let the server run and exit due to not having the EULA accepted, and then set `eula` to `true` in the docker volume. After rerunning the server, and letting it generate configuration files, you can then copy them to your preferred location, and bind them mount to YAMDI as shown in the above examples. When running with the bind mounts properly setup YAMDI will replace the generated configuration files with the new ones.
 
 After adding your configuration files, and letting YAMDI run with them, your configuration directory (similar to plugin directory) will look something like this:
 ```
