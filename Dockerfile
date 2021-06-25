@@ -16,8 +16,8 @@ RUN \
   # - curl    Curl, for downloading Spigot BuildTools and using the Paper build API.
   # - jq      jq, for parsing the Paper API response.
   #
-  # For each of the package manager tests, we use the ">" redirector as opposed to the "&>" because sh
-  # seems to erroneously think that the command succeeded when it didn't.
+  # For each of the package manager tests, we use the ">" redirector as opposed to the "&>" because
+  # sh seems to erroneously think that the command succeeded when it didn't.
   \
   # Handle Alpine Package Keeper, used on Alpine Linux.
   if command -v apk > /dev/null; then \
