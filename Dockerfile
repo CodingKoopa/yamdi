@@ -23,28 +23,28 @@ RUN \
   if command -v apk > /dev/null; then \
   # Update the package index, because the official Alpine Linux package does not ship with one,
   # since it would get stale quickly.
-  apk update && \
+  apk update; \
   # Upgrade the currently installed packages, because the base image may not be caught up.
-  apk upgrade && \
+  apk upgrade; \
   # Install the dependencies.
-  apk add bash git curl jq && \
+  apk add bash git curl jq; \
   # Remove the package index cache.
   rm -rf /var/cache/apk/*; \
   \
   # Handle Yellowdog Updater, Modified, used by Oracle Linux.
   elif command -v yum > /dev/null; then \
   # Update the currently installed packages, because the base image may not be caught up.
-  yum --assumeyes update && \
+  yum --assumeyes update; \
   # Install the dependencies.
-  yum --assumeyes install bash git curl jq && \
+  yum --assumeyes install bash git curl jq; \
   # Clean the package manager cache.
   yum clean all; \
   \
   # Handle any other cases.
   else \
-  echo "Error: Could not find a suitable package manager to use in this image." && \
+  echo >&2 "Error: Could not find a suitable package manager to use in this image."; \
   return 1; \
-  fi && \
+  fi; \
   \
   # Add the non-root group that we'll add the non-root user to. This is a system user with a static
   # UID and GID that should never conflict with any existing user or group on the host system. See
@@ -63,9 +63,9 @@ RUN \
   groupadd --gid 10001 --system nonroot; \
   # Handle any other cases.
   else \
-  echo "Error: Could not find a way to add a group in this image." && \
+  echo >&2 "Error: Could not find a way to add a group to use in this image."; \
   return 1; \
-  fi && \
+  fi; \
   \
   # Add the non-root user that we'll add the non-root user to.
   \
@@ -80,19 +80,19 @@ RUN \
   \
   # Handle any other cases.
   else \
-  echo "Error: Could not find a way to add a user in this image." && \
+  echo >&2 "Error: Could not find a way to add a user in this image."; \
   return 1; \
-  fi && \
+  fi; \
   \
   # Create the user subdirectory that the non-root user will be using. It's necessary to create and
   # own the "server" subdirectory ahead of time because, by default, the volume will be mounted and
   # owned by root.
   \
-  mkdir --parents /opt/yamdi/user/server && \
+  mkdir --parents /opt/yamdi/user/server; \
   # The presence of this file indicates that no volume has been mounted here, which is really bad
   # because it means that server data will not persist.
-  touch /opt/yamdi/user/server/volume-not-mounted && \
-  chown -R nonroot:nonroot /opt/yamdi/user
+  touch /opt/yamdi/user/server/volume-not-mounted; \
+  chown -R nonroot:nonroot /opt/yamdi/user;
 
 # Copy the Git configuration into the non-root user's home directory.
 COPY --chown=nonroot:nonroot src/.gitconfig /home/nonroot/
