@@ -30,8 +30,8 @@ RUN \
   apt-get update; \
   # Install the newest versions of all packages.
   apt-get --assume-yes upgrade; \
-  # Install the dependencies.
-  apt-get --assume-yes install bash git curl jq; \
+  # Install the dependencies, without recommended packages.
+  apt-get --assume-yes --no-install-recommends install bash git curl jq; \
   # Clear the local repository of retrieved package files.
   apt-get clean; \
   # Remove the package index cache.
@@ -54,7 +54,7 @@ RUN \
   # Update the currently installed packages, because the base image may not be caught up.
   yum --assumeyes update; \
   # Install the dependencies.
-  yum --assumeyes install bash git curl jq; \
+  yum --assumeyes --setopt=tsflags=nodocs install bash git curl jq; \
   # Clean the package manager cache.
   yum clean all; \
   \
