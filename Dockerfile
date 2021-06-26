@@ -64,14 +64,19 @@ RUN \
   return 1; \
   fi; \
   \
-  # Add the non-root group that we'll add the non-root user to. This is a system user with a static
-  # UID and GID that should never conflict with any existing user or group on the host system. See
-  # here for more info: https://github.com/hexops/dockerfile#use-a-static-uid-and-gid.
+  # Add the non-root group that we'll add the non-root user to. We create the group in a separate
+  # step in order to set its GID manually.
   #
-  # Confusingly, both "addgroup" and "groupadd" exist, as well as their "user" counterparts. On
-  # Alpine (which we put first), the former is the only option. On Debian and most Debian,
-  # derivations, both are present, and it doesn't matter very much for our purposes which one is
-  # used.
+  # This non-root user will be a system user with a static UID and GID that should never conflict
+  # with any existing user or group on the host system. See here for more info:
+  # https://github.com/hexops/dockerfile#use-a-static-uid-and-gid.
+  #
+  # When it comes to Debian and friends, confusingly, both "addgroup" and "groupadd" exist, as well
+  # as their "user" counterparts. Generally, the former is preferrable, as a higher level utiltiy.
+  #
+  # In Alpine Linux, the former is the only option.
+  #
+  # See here for more info: https://unix.stackexchange.com/q/121071.
   \
   # Handle addgroup.
   if command -v addgroup > /dev/null; then \
