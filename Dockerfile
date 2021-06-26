@@ -10,6 +10,7 @@ RUN \
   # Quit on error (this makes it unnecessary to use "&&"), disallow undefined variable substitution,
   # and print commands as they are executed.
   set -eux; \
+  \
   # Install the dependencies:
   # - bash    Bash, for running the server startup script.
   # - git     Git, for BuildTools to clone the repositories.
