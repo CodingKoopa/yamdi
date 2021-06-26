@@ -6,6 +6,8 @@ ARG YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:alpine-jre
 # Source the specified base image.
 FROM ${YAMDI_BASE_IMAGE}
 
+# For each of the command tests, we use the ">" redirector as opposed to the "&>" because sh seems
+# to erroneously think that the command succeeded when it didn't.
 RUN \
   # Quit on error (this makes it unnecessary to use "&&"), disallow undefined variable substitution,
   # and print commands as they are executed.
@@ -17,11 +19,26 @@ RUN \
   # - curl    Curl, for downloading Spigot BuildTools and using the Paper build API.
   # - jq      jq, for parsing the Paper API response.
   #
-  # For each of the package manager tests, we use the ">" redirector as opposed to the "&>" because
-  # sh seems to erroneously think that the command succeeded when it didn't.
+  \
+  # Handle Advanced Package Tool, used on Debian, Ubuntu, and other Debian derivations. Both apt-get
+  # and apt are usually available; the former is preferable for scripting purposes.
+  if command -v apt-get > /dev/null; then \
+  # Indicate that no input can be given. This is for any tools that may be called by apt-get; for
+  # apt-get itself we still have to use the command line argument.
+  export DEBIAN_FRONTEND=noninteractive; \
+  # Re-synchronize the package index, because the base image may not be caught up.
+  apt-get update; \
+  # Install the newest versions of all packages.
+  apt-get --assume-yes upgrade; \
+  # Install the dependencies.
+  apt-get --assume-yes install bash git curl jq; \
+  # Clear the local repository of retrieved package files.
+  apt-get clean; \
+  # Remove the package index cache.
+  rm -rf /var/lib/apt/lists/*; \
   \
   # Handle Alpine Package Keeper, used on Alpine Linux.
-  if command -v apk > /dev/null; then \
+  elif command -v apk > /dev/null; then \
   # Update the package index, because the official Alpine Linux package does not ship with one,
   # since it would get stale quickly.
   apk update; \
