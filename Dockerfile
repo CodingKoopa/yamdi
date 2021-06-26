@@ -90,12 +90,16 @@ RUN \
   return 1; \
   fi; \
   \
-  # Add the non-root user that we'll add the non-root user to.
+  # Add the non-root user that we'll add the non-root user to. See here for more info:
+  # https://stackoverflow.com/a/55757473.
   \
   # Handle adduser.
   if command -v adduser > /dev/null; then \
-  # See here (https://stackoverflow.com/a/55757473) for more info about this command.
-  adduser --uid 10001 --ingroup nonroot --system --home /home/nonroot --gecos "" nonroot; \
+  # We need to try a couple of different commands, because the BusyBox implementation of adduser
+  # only supports specifying a group via "--ingroup". This option is supported by *most* other
+  # adduser impls, but not, for example, that which is included with CentOS.
+  adduser --uid 10001 --ingroup nonroot --system --home /home/nonroot nonroot || \
+  adduser --uid 10001 --gid 10001 --system --home /home/nonroot nonroot; \
   \
   # Handle useradd.
   elif command -v useradd > /dev/null; then \
