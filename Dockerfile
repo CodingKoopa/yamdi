@@ -72,7 +72,7 @@ RUN \
   # Handle adduser.
   if command -v adduser > /dev/null; then \
   # See here (https://stackoverflow.com/a/55757473) for more info about this command.
-  adduser --uid 10001 --ingroup nonroot --system -h /home/nonroot --gecos "" nonroot; \
+  adduser --uid 10001 --ingroup nonroot --system --home /home/nonroot --gecos "" nonroot; \
   \
   # Handle useradd.
   elif command -v useradd > /dev/null; then \
