@@ -52,7 +52,7 @@ analysis:shellcheck:
         # Watch for changes in the CI scripts.
         - "CI/**/*.sh"
   # Check that all Bash code is proper.
-  script: shellcheck -x *.sh
+  script: shellcheck --external-sources *.sh
 
 # Define the Docker image building anchor. Since there's already a Docker in Docker anchor, this
 # should only define elements needed for building.
