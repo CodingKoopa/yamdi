@@ -52,7 +52,7 @@ RUN \
   # Handle Yellowdog Updater, Modified, used by Oracle Linux.
   elif command -v yum > /dev/null; then \
   # Update the currently installed packages, because the base image may not be caught up.
-  yum update; \
+  yum --assumeyes update; \
   # Install the dependencies.
   yum --assumeyes install bash git curl jq; \
   # Clean the package manager cache.
