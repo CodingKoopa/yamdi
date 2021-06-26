@@ -49,6 +49,17 @@ RUN \
   # Remove the package index cache.
   rm -rf /var/cache/apk/*; \
   \
+  # Handle Dandified YUM, used by newer versions of RHEL and Fedora.
+  elif command -v dnf > /dev/null; then \
+  \
+  # Update the currently installed packages, limited to upgrades that provide a bugfix, enhancement,
+  # or fix for a security issue.
+  dnf --assumeyes --nodocs upgrade-minimal; \
+  # Install the dependencies, without recommended packages.
+  dnf --assumeyes --nodocs --setopt=install_weak_deps=False install bash git curl jq; \
+  # Clean the package manager cache.
+  dnf clean all; \
+  \
   # Handle Yellowdog Updater, Modified, used by Oracle Linux.
   elif command -v yum > /dev/null; then \
   # Update the currently installed packages, because the base image may not be caught up.
