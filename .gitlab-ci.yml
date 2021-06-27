@@ -1,3 +1,9 @@
+# Privately defined variables:
+# - YAMDI_DOCKER_REGISTRY: The URL of the Docker registry to use.
+# - YAMDI_DOCKER_USER: The username of the registry user to sign in with.
+# - YAMDI_DOCKER_PASS: The password of the registry user to sign in with.
+# - YAMDI_DOCKER_IMAGE: The image of the registry to push to.
+
 # Define the Docker in Docker template.
 .dind:
   variables:
@@ -11,7 +17,7 @@
   before_script:
     # If we are running on a protected branch or tag.
     - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
-    # Log into the Docker registry. These variables are defined privately for the project.
+    # Log into the Docker registry.
     - echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
     - --username "$YAMDI_DOCKER_USER" --password-stdin; fi
 
