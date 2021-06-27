@@ -58,15 +58,19 @@ shellcheck:
   # Any Docker image building will be a part of the package building stage, so do so here.
   stage: build
   script:
-    # If we are building for non-native architectures, create a new builder instance whose driver
-    # will support multi-arch building.
-    - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then docker buildx create --use; fi
+    # If we are building for any architectures other than our own.
+    - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ];
+    # Create a new builder instance whose driver will support multi-arch building.
+    - then docker buildx create --use; fi
     # Retrieve the date from the predefined CI datetime variable.
-    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1)
-    # Construct tag arguments from the specified list, with the default IFS delimiters.
-    - for tag in $YAMDI_TAGS; do tag_args="$tag_args --tag $tag --tag $tag-$date"; done
-    - "docker buildx --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
-      --platforms=\"$YAMDI_ARCH\" --push"
+    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut --delimiter=T --fields=1)
+    # Iterate over the tags specified. The default IFS delimiter includes spaces.
+    - for tag in $YAMDI_TAGS; do
+    # # Construct the tag arguments
+    - tag_args="$tag_args --tag $tag --tag $tag-$date"; done
+    # Build and push the images.
+    - docker buildx --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
+    - --platforms=\"$YAMDI_ARCH\" --push
 
 adoptopenjdk-jre16-alpine:
   extends: .docker-build
