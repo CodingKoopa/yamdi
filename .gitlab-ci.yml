@@ -8,6 +8,12 @@
   services:
     # Enable the Docker service.
     - docker:dind
+  before_script:
+    # If we are running on a protected branch or tag.
+    - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
+    # Log into the Docker registry. These variables are defined privately for the project.
+    - echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
+    - --username "$YAMDI_DOCKER_USER" --password-stdin; fi
 
 # Define the stages.
 stages:
