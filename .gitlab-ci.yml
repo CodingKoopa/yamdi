@@ -18,7 +18,7 @@ stages:
   # Create an app package deploying stage.
   - deploy
 
-analysis:ec:
+ec:
   # Add to the analysis stage.
   stage: analyze
   # Use the latest ec Docker image.
@@ -26,8 +26,7 @@ analysis:ec:
   # Check that all text complies with the EditorConfig file.
   script: ec
 
-analysis:shfmt:
-  # Add to the analysis stage.
+shfmt:
   stage: analyze
   # Use the latest Alpine Linux shfmt Docker image.
   image: mvdan/shfmt:latest-alpine
@@ -40,92 +39,37 @@ analysis:shfmt:
   # Check that all Bash code has proper formatting.
   script: shfmt -d .
 
-analysis:shellcheck:
-  # Add to the analysis stage.
+shellcheck:
   stage: analyze
   # Use the latest stable ShellCheck Docker image.
   image: koalaman/shellcheck-alpine:stable
   rules:
     - changes:
-        # Watch for changes in the YAMDI scripts.
         - "*.sh"
-        # Watch for changes in the CI scripts.
         - "CI/**/*.sh"
   # Check that all Bash code is proper.
   script: shellcheck --external-sources *.sh
 
-# Define the Docker image building anchor. Since there's already a Docker in Docker anchor, this
-# should only define elements needed for building.
-.build:docker: &docker_build
+# Define the Docker image building template.
+.docker-build:
   extends: .dind
-  # Any Docker image building will be a part of the package building stage, so add it.
+  # Any Docker image building will be a part of the package building stage, so do so here.
   stage: build
-  artifacts:
-    # Save the built image.
-    paths: [Build/]
-  # Run the Docker build script.
-  script: CI/build.sh
+  script:
+    # If we are building for non-native architectures, create a new builder instance whose driver
+    # will support multi-arch building.
+    - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then docker buildx create --use; fi
+    # Retrieve the date from the predefined CI datetime variable.
+    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1)
+    # Construct tag arguments from the specified list, with the default IFS delimiters.
+    - for tag in $YAMDI_TAGS; do tag_args="$tag_args --tag $tag --tag $tag-$date"; done
+    - "docker buildx --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
+      --platforms=\"$YAMDI_ARCH\" --push"
 
-# Define the Docker AMD64 image building job.
-build:docker:amd64:
-  <<: *docker_build
+adoptopenjdk-jre16-alpine:
+  extends:
+    - .docker_build
   variables:
-    # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
-    TARGET_ARCH: amd64
-
-# Define the Docker ARMv7 image building job.
-build:docker:arm32v7:
-  <<: *docker_build
-  variables:
-    # Set the target architecture to ARMv7 32 bit. This will be able to run on some embedded
-    # platforms, such as the Raspberry Pi 2 v1.1 model.
-    TARGET_ARCH: arm32v7
-
-# Define the Docker ARMv8 image building job.
-build:docker:arm64v8:
-  <<: *docker_build
-  variables:
-    # Set the target architecture to ARMv8 64 bit. This will be able to run on some embedded
-    # platforms, such as the Raspberry Pi 2 v1.2 model and the Raspberry Pi 3 models.
-    TARGET_ARCH: arm64v8
-
-# Define the Docker image deploying anchor.
-.deploy:docker: &docker_deploy
-  extends: .dind
-  # Add to the deploying stage.
-  stage: deploy
-  variables:
-    # Don't clone or fetch the Git repo, as the dependencies are all that's needed here.
-    GIT_STRATEGY: none
-  only:
-    # Only deploy for tags.
-    - tags
-  # Run the deploying script.
-  script: ./CI/deploy.sh
-
-# Define the Docker AMD64 image deploying job.
-deploy:docker:amd64:
-  <<: *docker_deploy
-  variables:
-    # Set the target architecture to AMD64. This will be able to run on most desktop platforms.
-    TARGET_ARCH: amd64
-  # Require the AMD64 build job.
-  needs: ["build:docker:amd64"]
-
-# Define the Docker ARMv7 image deploying job.
-deploy:docker:arm32v7:
-  <<: *docker_deploy
-  variables:
-    # Set the target architecture to ARMv7 32 bit.
-    TARGET_ARCH: arm32v7
-  # Require the ARMv7 build job.
-  needs: ["build:docker:arm32v7"]
-
-# Define the Docker ARMv8 image deploying job.
-deploy:docker:arm64v8:
-  <<: *docker_deploy
-  variables:
-    # Set the target architecture to ARMv8.
-    TARGET_ARCH: arm64v8
-  # Require the ARMv8 build job.
-  needs: ["build:docker:arm64v8"]
+    YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
+    YAMDI_ARCH: linux/amd64
+    YAMDI_TAGS: latest-alpine adoptopenjdk-jre16-alpine
