@@ -69,8 +69,7 @@ shellcheck:
       --platforms=\"$YAMDI_ARCH\" --push"
 
 adoptopenjdk-jre16-alpine:
-  extends:
-    - .docker_build
+  extends: .docker-build
   variables:
     YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
     YAMDI_ARCH: linux/amd64
