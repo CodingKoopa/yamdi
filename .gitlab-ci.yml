@@ -9,6 +9,10 @@
     # Enable the Docker service.
     - docker:dind
 
+test:
+  stage: analyze
+  script: export
+
 # Define the stages.
 stages:
   # Create a static code analysis stage.
