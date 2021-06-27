@@ -13,10 +13,12 @@
 stages:
   # Create a static code analysis stage.
   - analyze
-  # Create an app package building stage.
+  # Create an app package building stage. There is no separate deploy stage, because docker buildx
+  # doesn't have any built in support for building a multi-arch image manifest, and deploying it
+  # later. Relevant GitHub issues:
+  # - https://github.com/docker/buildx/issues/166
+  # - https://github.com/docker/buildx/issues/430
   - build
-  # Create an app package deploying stage.
-  - deploy
 
 ec:
   # Add to the analysis stage.
