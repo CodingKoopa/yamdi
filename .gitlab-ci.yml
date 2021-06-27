@@ -18,8 +18,9 @@
     # If we are running on a protected branch or tag.
     - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
     # Log into the Docker registry.
-    - echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
-    - --username "$YAMDI_DOCKER_USER" --password-stdin; fi
+    - |
+      echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
+      --username "$YAMDI_DOCKER_USER" --password-stdin; fi
 
 # Define the stages.
 stages:
@@ -81,8 +82,9 @@ shellcheck:
     # # Construct the tag arguments.
     - tag_args="$tag_args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images.
-    - docker buildx --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
-    - --platforms=\"$YAMDI_ARCH\" --push
+    - |
+      docker buildx --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
+      --platforms=\"$YAMDI_ARCH\" --push
 
 adoptopenjdk-jre16-alpine:
   extends: .docker-build
