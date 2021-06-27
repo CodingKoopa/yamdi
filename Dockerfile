@@ -35,7 +35,7 @@ RUN \
   # Clear the local repository of retrieved package files.
   apt-get clean; \
   # Remove the package index cache.
-  rm --recursive --force /var/lib/apt/lists/*; \
+  rm -rf /var/lib/apt/lists/*; \
   \
   # Handle Alpine Package Keeper, used on Alpine Linux.
   elif command -v apk > /dev/null; then \
@@ -47,7 +47,7 @@ RUN \
   # Install the dependencies.
   apk add bash git curl jq; \
   # Remove the package index cache.
-  rm --recursive --force /var/cache/apk/*; \
+  rm -rf /var/cache/apk/*; \
   \
   # Handle Dandified YUM, used by newer versions of RHEL and Fedora.
   elif command -v dnf > /dev/null; then \
