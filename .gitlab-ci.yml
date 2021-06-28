@@ -81,6 +81,7 @@ shellcheck:
     - for tag in $YAMDI_TAGS; do
     # # Construct the tag arguments.
     - tag_args="$tag_args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
+    - echo "tags: $tag_args"
     # Build and push the images.
     - |
       docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" $tag_args \
