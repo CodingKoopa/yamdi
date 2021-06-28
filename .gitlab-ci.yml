@@ -71,6 +71,7 @@ shellcheck:
   # Any Docker image building will be a part of the package building stage, so do so here.
   stage: build
   script:
+    - set +x
     # If we are building for any architectures other than our own.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ];
     # Create a new builder instance whose driver will support multi-arch building.
