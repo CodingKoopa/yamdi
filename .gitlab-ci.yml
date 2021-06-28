@@ -9,13 +9,11 @@
   variables:
     # Set the Docker host to the network connection to the dind service instead of the usual socket.
     DOCKER_HOST: tcp://docker:2375/
-  # Run in the official Docker image.
-  image: docker:19.03
+  # Run in our Docker in Docker w/ buildx image.
+  image: yamdi/dind-buildx
   services:
     # Enable the Docker service.
-    - name: docker:19.03-dind
-      # Enable experimental features to gain acces to the buildx plugin.
-      command: ["--experimental"]
+    - docker
   before_script:
     # If we are running on a protected branch or tag.
     - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
