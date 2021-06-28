@@ -76,7 +76,7 @@ shellcheck:
     # Create a new builder instance whose driver will support multi-arch building.
     - then docker buildx create --use; fi
     # Retrieve the date from the predefined CI datetime variable.
-    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -d=T -f=1)
+    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1)
     # Iterate over the tags specified. The default IFS delimiter includes spaces.
     - for tag in $YAMDI_TAGS; do
     # # Construct the tag arguments.
