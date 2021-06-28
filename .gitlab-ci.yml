@@ -83,8 +83,8 @@ shellcheck:
     - tag_args="$tag_args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images.
     - |
-      docker buildx build --build-arg YAMDI_BASE_IMAGE=\"$YAMDI_BASE_IMAGE\" $tag_args \
-      --platform=\"$YAMDI_ARCH\" --push .
+      docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" $tag_args \
+      --platform="$YAMDI_ARCH" --push .
 
 adoptopenjdk-jre16-alpine:
   extends: .docker-build
