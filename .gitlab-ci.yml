@@ -69,7 +69,6 @@ build:
       echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
       --username "$YAMDI_DOCKER_USER" --password-stdin; fi
     # If we are building for any architectures other than our own.
-    # TODO: This check doesn't function correctly.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
     # Create a new builder instance whose driver will support multi-arch building.
     - docker buildx create --use;
