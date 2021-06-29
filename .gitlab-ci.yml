@@ -85,7 +85,9 @@ build:
         [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ] ||
         [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ] ||
         [ "$CI_PIPELINE_SOURCE" = "webide" ]; then
-    - args="$args --cache-from $YAMDI_DOCKER_IMAGE"; fi
+    # Cache from the first tag belonging to this job. this is arbitrary - unless the CI
+    # configuration has changed, any of the tags would work.
+    - args="$args --cache-from $YAMDI_DOCKER_IMAGE:$(printf %s "$YAMDI_TAGS" | cut -d' ' -f1)"; fi
     # Retrieve the date from the predefined CI datetime variable.
     - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr -d -)
     # Iterate over the tags specified. The default IFS delimiter includes spaces.
