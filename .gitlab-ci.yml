@@ -1,8 +1,14 @@
-# Privately defined variables:
-# - YAMDI_DOCKER_REGISTRY: The URL of the Docker registry to use.
-# - YAMDI_DOCKER_USER: The username of the registry user to sign in with.
-# - YAMDI_DOCKER_PASS: The password of the registry user to sign in with.
-# - YAMDI_DOCKER_IMAGE: The image of the registry to push to.
+variables:
+  YAMDI_DOCKER_REGISTRY:
+    description: "URL of the Docker registry to use."
+    # The v2 registry seems to have authentication issues when used here.
+    value: "https://index.docker.io/v1/"
+  YAMDI_DOCKER_USER:
+    description: "Username of the registry user."
+  YAMDI_DOCKER_PASS:
+    description: "Password of the registry user."
+  YAMDI_DOCKER_IMAGE:
+    description: "Image to push to."
 
 # Define the Docker in Docker template.
 .dind:
