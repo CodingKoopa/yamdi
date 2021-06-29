@@ -97,7 +97,7 @@ build:
   parallel:
     matrix:
       - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:jre
-        YAMDI_ARCH: linux/amd64
+        YAMDI_ARCH: linux/amd64,linux/arm64,linux/arm
         YAMDI_TAGS: latest latest-ubuntu adoptopenjdk-jre16-ubuntu
       - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
         YAMDI_ARCH: linux/amd64
