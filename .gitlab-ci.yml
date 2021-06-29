@@ -59,6 +59,10 @@ build:
     # Enable the dind service.
     - docker:dind
   script:
+    # Disallow usage of undefined variables. The options "-e" for exiting if a command exits with a
+    # non-zero status, and "-o pipefail" for extending this to all of the pipelines, are both set by
+    # the GitLab Runner already.
+    - set -u
     # Just to be safe, initialize the variable we'll be using to store arguments.
     - args="";
     # If we are running on the default branch.
