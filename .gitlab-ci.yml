@@ -38,7 +38,7 @@ shfmt:
         # Watch for changes in the source.
         - "src/*"
   # Check that all Bash code has proper formatting.
-  script: shfmt -d .
+  script: shfmt -d src
 
 shellcheck:
   stage: analyze
