@@ -82,9 +82,9 @@ build:
     # will cache. For the rest, "--no-cache" isn't even necessary because this is running on dry CI.
     - |
       if [ "$CI_PIPELINE_SOURCE" = "push" ] ||
-         [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ] ||
-         [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ] ||
-         [ "$CI_PIPELINE_SOURCE" = "webide" ]; then
+        [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ] ||
+        [ "$CI_PIPELINE_SOURCE" = "external_pull_request_event" ] ||
+        [ "$CI_PIPELINE_SOURCE" = "webide" ]; then
     - args="$args --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $YAMDI_DOCKER_IMAGE"; fi
     # Retrieve the date from the predefined CI datetime variable.
     - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr -d -)
