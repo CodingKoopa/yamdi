@@ -65,8 +65,8 @@ build:
     # Just to be safe, initialize the variables we'll be using to store arguments.
     - push_arg="";
     - tag_args="";
-    # If we are running on a protected branch or tag.
-    - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
+    # If we are running on the default branch.
+    - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
     # Log into the Docker registry.
     - |
       echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
