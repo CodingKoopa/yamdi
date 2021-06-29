@@ -92,9 +92,13 @@ shellcheck:
       docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" $tag_args \
       --platform="$YAMDI_ARCH" --push .
 
-adoptopenjdk-jre16-alpine:
+build:
   extends: .docker-build
-  variables:
-    YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
-    YAMDI_ARCH: linux/amd64
-    YAMDI_TAGS: latest-alpine adoptopenjdk-jre16-alpine
+  parallel:
+    matrix:
+      - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:jre
+        YAMDI_ARCH: linux/amd64
+        YAMDI_TAGS: latest latest-ubuntu adoptopenjdk-jre16-ubuntu
+      - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
+        YAMDI_ARCH: linux/amd64
+        YAMDI_TAGS: latest-alpine adoptopenjdk-jre16-alpine
