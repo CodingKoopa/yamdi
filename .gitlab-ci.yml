@@ -65,14 +65,6 @@ build:
     - set -u
     # Just to be safe, initialize the variable we'll be using to store arguments.
     - args="";
-    # If we are running on the default branch.
-    - if [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
-    # Log into the Docker registry.
-    - |
-      echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
-      --username "$YAMDI_DOCKER_USER" --password-stdin
-    # Append the push argument.
-    - args="$args --push"; fi
     # If we are building for any architectures other than our own.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
     # Create a new builder instance whose driver will support multi-arch building.
@@ -98,6 +90,14 @@ build:
     - for tag in $YAMDI_TAGS; do
     # # Construct the tag arguments.
     - args="$args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
+      # If we are running on the default branch.
+    - if [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
+    # Log into the Docker registry.
+    - |
+      echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
+      --username "$YAMDI_DOCKER_USER" --password-stdin
+    # Append the push argument.
+    - args="$args --push"; fi
     # Build and push the images. Even if we aren't using the cache to build, we want to make sure
     # to be writing inline cache metadata to the image.
     - |
