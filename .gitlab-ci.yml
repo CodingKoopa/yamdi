@@ -18,7 +18,9 @@
     # If we are running on a protected branch or tag.
     - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
     # Log into the Docker registry.
-    - echo "$YAMDI_DOCKER_PASS" | docker login --username "$YAMDI_DOCKER_USER" --password-stdin; fi
+    - |
+      echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
+      --username "$YAMDI_DOCKER_USER" --password-stdin; fi
 
 # Define the stages.
 stages:
