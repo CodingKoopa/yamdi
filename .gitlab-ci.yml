@@ -87,9 +87,9 @@ build:
     - tag_args="$tag_args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images.
     # TODO: Only add "--push" if on protected branch or tag.
-      --platform="$YAMDI_ARCH" $push_arg .
+    - |
       docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" $tag_args \
-      --platform="$YAMDI_ARCH" --push .
+      --platform="$YAMDI_ARCH" $push_arg .
   parallel:
     matrix:
       - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:jre
