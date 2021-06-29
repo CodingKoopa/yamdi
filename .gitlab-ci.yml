@@ -76,7 +76,7 @@ build:
     # TODO: Document this.
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; fi
     # Retrieve the date from the predefined CI datetime variable.
-    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr --delete -)
+    - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr -d -)
     # Iterate over the tags specified. The default IFS delimiter includes spaces.
     - for tag in $YAMDI_TAGS; do
     # # Construct the tag arguments.
