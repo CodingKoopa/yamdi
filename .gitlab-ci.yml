@@ -48,7 +48,7 @@ shellcheck:
     - changes:
         - "src/*"
   # Check that all Bash code is proper.
-  script: shellcheck --external-sources *.sh
+  script: shellcheck --external-sources src/*
 
 build:
   # Add to the build stage.
