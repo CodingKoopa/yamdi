@@ -62,6 +62,9 @@ build:
     # Set the Docker host to the network connection to the dind service instead of the usual socket.
     DOCKER_HOST: tcp://docker:2375/
   script:
+    # Just to be safe, initialize the variables we'll be using to store arguments.
+    - push_arg="";
+    - tag_args="";
     # If we are running on a protected branch or tag.
     - if [ "$CI_COMMIT_REF_PROTECTED" = true ]; then
     # Log into the Docker registry.
