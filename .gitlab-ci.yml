@@ -39,7 +39,7 @@ stages:
   # - https://github.com/docker/buildx/issues/430
   - build
 
-ec:
+editorconfig-checker:
   # Add to the analysis stage.
   stage: analyze
   # Use the latest ec Docker image.
