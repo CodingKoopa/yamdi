@@ -53,10 +53,8 @@ shfmt:
   image: mvdan/shfmt:latest-alpine
   rules:
     - changes:
-        # Watch for changes in the YAMDI scripts.
-        - "*.sh"
-        # Watch for changes in the CI scripts.
-        - "CI/*.sh"
+        # Watch for changes in the source.
+        - "src/*"
   # Check that all Bash code has proper formatting.
   script: shfmt -d .
 
@@ -66,8 +64,7 @@ shellcheck:
   image: koalaman/shellcheck-alpine:stable
   rules:
     - changes:
-        - "*.sh"
-        - "CI/**/*.sh"
+        - "src/*"
   # Check that all Bash code is proper.
   script: shellcheck --external-sources *.sh
 
