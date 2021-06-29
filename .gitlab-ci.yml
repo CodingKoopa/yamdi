@@ -62,11 +62,12 @@ build:
     # Disallow usage of undefined variables. The options "-e" for exiting if a command exits with a
     # non-zero status, and "-o pipefail" for extending this to all of the pipelines, are both set by
     # the GitLab Runner already.
-    # - set -u
+    - set -u
     # Just to be safe, initialize the variable we'll be using to store arguments.
     - args="";
     # If we are running on the default branch.
     - if [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
+    - set;
     # Log into the Docker registry.
     - |
       echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
