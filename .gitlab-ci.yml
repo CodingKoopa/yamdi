@@ -67,7 +67,9 @@ build:
     # Log into the Docker registry.
     - |
       echo "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
-      --username "$YAMDI_DOCKER_USER" --password-stdin; fi
+      --username "$YAMDI_DOCKER_USER" --password-stdin
+    # Append the push argument.
+    - push_arg="--push"; fi
     # If we are building for any architectures other than our own.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
     # Create a new builder instance whose driver will support multi-arch building.
@@ -82,7 +84,7 @@ build:
     - tag_args="$tag_args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images.
     # TODO: Only add "--push" if on protected branch or tag.
-    - |
+      --platform="$YAMDI_ARCH" $push_arg .
       docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" $tag_args \
       --platform="$YAMDI_ARCH" --push .
   parallel:
