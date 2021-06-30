@@ -145,7 +145,7 @@ This the official AdoptOpenJDK maintained image for AdoptOpenJDK (now Adoptium) 
 - Java Versions: JDK and JRE 8 onwards
 - JVMs: HotSpot, OpenJ9
 - OSs: Too complicated to succinctly summarize - See [here](https://github.com/AdoptOpenJDK/openjdk-docker#official-and-non-official-images).
-- Architectures: `amd64`, `arm64v8` (HotSpot only), `pp64le`, `s380x`
+- Architectures: `amd64`, `arm32v7` (HotSpot only), `arm64v8` (HotSpot only), `pp64le`, `s380x`
 
 [Alpine Linux images for recent Java versions are now using native musl builds](https://github.com/AdoptOpenJDK/openjdk-docker#musl-libc-based-alpine-images).
 
