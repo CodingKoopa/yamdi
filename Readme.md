@@ -52,21 +52,6 @@ wget https://gitlab.com/CodingKoopa/yamdi/-/archive/master/yamdi-master.tar.gz
 tar xzf yamdi-master.tar.gz
 ```
 
-If you would rather use a tagged release (if unsure, you don't), rather than the latest code, you can switch to it if using Git:
-```sh
-git checkout tags/1.0.3
-```
-Or, if using wget or curl, download the source code tarball from the [releases page](https://gitlab.com/CodingKoopa/yamdi/-/releases):
-```sh
-curl -O https://gitlab.com/CodingKoopa/yamdi/-/archive/v1.0.0/yamdi-v1.0.0.tar.gz
-tar xzf yamdi-v1.0.0.tar.gz
-```
-With wget:
-```sh
-wget https://gitlab.com/CodingKoopa/yamdi/-/archive/v1.0.0/yamdi-v1.0.0.tar.gz
-tar xzf yamdi-v1.0.0.tar.gz
-```
-
 ###### Building the Image
 The image is built using the `docker build` command. To build an image and tag it as `yamdi` so that it's not a dangling image:
 ```sh

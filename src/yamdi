@@ -73,7 +73,7 @@ trap stop SIGTERM
 # shellcheck source=src/yamdi-utils
 source yamdi-utils
 
-info "Starting Yet Another Minecraft Docker Image v1.0.2."
+info "Starting Yet Another Minecraft Docker Image."
 
 # TODO: After set -u is fixed, have this be = false.
 if [ ! "$YAMDI_SKIP_VOLUME_CHECK" = true ] && [ -f $SERVER_DIRECTORY/volume-not-mounted ]; then
