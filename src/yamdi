@@ -119,16 +119,16 @@ unset GIT_DIR GIT_WORK_TREE
 if [ -z "$YAMDI_SERVER_TYPE" ]; then
   YAMDI_SERVER_TYPE="spigot"
 fi
-if [ -z "$YAMDI_REV" ]; then
-  YAMDI_REV="latest"
+if [ -z "$YAMDI_MINECRAFT_VERSION" ]; then
+  YAMDI_MINECRAFT_VERSION="latest"
 fi
 
 if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
   declare -r server_jar="$SERVER_DIRECTORY/spigot.jar"
-  declare -r spigot_revision_jar="$SERVER_DIRECTORY/spigot-$YAMDI_REV.jar"
-  declare -r server_name="Spigot-$YAMDI_REV"
+  declare -r spigot_revision_jar="$SERVER_DIRECTORY/spigot-$YAMDI_MINECRAFT_VERSION.jar"
+  declare -r server_name="Spigot-$YAMDI_MINECRAFT_VERSION"
 
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
   # exist.
@@ -151,7 +151,7 @@ artifact/target/BuildTools.jar"
 
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
-    java $total_buildtools_memory_opts -jar BuildTools.jar --rev $YAMDI_REV
+    java $total_buildtools_memory_opts -jar BuildTools.jar --rev $YAMDI_MINECRAFT_VERSION
     # Copy the Spigot build to the Spigot directory.
     cp spigot-*.jar "$spigot_revision_jar"
     popd
@@ -186,7 +186,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   # Unlike Spigot, the Paper launcher doesn't know what to do with a "latest" version, so here we
   # manually find out the latest version using the API. When we do have the latest version, if a
   # "latest" build was specified (or omitted altogether) then we have to find out that too.
-  if [ "$YAMDI_REV" = "latest" ]; then
+  if [ "$YAMDI_MINECRAFT_VERSION" = "latest" ]; then
     debug "Resolving latest Paper revision."
 
     versions_json=$(curl -s https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE)
@@ -200,14 +200,14 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
       exit 2
     fi
 
-    YAMDI_REV=$(echo "$versions_json" | jq .versions[-1] | sed s/\"//g)
+    YAMDI_MINECRAFT_VERSION=$(echo "$versions_json" | jq .versions[-1] | sed s/\"//g)
   fi
-  debug "Paper revision: \"$YAMDI_REV\"."
+  debug "Paper revision: \"$YAMDI_MINECRAFT_VERSION\"."
 
   if [ "$YAMDI_PAPER_BUILD" = "latest" ]; then
     debug "Resolving latest Paper build."
     builds_json=$(curl -s \
-      "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_REV")
+      "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_MINECRAFT_VERSION")
     declare -r builds_json
 
     handle_curl_errors
@@ -224,7 +224,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
 
   debug "Resolving Paper build name."
   build_json=$(curl -s "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/\
-versions/$YAMDI_REV/builds/$YAMDI_PAPER_BUILD")
+versions/$YAMDI_MINECRAFT_VERSION/builds/$YAMDI_PAPER_BUILD")
   declare -r build_json
 
   handle_curl_errors
@@ -239,11 +239,11 @@ versions/$YAMDI_REV/builds/$YAMDI_PAPER_BUILD")
   declare -r paper_build_jar_name
 
   declare -r paper_revision_jar="$SERVER_DIRECTORY/\
-$YAMDI_SERVER_TYPE-$YAMDI_REV-$YAMDI_PAPER_BUILD.jar"
-  declare -r server_name="Paper-$YAMDI_REV-$YAMDI_PAPER_BUILD"
+$YAMDI_SERVER_TYPE-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD.jar"
+  declare -r server_name="Paper-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD"
   if [ ! -f "$paper_revision_jar" ]; then
     debug "Downloading $server_name."
-    curl "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_REV/builds/\
+    curl "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_MINECRAFT_VERSION/builds/\
 $YAMDI_PAPER_BUILD/downloads/$paper_build_jar_name" >"$paper_revision_jar"
     handle_curl_errors
   else

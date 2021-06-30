@@ -118,15 +118,15 @@ services:
 ```
 
 ### Server Version
-The target revision, or game version, can be adjusted by setting the `YAMDI_REV` variable either to `latest` (default) or a supported game version. Setting it to a version is recommended because of how plugins may not work on newer versions.
+The target revision, or game version, can be adjusted by setting the `YAMDI_MINECRAFT_VERSION` variable either to `latest` (default) or a supported game version. Setting it to a version is recommended because of how plugins may not work on newer versions.
 ```sh
-docker run --env YAMDI_REV=1.14.1
+docker run --env YAMDI_MINECRAFT_VERSION=1.14.1
 ```
 ```yml
 services:
   yamdi:
     environment:
-      YAMDI_REV: "1.14.1"
+      YAMDI_MINECRAFT_VERSION: "1.14.1"
 ```
 For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in the same way.
 
