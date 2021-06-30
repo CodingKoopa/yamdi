@@ -224,7 +224,17 @@ services:
 ### JVM Configuration
 
 #### General Options
-The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and the server.
+The options passed to the Java Virtual Machine can be adjusted by setting the `JVM_OPTS` environment variable. This will be passed to both BuildTools and the server. For instance, if you are
+using a OpenJ9 image, and will be running YAMDI in a virtual machine (e.g. if your cloud provider uses virtualzation), you may want to use [`-Xtune:virtualized`](https://www.eclipse.org/openj9/docs/xtunevirtualized/):
+```sh
+docker run --env JVM_OPTS="-Xtune:virtualized"
+```
+```yml
+services:
+  yamdi:
+    environment:
+      JVM_OPTS: "-Xtune:virtualized"
+```
 
 #### Memory Options
 The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `YAMDI_BUILDTOOLS_MEMORY_AMOUNT` and `YAMDI_GAME_MEMORY_AMOUNT` variables, for example:
