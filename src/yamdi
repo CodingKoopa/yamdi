@@ -147,7 +147,7 @@ artifact/target/BuildTools.jar"
     buildtools_memory_opts=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
       "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT")
     declare -r buildtools_memory_opts
-    declare -r total_buildtools_memory_opts="$buildtools_memory_opts $JVM_OPTS"
+    declare -r total_buildtools_memory_opts="$buildtools_memory_opts $YAMDI_JVM_OPTS"
 
     # Run BuildTools with the specified RAM, for the specified revision.
     # shellcheck disable=SC2086
@@ -328,7 +328,7 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
   fi
 fi
 
-total_game_jvm_opts="$game_memory_opts $suggested_jvm_opts $JVM_OPTS"
+total_game_jvm_opts="$game_memory_opts $suggested_jvm_opts $YAMDI_JVM_OPTS"
 declare -r total_game_jvm_opts
 info "Launching Java process for $server_name with JVM options \"$total_game_jvm_opts\"."
 # Start the launcher with the specified memory amounts. Execute it in the background, so that this
