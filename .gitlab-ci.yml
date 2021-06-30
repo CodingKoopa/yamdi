@@ -107,7 +107,13 @@ build:
     matrix:
       - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:jre
         YAMDI_ARCH: linux/amd64,linux/arm64,linux/arm
-        YAMDI_TAGS: latest latest-ubuntu adoptopenjdk-jre16-ubuntu
+        YAMDI_TAGS: latest latest-ubuntu adoptopenjdk-jre16-ubuntu adoptopenjdk-hostpot-jre16-ubuntu
       - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
         YAMDI_ARCH: linux/amd64
-        YAMDI_TAGS: latest-alpine adoptopenjdk-jre16-alpine
+        YAMDI_TAGS: latest-alpine adoptopenjdk-jre16-alpine adoptopenjdk-hotspot-jre16-alpine
+      - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16-openj9:jre
+        YAMDI_ARCH: linux/amd64
+        YAMDI_TAGS: adoptopenjdk-openj9-jre16-ubuntu
+      - YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16-openj9:alpine-jre
+        YAMDI_ARCH: linux/amd64
+        YAMDI_TAGS: adoptopenjdk-openj9-jre16-alpine
