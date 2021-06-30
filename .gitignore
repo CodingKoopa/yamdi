@@ -1,0 +1,6 @@
+# Don't commit user configurations.
+docker-compose.yml
+start.sh
+# Don't commit user data.
+mc-config
+mc-plugins
