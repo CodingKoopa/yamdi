@@ -21,39 +21,17 @@ There are a couple of options for the YAMDI image to use:
 - Use a prebuilt image with a preselected common Java base image.
 - Build YAMDI yourself with whichever Java base image you want.
 
-##### Prebuilt YAMDI (OUTDATED)
-Images for YAMDI are provided for `amd64`, `arm32v7`,  and `arm64v8` (`arm64`, `aarch64`). These prebuilt images can be obtained from the [GitLab Container Registry](https://gitlab.com/help/user/packages/container_registry/index). These are the most important tags:
-- `stable-hotspot`: The latest release of YAMDI, with the HotSpot JVM.
-- `stable-openj9` The latest release of YAMDI, with the OpenJ9 JVM.
-- `latest-hotspot`: The latest commit of YAMDI, with the HotSpot JVM.
-- `latest-openj9`: The latest commit of YAMDI, with the OpenJ9 JVM.
+##### Prebuilt YAMDI
+TODO: Explain tags here.
 
 For more info on HotSpot and OpenJ9, see [Java Distributions](#java-distributions).
 ```sh
-docker run registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
+docker run yamdi/yamdi:adoptopenjdk-hostpot-jre16-ubuntu
 ```
 ```yml
 services:
   yamdi:
-    image: registry.gitlab.com/codingkoopa/yamdi/amd64:stable-hotspot
-```
-```yml
-services:
-  yamdi:
-    build:
-      context: ./yamdi
-      dockerfile: yamdi/Dockerfile.openjdk.hotspot
-```
-It is also worth noting that the OpenJDK base image is multiarch, so this should work seamlessly across platforms. To build for a platform other than `amd64`, you must set the `YAMDI_TARGET_ARCH` variable, e.g. `--build-arg YAMDI_TARGET_ARCH="arm64v8"`.
-
-It may also be desirable to have the server restart if it crashes.
-```sh
-docker run --restart on-failure
-```
-```yml
-services:
-  yamdi:
-    restart: on-failure
+    image: yamdi/yamdi:adoptopenjdk-hostpot-jre16-ubuntu
 ```
 
 ##### Building YAMDI
