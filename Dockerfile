@@ -129,14 +129,10 @@ RUN \
   mkdir --parents /opt/yamdi/user/server; \
   # The presence of this file indicates that no volume has been mounted here, which is really bad
   # because it means that server data will not persist.
-  touch /opt/yamdi/user/server/volume-not-mounted; \
-  chown -R nonroot:nonroot /opt/yamdi/user;
+  touch /opt/yamdi/user/server/volume-not-mounted;
 
 # Copy the Git configuration into the non-root user's home directory.
 COPY --chown=nonroot:nonroot src/.gitconfig /home/nonroot/
-
-# Change to the non-root user when running the container.
-USER nonroot
 
 # Run from the server directory because we will use Git to update files here, and the Minecraft
 # server will check the current directory for configuration files.
@@ -152,7 +148,7 @@ EXPOSE 25565 8123
 ENV PATH=/opt/yamdi:$PATH
 
 # Set the container entrypoint to the startup script.
-ENTRYPOINT ["yamdi"]
+ENTRYPOINT ["/bin/sh", "-c", "chown -R nonroot:nonroot /opt/yamdi/user && exec yamdi"]
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
