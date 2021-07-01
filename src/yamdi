@@ -189,6 +189,12 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
 
   # Disable exit on error so that we can handle curl errors.
   set +e
+
+  # Handles errrors produced by curl, by printing a common message, and exiting.
+  # Outputs:
+  #   - Any errors produced.
+  # Returns:
+  #   - Exits with 2 if any curl error has immediately occurred before this command.
   handle_curl_errors() {
     curl_ret=$?
     readonly curl_ret
