@@ -264,6 +264,9 @@ $YAMDI_PAPER_BUILD/downloads/$paper_build_jar_name" >"$paper_revision_jar"
     debug "$server_name already downloaded."
   fi
 
+  # Resume exit on error.
+  set -e
+
   # Select the specified revision. In some cases, ln's -f option doesn't work.
   rm -rf "$server_jar"
   ln -sf "$paper_revision_jar" "$server_jar"
