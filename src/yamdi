@@ -191,6 +191,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   set +e
   handle_curl_errors() {
     curl_ret=$?
+    readonly curl_ret
     if [ "$curl_ret" -ne 0 ]; then
       error "Failed to connect to Paper servers. Curl error code: \"$curl_ret\""
       exit 2
