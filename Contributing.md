@@ -1,9 +1,9 @@
 # Contributing
-Contributions to this project are welcome via [Merge Requests](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) on [GitLab](https://gitlab.com/). The general guidelines to follow for most files are:
-- All text files in this repository should use 2 spaces per level of indentation.
-- Most text files should use no more than 100 characters on each line. See the [`.editorconfig`](.editorconfig) file for what files this applies to.
+Contributions to this project are welcome via [Merge Requests](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) on [GitLab](https://gitlab.com/).
 
-This project's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) will check this using [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker).
+## General
+
+Refer to the [`.editorconfig`](.editorconfig) file for general formatting rules that apply to all files. This project's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) will check this using [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker).
 
 ## Bash
 All Bash scripts should:
@@ -75,3 +75,7 @@ If a function exports any variables, they must be documented. Example:
 ```
 
 Exiting with a non-0 value for non-fatal errors is permitted.
+
+## Infrastructure
+
+Infrastructure scripts, such as Docker and CI code, are held to a high standard. They should be exemplary, well commented pieces of code. Prefer long options to programs that support it, to improve readability. - note that BusyBox variants of common Unix tools often do not.
