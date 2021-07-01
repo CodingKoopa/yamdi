@@ -103,7 +103,7 @@ services:
 ```
 
 ### Server Version
-The target revision, or game version, can be adjusted by setting the `YAMDI_MINECRAFT_VERSION` variable either to `latest` (default) or a supported game version. Setting it to a version is recommended because of how plugins may not work on newer versions.
+The target Minecraft version, can be adjusted by setting the `YAMDI_MINECRAFT_VERSION` variable either to `latest` (default) or a supported game version. Setting it to a version is recommended because of how plugins may not work on newer versions.
 ```sh
 docker run --env YAMDI_MINECRAFT_VERSION=1.14.1
 ```
@@ -113,7 +113,7 @@ services:
     environment:
       YAMDI_MINECRAFT_VERSION: "1.14.1"
 ```
-For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision) can be set in the same way.
+For Paper, `YAMDI_PAPER_BUILD` (a build for a particular revision of Paper) can be set in the same way.
 
 ### Server Data
 YAMDI exposes three volumes:
