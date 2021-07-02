@@ -147,8 +147,16 @@ EXPOSE 25565 8123
 # Append the YAMDI directory to the path to make it accessible.
 ENV PATH=/opt/yamdi:$PATH
 
-# Set the container entrypoint to the startup script.
-ENTRYPOINT ["/bin/sh", "-c", "chown -R nonroot:nonroot /opt/yamdi/user && exec yamdi"]
+ENTRYPOINT ["/bin/sh", "-c", \
+  # At startup, running as root, transfer ownership of the user directory to the non-root user. This
+  # is the only way to have our user be able to write to the server directory, because Docker
+  # doesn't provide a mechanism to mount the volume as nonroot to begin with.
+  #
+  # See here for more info: https://github.com/moby/moby/issues/2259.
+  "chown -R nonroot:nonroot /opt/yamdi/user && \
+  # Execute yamdi, as the non-root user, specifying the login shell because the system user doesn't
+  # have one defined. Using exec ensures that yamdi replaces the current process.
+  exec su -c yamdi -s /bin/sh nonroot"]
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
