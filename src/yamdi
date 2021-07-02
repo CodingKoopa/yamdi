@@ -21,7 +21,7 @@ function exit_script() {
   if [ "$java_ret" -ne 0 ]; then
     warning "Java process return code is $java_ret, likely crashed. Not checking files for changes."
   else
-    info "Java process return is 0, this is good. Checking files for changes."
+    info "Java process return is 0. Checking files for changes."
 
     info "Checking server configuration files."
     get_directory_changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
