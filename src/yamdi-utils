@@ -84,18 +84,18 @@ function import_directory() {
   fi
 
   debug "Making copy of host files."
-  local -r source_directory_vcs=$(make_user_path "$source_directory")
+  local -r source_directory_copy=$(make_user_path "$source_directory")
   # Ensure that the VCS directory isn't present to begin with, because if it is then the source
   # directory will be copied inside of the VCS directory, effectively discarding any new changes.
-  rm -rf "$source_directory_vcs"
-  cp -R "$source_directory" "$source_directory_vcs"
+  rm -rf "$source_directory_copy"
+  cp -R "$source_directory" "$source_directory_copy"
 
   debug "Initializing Git repo."
   # Use a temporary Git directory. This reduces the need for maintining a repo externally, and
   # reduces any conflict with a preexisting repo.
-  export GIT_DIR="$source_directory_vcs/.git-yamdi"
+  export GIT_DIR="$source_directory_copy/.git-yamdi"
   # For now, use the source directory as Git's working directory, to copy the initial changes.
-  export GIT_WORK_TREE="$source_directory_vcs"
+  export GIT_WORK_TREE="$source_directory_copy"
   # Initialize the temporary directory, if it hasn't already been initialized.
   git init -q
 
