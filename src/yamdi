@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+# Quit on error.
 set -e
 
 # Exits YAMDI, saving the patch for any changes that have been made to the configuration files by
@@ -13,8 +15,9 @@ set -e
 #   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration
 # directory.
 #   - SERVER_DIRECTORY: Location of the containerized server directory.
-function exit_script() {
-  local -r java_ret=$1
+exit_script() {
+  java_ret=$1
+  readonly java_ret
 
   info "Exiting Yet Another Minecraft Docker Image."
 
@@ -36,20 +39,24 @@ function exit_script() {
 
 # Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals. This
 # function needs "utils.sh" to be sourced.
+# Arguments:
+#   - The name of the signal received.
 # Outputs:
 #   - Status messages.
 # Variables Read:
 #   - JAVA_PID: The PID of the Java process.
-function stop() {
-  info "SIGINT or SIGTERM recieved."
-  if [[ -n $JAVA_PID ]]; then
+stop() {
+  info "$1 recieved."
+  if [ -n "$JAVA_PID" ]; then
     info "Server is running with PID $JAVA_PID, sending stop command."
     # Send the "stop" command to the server.
     cmd stop
+    # Take over the job of quitting YAMDI, as the code at the end of this script won't be executed
+    # as it normally would.
     info "Waiting for Java process to exit."
     set +e
     wait "$JAVA_PID"
-    local -r java_ret=$?
+    java_ret=$?
     set -e
     exit_script $java_ret
   else
@@ -67,11 +74,11 @@ function stop() {
 # down the server, but without saving. The "stop" Bukkit command shuts down the server properly,
 # and does save everything, so here the signals are trapped, and will intervene to run the "stop"
 # command.
-trap stop SIGINT
-trap stop SIGTERM
+trap "stop SIGINT" INT
+trap "stop SIGTERM" TERM
 
 # shellcheck source=src/yamdi-utils
-source yamdi-utils
+. yamdi-utils
 
 info "Starting Yet Another Minecraft Docker Image."
 
@@ -100,7 +107,7 @@ fi
 if [ "$YAMDI_CLEAN_FILES" = true ]; then
   debug "Cleaning crash dumps and reports."
   # Purge crash dumps.
-  rm -rf {heapdump,javacore,Snap}.*
+  rm -rf heapdump.* javacore.* Snap.*
   # Purge crash reports and logs. With Docker, we have our own logging system.
   rm -rf crash-reports logs ./*.log
 fi
@@ -114,14 +121,14 @@ if [ ! "$YAMDI_IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
 fi
 
 if [ -d "$SERVER_DIRECTORY/plugins" ]; then
-  # If we aren't doing a clean, don't go any further than the root JARs.
+  # If we aren't doing a clean, don't go any further than the root JARs. If we do go further, then
+  # JARs in subdirectories will be cleaned, mostly consisting of plugin dependency JARs.
   if [ ! "$YAMDI_CLEAN_FILES" = true ]; then
-    maxdepth=(-maxdepth 1)
-    declare -r maxdepth
+    _shallow=true
+    readonly _shallow
   fi
-  # If this isn't done, then when the source directory has new JARs, the target will still have the
-  # old ones.
-  find "$SERVER_DIRECTORY/plugins" "${maxdepth[@]}" -name "*.jar" -type f -delete
+  # Delete pre-existing JARs because, otherwise they will persist when/if new JARs are added.
+  find "$SERVER_DIRECTORY/plugins" ${_shallow:+-maxdepth 1} -name "*.jar" -type f -delete
 fi
 info "Importing server plugin files."
 import_directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
@@ -140,35 +147,42 @@ fi
 if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
-  declare -r server_jar="$SERVER_DIRECTORY/spigot.jar"
-  declare -r spigot_revision_jar="$SERVER_DIRECTORY/spigot-$YAMDI_MINECRAFT_VERSION.jar"
-  declare -r server_name="Spigot-$YAMDI_MINECRAFT_VERSION"
+  server_jar="$SERVER_DIRECTORY/spigot.jar"
+  readonly server_jar
+  spigot_revision_jar="$SERVER_DIRECTORY/spigot-$YAMDI_MINECRAFT_VERSION.jar"
+  readonly spigot_revision_jar
+  server_name="Spigot-$YAMDI_MINECRAFT_VERSION"
+  readonly server_name
 
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
   # exist.
   if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$spigot_revision_jar" ]; then
     debug "Building $server_name."
     # Build in a temporary directory.
-    declare -r spigot_build_directory=/tmp/spigot-build
+    spigot_build_directory=/tmp/spigot-build
+    readonly spigot_build_directory
     mkdir -p "$spigot_build_directory"
-    pushd "$spigot_build_directory"
-    # Remove any preexisting JARs from failed compilations.
-    rm -f BuildTools.jar
-    # Download the latest BuildTools JAR.
-    curl -O "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
+    (
+      cd "$spigot_build_directory"
+      # Remove any preexisting JARs from failed compilations.
+      rm -f BuildTools.jar
+      # Download the latest BuildTools JAR.
+      curl -O "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/\
 artifact/target/BuildTools.jar"
 
-    buildtools_memory_opts=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
-      "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT")
-    declare -r buildtools_memory_opts
-    declare -r total_buildtools_memory_opts="$buildtools_memory_opts $YAMDI_JVM_OPTS"
+      buildtools_memory_opts=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
+        "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT")
+      readonly buildtools_memory_opts
+      total_buildtools_memory_opts="$buildtools_memory_opts $YAMDI_JVM_OPTS"
+      readonly total_buildtools_memory_opts
 
-    # Run BuildTools with the specified RAM, for the specified revision.
-    # shellcheck disable=SC2086
-    java $total_buildtools_memory_opts -jar BuildTools.jar --rev $YAMDI_MINECRAFT_VERSION
-    # Copy the Spigot build to the Spigot directory.
-    cp spigot-*.jar "$spigot_revision_jar"
-    popd
+      # Run BuildTools with the specified RAM, for the specified revision.
+      # shellcheck disable=SC2086
+      java $total_buildtools_memory_opts -jar BuildTools.jar --rev $YAMDI_MINECRAFT_VERSION
+      # Copy the Spigot build to the Spigot directory.
+      cp spigot-*.jar "$spigot_revision_jar"
+    )
+
     # Remove the build files to preserve space.
     rm -rf "$spigot_build_directory"
   else
@@ -182,7 +196,8 @@ artifact/target/BuildTools.jar"
 elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   info "Paper server selected."
 
-  declare -r server_jar="$SERVER_DIRECTORY/paper.jar"
+  server_jar="$SERVER_DIRECTORY/paper.jar"
+  readonly server_jar
   if [ -z "$YAMDI_PAPER_BUILD" ]; then
     YAMDI_PAPER_BUILD="latest"
   fi
@@ -210,11 +225,11 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
     debug "Resolving latest Paper revision."
 
     versions_json=$(curl -s https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE)
-    declare -r versions_json
+    readonly versions_json
 
     handle_curl_errors
     version_json_error=$(echo "$versions_json" | jq .error)
-    declare -r version_json_error
+    readonly version_json_error
     if [ ! "null" = "$version_json_error" ]; then
       error "Failed to fetch Paper versions. Curl error: \"$version_json_error\"."
       exit 2
@@ -228,11 +243,11 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
     debug "Resolving latest Paper build."
     builds_json=$(curl -s \
       "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_MINECRAFT_VERSION")
-    declare -r builds_json
+    readonly builds_json
 
     handle_curl_errors
     builds_json_error=$(echo "$builds_json" | jq .error)
-    declare -r builds_json_error
+    readonly builds_json_error
     if [ ! "null" = "$builds_json_error" ]; then
       error "Failed to fetch Paper build info. Curl error: \"$builds_json_error\"."
       exit 2
@@ -245,22 +260,24 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   debug "Resolving Paper build name."
   build_json=$(curl -s "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/\
 versions/$YAMDI_MINECRAFT_VERSION/builds/$YAMDI_PAPER_BUILD")
-  declare -r build_json
+  readonly build_json
 
   handle_curl_errors
   build_json_error=$(echo "$build_json" | jq .error)
-  declare -r builds_json_error
+  readonly builds_json_error
   if [ ! "null" = "$build_json_error" ]; then
     error "Failed to fetch Paper build info. Curl error: \"$build_json_error\"."
     exit 2
   fi
 
   paper_build_jar_name=$(echo "$build_json" | jq .downloads.application.name | sed s/\"//g)
-  declare -r paper_build_jar_name
+  readonly paper_build_jar_name
 
-  declare -r paper_revision_jar="$SERVER_DIRECTORY/\
+  paper_revision_jar="$SERVER_DIRECTORY/\
 $YAMDI_SERVER_TYPE-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD.jar"
-  declare -r server_name="Paper-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD"
+  readonly paper_revision_jar
+  server_name="Paper-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD"
+  readonly server_name
   if [ ! -f "$paper_revision_jar" ]; then
     debug "Downloading $server_name."
     curl "https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE/versions/$YAMDI_MINECRAFT_VERSION/builds/\
@@ -298,70 +315,86 @@ mkfifo -m700 "$COMMAND_INPUT_FILE"
 
 game_memory_opts=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" \
   "$YAMDI_GAME_MEMORY_AMOUNT_MAX" "$YAMDI_GAME_MEMORY_AMOUNT")
-declare -r game_memory_opts
+readonly game_memory_opts
 
 # Append suggested JVM options unless required not to.
 if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
   if [ "$jvm_impl" = "hotspot" ]; then
     # Set the error file path to include the server info.
-    suggested_jvm_opts+=" -XX:ErrorFile=./$server_name-error-pid%p.log"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:ErrorFile=./$server_name-error-pid%p.log"
 
     # Enable experimental VM features, for the options we'll be setting. Although this is not
     # listed in the documentation for "java", when I tested an experimental feature in a YAMDI
     # container, this was necessary. These options are largely taken from here:
     # https://mcflags.emc.gs/.
-    suggested_jvm_opts+=" -XX:+UnlockExperimentalVMOptions"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+UnlockExperimentalVMOptions"
 
     # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
-    suggested_jvm_opts+=" -XX:+UseG1GC"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+UseG1GC"
     # Don't reserve memory, because this option seems to break and cause OOM errors when running in
     # Docker.
-    # suggested_jvm_opts+=" -XX:+AlwaysPreTouch"
+    # suggested_jvm_opts="$suggested_jvm_opts -XX:+AlwaysPreTouch"
     # Disable explicit garbage collection, because some plugins try to manage their own memory and
     # suck at it.
-    suggested_jvm_opts+=" -XX:+DisableExplicitGC"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+DisableExplicitGC"
     # Adjust the max size of the new generation that will be set later.
-    suggested_jvm_opts+=" -XX:G1MaxNewSizePercent=80"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MaxNewSizePercent=80"
     # Lower the garbage collection threshold, to make cleanups not as demanding.
-    suggested_jvm_opts+=" -XX:G1MixedGCLiveThresholdPercent=35"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCLiveThresholdPercent=35"
     # Raise the New Generation size to keep up with MC's allocations, because MC has many.
-    suggested_jvm_opts+=" -XX:G1NewSizePercent=50"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1NewSizePercent=50"
     # Take 100ms at the most to collect garbage.
-    suggested_jvm_opts+=" -XX:MaxGCPauseMillis=100"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:MaxGCPauseMillis=100"
     # Allow garbage collection to use multiple threads, for performance.
-    suggested_jvm_opts+=" -XX:+ParallelRefProcEnabled"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+ParallelRefProcEnabled"
     # Set the garbage collection target survivor ratio higher to use more of the survivor space
     # before promoting it, because MC has steady allocations.
-    suggested_jvm_opts+=" -XX:TargetSurvivorRatio=90"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:TargetSurvivorRatio=90"
   elif [ "$jvm_impl" = "openj9" ]; then
     # These options are largely taken from here:
     # https://steinborn.me/posts/tuning-minecraft-openj9/.
     # See the utility script for the generation of the nursery limits.
 
     # Enable pausless garbage collection, for smaller pause times.
-    suggested_jvm_opts+=" -Xgc:concurrentScavenge"
+    suggested_jvm_opts="$suggested_jvm_opts -Xgc:concurrentScavenge"
     # Reduce the amount of time spent collecting the nursery.
-    suggested_jvm_opts+=" -Xgc:dnssExpectedTimeRatioMaximum=3"
+    suggested_jvm_opts="$suggested_jvm_opts -Xgc:dnssExpectedTimeRatioMaximum=3"
     # Ensure that nursery objects aren't promoted to the nursery too quickly, since the server will
     # be making many of them.
-    suggested_jvm_opts+=" -Xgc:scvNoAdaptiveTenure"
+    suggested_jvm_opts="$suggested_jvm_opts -Xgc:scvNoAdaptiveTenure"
     # Disable explicit garbage collection, for the same reason as in hotspot.
-    suggested_jvm_opts+=" -Xdisableexplicitgc"
+    suggested_jvm_opts="$suggested_jvm_opts -Xdisableexplicitgc"
   fi
 fi
 
 total_game_jvm_opts="$game_memory_opts $suggested_jvm_opts $YAMDI_JVM_OPTS"
-declare -r total_game_jvm_opts
+readonly total_game_jvm_opts
 info "Launching Java process for $server_name with JVM options \"$total_game_jvm_opts\"."
-# Start the launcher with the specified memory amounts. Execute it in the background, so that this
-# script can still recieve signals.
+# Start the launcher with the options we've put together, while feeding it input from the named
+# pipe. Execute it in the background, so we can still handle signals, and manage the "tail" process.
 # shellcheck disable=SC2086
-java $total_game_jvm_opts -jar "$server_jar" nogui < <(tail -f "$COMMAND_INPUT_FILE") &
+tail -f $COMMAND_INPUT_FILE | java $total_game_jvm_opts -jar "$server_jar" nogui &
 export JAVA_PID=$!
+# Start a background subshell that we can use to monitor the background process.
+(
+  # Wait for the Java process to exit.
+  while kill -0 $JAVA_PID 2>/dev/null; do sleep 1; done
+  # Kill the "tail" process that feeds commands to the "java" process. Without doing this, if the
+  # "java" process exits, then the "tail" process will continue to exist. Since we're using POSIX
+  # sh, we can't use process substitution or the pipefail option to alleviate this, as recommmended
+  # here (https://stackoverflow.com/a/53382807), so we need to kill it ourselves.
+  #
+  # The reason why we care about killing the "tail" process is that, if we don't do so, then the
+  # "wait" command will wait indefinitely.
+  killall tail
+) &
 info "Waiting for Java process (PID $JAVA_PID) to exit."
 # Allow wait to return an error without making the whole script exit.
 set +e
-wait "$JAVA_PID"
+# Wait for the Java process to exit. This may seem redundant with the prior while loop; the purpose
+# of this one is to capture the exit code, which is useful to determine whether the process exited
+# peacefully.
+wait $JAVA_PID
 java_ret=$?
 set -e
 debug "Java process exited (return $java_ret)."

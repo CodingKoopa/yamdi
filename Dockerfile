@@ -14,7 +14,6 @@ RUN \
   set -eux; \
   \
   # Install the dependencies:
-  # - bash    Bash, for running the server startup script.
   # - git     Git, for BuildTools to clone the repositories.
   # - curl    Curl, for downloading Spigot BuildTools and using the Paper build API.
   # - jq      jq, for parsing the Paper API response.
@@ -31,7 +30,7 @@ RUN \
   # Install the newest versions of all packages.
   apt-get --assume-yes upgrade; \
   # Install the dependencies, without recommended packages.
-  apt-get --assume-yes --no-install-recommends install bash git curl jq; \
+  apt-get --assume-yes --no-install-recommends install git curl jq; \
   # Clear the local repository of retrieved package files.
   apt-get clean; \
   # Remove the package index cache.
@@ -45,7 +44,7 @@ RUN \
   # Upgrade the currently installed packages, because the base image may not be caught up.
   apk upgrade; \
   # Install the dependencies.
-  apk add bash git curl jq; \
+  apk add git curl jq; \
   # Remove the package index cache.
   rm -rf /var/cache/apk/*; \
   \
@@ -56,7 +55,7 @@ RUN \
   # or fix for a security issue.
   dnf --assumeyes --nodocs upgrade-minimal; \
   # Install the dependencies, without recommended packages.
-  dnf --assumeyes --nodocs --setopt=install_weak_deps=False install bash git curl jq; \
+  dnf --assumeyes --nodocs --setopt=install_weak_deps=False install git curl jq; \
   # Clean the package manager cache.
   dnf clean all; \
   \
@@ -65,7 +64,7 @@ RUN \
   # Update the currently installed packages, because the base image may not be caught up.
   yum --assumeyes update; \
   # Install the dependencies.
-  yum --assumeyes --setopt=tsflags=nodocs install bash git curl jq; \
+  yum --assumeyes --setopt=tsflags=nodocs install git curl jq; \
   # Clean the package manager cache.
   yum clean all; \
   \

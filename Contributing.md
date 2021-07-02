@@ -4,8 +4,8 @@ Contributions to this project are welcome via [Merge Requests](https://docs.gitl
 ## General
 Refer to the [`.editorconfig`](.editorconfig) file for general formatting rules that apply to all files. This project's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) will check this using [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker).
 
-## Bash
-All Bash scripts should:
+## Shell
+All shell scripts should:
 - Pass [ShellCheck](https://github.com/koalaman/shellcheck).
 - Pass [shfmt](https://github.com/mvdan/sh#shfmt).
 
@@ -21,54 +21,54 @@ Functions must have certain attributes marked, if applicable.
 
 #### Description
 The first line of a function's documentation must describe what the function does. Example:
-```bash
+```sh
 # Sets up a new system.
 ```
 
 ##### TODOs
 The lines proceeding a function's documentation must describe general TODOs for it, if there are any. Example:
-```bash
+```sh
 # TODO: Add licensing info.
 ```
 
 #### Arguments
 If a function reads any arguments, they must be documented. Example:
-```bash
+```sh
 # Arguments:
 #   - Whether to require root or to require non root.
 ```
 
 #### Outputs
 If a function outputs anything, it must be documented. Example:
-```bash
+```sh
 # Outputs:
 #   - The bootnum of the boot entry.
 ```
 
 #### Returns
 If a function has cases in which it returns a non-0 exit code, they must be documented. Example:
-```bash
+```sh
 # Returns:
 #   - 1 if the file couldn't be found.
 ```
 
 #### Variables Read
 If a function reads any variables, they must be documented. Example:
-```bash
+```sh
 # Variables Read:
 #   - dry_run: Whether to actually perform actions.
 ```
 
 #### Variables Written
 If a function writes to any variables, they must be documented. Example:
-```bash
+```sh
 # Variables Written:
 #   - install_home: Location of the home directory of the current install user.
 ```
 
 #### Variables Exported
 If a function exports any variables, they must be documented. Example:
-```bash
+```sh
 # Variables Exported:
 #   - WINEPREFIX: See Wine documentation.
 ```

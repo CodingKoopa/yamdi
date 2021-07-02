@@ -37,7 +37,7 @@ shfmt:
     - changes:
         # Watch for changes in the source.
         - "src/*"
-  # Check that all Bash code has proper formatting.
+  # Check that all shell code has proper formatting.
   script: shfmt -d src
 
 shellcheck:
@@ -47,7 +47,7 @@ shellcheck:
   rules:
     - changes:
         - "src/*"
-  # Check that all Bash code is proper.
+  # Check that all shell code is proper.
   script: shellcheck --external-sources src/*
 
 build:

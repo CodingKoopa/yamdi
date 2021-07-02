@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Set the directory for YAMDI data to be kept.
 export YAMDI_DIRECTORY="/opt/yamdi/"
@@ -18,7 +18,7 @@ export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 #   - The message.
 # Outputs:
 #   - The formatted message.
-function debug() {
+debug() {
   if [ "$YAMDI_DEBUG" = "true" ]; then
     printf "[$(date +%R:%S) DEBUG]: [YAMDI] %s\n" "$*"
   fi
@@ -29,7 +29,7 @@ function debug() {
 #   - The message.
 # Outputs:
 #   - The formatted message.
-function info() {
+info() {
   printf "[$(date +%R:%S) INFO]: [YAMDI] %s\n" "$*"
 }
 
@@ -38,7 +38,7 @@ function info() {
 #   - The message.
 # Outputs:
 #   - The formatted message.
-function warning() {
+warning() {
   printf "[$(date +%R:%S) WARNING]: [YAMDI] %s\n" "$*"
 }
 
@@ -47,7 +47,7 @@ function warning() {
 #   - The message.
 # Outputs:
 #   - The formatted message.
-function error() {
+error() {
   printf "[$(date +%R:%S) ERROR]: [YAMDI] %s\n" "$*"
 }
 
@@ -56,7 +56,7 @@ function error() {
 #   - The original directory, that may not be writable.
 # Outputs:
 #   - The corresponding user subdirectory, that should be writable.
-function make_user_path() {
+make_user_path() {
   printf %s "$USER_DIRECTORY/$(basename "$1")-copy"
 }
 
@@ -72,9 +72,9 @@ function make_user_path() {
 # Variables Exported:
 #   - GIT_DIR: Location of the Git directory.
 #   - GIT_WORK_TREE: Location of the Git work tree.
-function import_directory() {
-  local -r source_directory=$1
-  local -r target_directory=$2
+import_directory() {
+  source_directory=$1
+  target_directory=$2
 
   # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty
   # directory.
@@ -84,7 +84,7 @@ function import_directory() {
   fi
 
   debug "Making copy of host files."
-  local -r source_directory_copy=$(make_user_path "$source_directory")
+  source_directory_copy=$(make_user_path "$source_directory")
   # Ensure that the VCS directory isn't present to begin with, because if it is then the source
   # directory will be copied inside of the VCS directory, effectively discarding any new changes.
   rm -rf "$source_directory_copy"
@@ -155,10 +155,10 @@ function import_directory() {
 # Variables Exported:
 #   - GIT_DIR: Location of the Git directory.
 #   - GIT_WORK_TREE: Location of the Git work tree.
-function get_directory_changes() {
-  local -r source_directory=$1
-  local -r target_directory=$2
-  local -r patch_path=$3
+get_directory_changes() {
+  source_directory=$1
+  target_directory=$2
+  patch_path=$3
 
   GIT_DIR="$(make_user_path "$source_directory")/.git-yamdi"
   export GIT_DIR
@@ -180,12 +180,10 @@ function get_directory_changes() {
 #   - Number to be used for both minimum and maximum MB.
 # Outputs:
 #   - The generated JVM option string.
-function generate_memory_opts() {
-  local -r minimum="$1"
-  local -r maximum="$2"
-  local -r both="$3"
-
-  local output
+generate_memory_opts() {
+  minimum="$1"
+  maximum="$2"
+  both="$3"
 
   if [ -n "$minimum" ] && [ -z "$maximum" ]; then
     output="-Xms${minimum} -Xmx${minimum}"
@@ -201,7 +199,6 @@ function generate_memory_opts() {
   if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # shellcheck disable=2154
     if [ "$jvm_impl" = "openj9" ]; then
-      local upper_bound
       if [ -n "$maximum" ]; then
         upper_bound="$maximum"
       elif [ -n "$both" ]; then
@@ -210,12 +207,12 @@ function generate_memory_opts() {
         upper_bound="1024"
       fi
       # Strip out the letter indicating the storage unit.
-      upper_bound=${upper_bound//[!0-9]/}
+      upper_bound=$(echo $upper_bound | grep -oE '[0-9]+')
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
       # lived objects.
-      output+=" -Xmns$(("$upper_bound" / 2))M"
+      output="$output -Xmns$(("$upper_bound" / 2))M"
       # Set the nursery maximum to 80% of the heap size to allow the server to grow it.
-      output+=" -Xmnx$(("$upper_bound" * 4 / 5))M"
+      output="$output -Xmnx$(("$upper_bound" * 4 / 5))M"
     fi
   fi
 
