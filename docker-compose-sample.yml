@@ -1,0 +1,51 @@
+# This Compose file is intended to be copied and used to run YAMDI. It sets up sane defaults, and
+# exposes everything that is likely to be of interest.
+
+# Use the most recent version of the Docker Compose syntax.
+version: "3.9"
+services:
+  yamdi:
+    # Set the container name.
+    container_name: "yamdi"
+    # Use the default YAMDI image.
+    image: yamdi/yamdi:latest
+    environment:
+      # Use the Paper server software. This is the default for YAMDI; even though it is the fork of
+      # the still active Spigot server software, Paper is probably what you want for performance.
+      YAMDI_SERVER_TYPE: paper
+      # Set the version of the game to use. Make sure you set this to a specific Minecraft version!
+      # Having this always seek "latest" will likely cause issues when a new version is released.
+      YAMDI_MINECRAFT_VERSION: "latest"
+      # Do clean up any files that aren't strictly needed.
+      YAMDI_CLEAN_FILES: "true"
+    # Always restart the container.
+    restart: always
+    # Allow a 5 minute grace period when stopping.
+    stop_grace_period: 5m
+    volumes:
+      # Make a new volume mount.
+      - type: volume
+        # Use a named volume as the source.
+        source: mc_server_data
+        # Use the Minecraft data directory as the target.
+        target: /opt/yamdi/user/server
+        volume:
+          nocopy: true
+      # Make a new bind mount.
+      - type: bind
+        # Use the config directory as the source.
+        source: ./mc-config
+        # Use the dedicated host config data directory as the target.
+        target: /opt/yamdi/server-config-host
+        # Make a new bind mount.
+      - type: bind
+        # Use the plugin directory as the source.
+        source: ./mc-plugins
+        # Use the dedicated host server plugin directory as the target.
+        target: /opt/yamdi/server-plugins-host
+    ports:
+      # Open the Minecraft server port.
+      - "25565:25565"
+
+volumes:
+  mc_server_data:

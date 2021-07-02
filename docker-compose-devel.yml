@@ -1,0 +1,46 @@
+# This Compose file is intended to be used by developers while working on YAMDI, and by CI when
+# generating a default configuration. Differences from the sample configuration are noted.
+
+version: "3.9"
+services:
+  yamdi:
+    container_name: "yamdi-devel"
+    build:
+      # Build the image from  the current directory.
+      context: .
+      args:
+        # Use Alpine as the base because it's small.
+        YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
+    environment:
+      YAMDI_SERVER_TYPE: "paper"
+      YAMDI_MINECRAFT_VERSION: "latest"
+      YAMDI_CLEAN_FILES: "true"
+      # Enable debug output.
+      YAMDI_DEBUG: "true"
+      # Accept the EULA from the CLI, without requiring config files to be loaded in.
+      YAMDI_JVM_OPTS: "-Dcom.mojang.eula.agree=true"
+    # Don't restart. This is the default for Docker, and is only here for informational purposes.
+    restart: "no"
+    # If you need a shell to investigate the container, uncomment this. In order for this to work,
+    # you must use "docker-compose run yamdi" rather than "docker-compose up".
+    # entrypoint: /bin/sh
+    stop_grace_period: 5m
+    volumes:
+      - type: volume
+        # Use a different Docker volume, just to be safe.
+        source: mc_server_devel_data
+        target: /opt/yamdi/user/server
+        volume:
+          nocopy: true
+      - type: bind
+        source: ./mc-config
+        target: /opt/yamdi/server-config-host
+      - type: bind
+        source: ./mc-plugins
+        target: /opt/yamdi/server-plugins-host
+    ports:
+      - "25565:25565"
+
+volumes:
+  # Use a different Docker volume, just to be safe.
+  mc_server_devel_data:
