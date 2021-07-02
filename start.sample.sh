@@ -5,7 +5,6 @@
 # to do so on a line by line basis; for more information on what each part of this command does,
 # please refer to the YAMDI documentation.
 
-set -x
 docker run \
   --env YAMDI_SERVER_TYPE=paper \
   --env YAMDI_MINECRAFT_VERSION="latest" \
