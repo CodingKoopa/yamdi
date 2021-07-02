@@ -38,14 +38,14 @@ The first code block is what applies to you - you don't need to worry about the 
 The Docker commands can get really long! For this reason, it's useful to break them up into multiple lines by escaping the newline:
 ```sh
 docker run yamdi/yamdi:latest \
-  --env YAMDI_SERVER_TYPE=paper
+  --env YAMDI_SERVER_TYPE="paper"
 ```
 The backslash "cancels out" the newline, making it look like all the same line to the shell.
 
 If you don't include the backslash, bad things will happen. For instance:
 ```sh
 docker run yamdi/yamdi:latest
-  --env YAMDI_SERVER_TYPE=paper
+  --env YAMDI_SERVER_TYPE="paper"
 ```
 The shell sees this as two separate commands that it will try and run, which is undesired.
 
@@ -172,26 +172,26 @@ docker-compose up
 
 The Dockerfile is designed to adapt to whatever base image you give it. You can specify what base image you want to use by setting the `YAMDI_BASE_IMAGE` build-time variable to the full tag referring to the Java image you want to use. The vast array of Java images available is documented in [Java Distributions](JavaDistributions.md).
 ```sh
-docker build --build-arg YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:jre ...
+docker build --build-arg YAMDI_BASE_IMAGE="adoptopenjdk/openjdk16:jre" ...
 ```
 ```yaml
 services:
   yamdi:
     build:
       args:
-      - YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:jre
+      - YAMDI_BASE_IMAGE="adoptopenjdk/openjdk16:jre"
 ```
 
 ### Server Type
 The type of server can be specified by setting the `YAMDI_SERVER_TYPE` environment variable. Currently supported values are `paper` (default) and `spigot`, case sensitive.
 ```sh
-docker run --env YAMDI_SERVER_TYPE=paper ...
+docker run --env YAMDI_SERVER_TYPE="paper" ...
 ```
 ```yml
 services:
   yamdi:
     environment:
-      YAMDI_SERVER_TYPE: paper
+      YAMDI_SERVER_TYPE: "paper"
 ```
 
 ### Server Version
@@ -229,7 +229,7 @@ The server installation volume, `/opt/yamdi/user/server` must be mounted in orde
 
 To use a named volume to hold server data:
 ```sh
-docker run --mount type=volume,source=mc_server_data,target=/opt/yamdi/user/server,volume-opt=nocopy=true
+docker run --mount type=volume,source=mc_server_data,target=/opt/yamdi/user/server,volume-nocopy=true ...
 ```
 ```yml
 services:
@@ -358,7 +358,7 @@ services:
 #### Memory Options
 The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `YAMDI_BUILDTOOLS_MEMORY_AMOUNT` and `YAMDI_GAME_MEMORY_AMOUNT` variables, for example:
 ```sh
-docker run --env YAMDI_BUILDTOOLS_MEMORY_AMOUNT="800M" --env YAMDI_GAME_MEMORY_AMOUNT="1G" ..
+docker run --env YAMDI_BUILDTOOLS_MEMORY_AMOUNT="800M" --env YAMDI_GAME_MEMORY_AMOUNT="1G" ...
 ```
 ```yml
 services:
@@ -377,7 +377,7 @@ If nothing is specified, YAMDI defaults to a safe 1GB for both.
 By default, for HotSpot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `YAMDI_USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.
 
 ```sh
-docker run --env YAMDI_USE_SUGGESTED_JVM_OPTS="false" ..
+docker run --env YAMDI_USE_SUGGESTED_JVM_OPTS="false" ...
 ```
 ```yml
 services:
@@ -408,7 +408,7 @@ YAMDI properly traps the SIGINT and SIGTERM signals (sent when running `docker s
 
 Conversely, when the server shuts down on its own accord, the exit code of YAMDI will be equivalent to the exit code of the Java process, therefore YAMDI is compatible with Docker restart techniques:
 ```sh
-docker run --restart on-failure
+docker run --restart on-failure ...
 ```
 ```yml
 services:
@@ -430,7 +430,7 @@ It's important to mention that, when `Ctrl` + `C` is sent in a `docker-compose` 
 ### File Cleaning
 YAMDI can be made to clean unneeded files by setting the `YAMDI_CLEAN_FILES` variable. This purges crash dumps and crash logs.
 ```sh
-docker run --env YAMDI_CLEAN_FILES="true"
+docker run --env YAMDI_CLEAN_FILES="true" ...
 ```
 ```yml
 services:
@@ -442,7 +442,7 @@ services:
 ### Debug Mode
 YAMDI can be made to print debug messages from itself by setting the `YAMDI_DEBUG` variable.
 ```sh
-docker run --env YAMDI_DEBUG="true"
+docker run --env YAMDI_DEBUG="true" ...
 ```
 ```yml
 services:
