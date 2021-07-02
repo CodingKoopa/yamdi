@@ -3,4 +3,8 @@
 # shellcheck source=src/yamdi-utils
 . yamdi-utils
 
-echo "$@" >"$COMMAND_INPUT_FILE"
+if [ "$(whoami)" != nonroot ]; then
+  su -c "echo \"$*\" >\"$COMMAND_INPUT_FILE\"" -s /bin/sh nonroot
+else
+  echo "$@" >"$COMMAND_INPUT_FILE"
+fi
