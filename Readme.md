@@ -428,7 +428,7 @@ services:
 It's important to mention that, when `Ctrl` + `C` is sent in a `docker-compose` session, the log feed will always prematurely end. This gives the effect that the server has been stopped before it's gotten the chance to save, when really it's still running in the background.
 
 ### File Cleaning
-YAMDI can be made to clean unneeded files by setting the `YAMDI_CLEAN_FILES` variable. This purges crash dumps and crash logs.
+YAMDI can be made to clean unneeded files by setting the `YAMDI_CLEAN_FILES` variable. This purges crash dumps, crash logs, and plugin JARs beyond those directly in `/plugins` (these are most likely dependency JARs that have been automatically downloaded).
 ```sh
 docker run --env YAMDI_CLEAN_FILES="true" ...
 ```
