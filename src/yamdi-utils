@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# Set the directory for the server installation to be kept.
-export SERVER_DIRECTORY="/opt/yamdi/user/server"
+# Set the directory for YAMDI data to be kept.
+export YAMDI_DIRECTORY="/opt/yamdi/"
 # Set the directory for the server host configuration to be kept.
-export SERVER_CONFIG_HOST_DIRECTORY="/opt/yamdi/server-config-host"
+export SERVER_CONFIG_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-config-host"
 # Set the directory for the server host plugins to be kept.
-export SERVER_PLUGINS_HOST_DIRECTORY="/opt/yamdi/server-plugins-host"
+export SERVER_PLUGINS_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-plugins-host"
+# Set the directory for user data to be kept.
+export USER_DIRECTORY="$YAMDI_DIRECTORY/user/"
+# Set the directory for the server installation to be kept.
+export SERVER_DIRECTORY="$USER_DIRECTORY/server"
 # Set the directory for the command named pipe to be.
 export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
 
@@ -47,6 +51,15 @@ function error() {
   printf "[$(date +%R:%S) ERROR]: [YAMDI] %s\n" "$*"
 }
 
+# Given a resource, gets the path to its respective writable copy in the user directory.
+# Arguments:
+#   - The original directory, that may not be writable.
+# Outputs:
+#   - The corresponding user subdirectory, that should be writable.
+function make_user_path() {
+  printf %s "$USER_DIRECTORY/$(basename "$1")-copy"
+}
+
 # Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
 # given directory, using Git. It's very important that, if Git will be used after this function be
 # called, that `unset GIT_DIR GIT_WORK_TREE` is ran. For more details on the checkout method used
@@ -71,7 +84,7 @@ function import_directory() {
   fi
 
   debug "Making copy of host files."
-  local -r source_directory_vcs="$source_directory-copy"
+  local -r source_directory_vcs=$(make_user_path "$source_directory")
   # Ensure that the VCS directory isn't present to begin with, because if it is then the source
   # directory will be copied inside of the VCS directory, effectively discarding any new changes.
   rm -rf "$source_directory_vcs"
@@ -147,7 +160,8 @@ function get_directory_changes() {
   local -r target_directory=$2
   local -r patch_path=$3
 
-  export GIT_DIR="$source_directory-copy/.git-yamdi"
+  GIT_DIR="$(make_user_path "$source_directory")/.git-yamdi"
+  export GIT_DIR
   export GIT_WORK_TREE="$target_directory"
   if [ ! -d "$GIT_DIR" ]; then
     info "No Git repo found. No changes."
