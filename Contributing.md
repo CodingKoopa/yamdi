@@ -2,7 +2,6 @@
 Contributions to this project are welcome via [Merge Requests](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) on [GitLab](https://gitlab.com/).
 
 ## General
-
 Refer to the [`.editorconfig`](.editorconfig) file for general formatting rules that apply to all files. This project's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) will check this using [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker).
 
 ## Bash
@@ -77,5 +76,4 @@ If a function exports any variables, they must be documented. Example:
 Exiting with a non-0 value for non-fatal errors is permitted.
 
 ## Infrastructure
-
 Infrastructure scripts, such as Docker and CI code, are held to a high standard. They should be exemplary, well commented pieces of code. Prefer long options to programs that support it, to improve readability. - note that BusyBox variants of common Unix tools often do not.
