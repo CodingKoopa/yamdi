@@ -17,6 +17,8 @@ services:
       YAMDI_CLEAN_FILES: "true"
       # Enable debug output.
       YAMDI_DEBUG: "true"
+      # To enable trace output, uncomment this.
+      # YAMDI_TRACE: "true"
       # Accept the EULA from the CLI, without requiring config files to be loaded in.
       YAMDI_JVM_OPTS: "-Dcom.mojang.eula.agree=true"
     # Don't restart. This is the default for Docker, and is only here for informational purposes.

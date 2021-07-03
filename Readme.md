@@ -465,6 +465,18 @@ services:
       YAMDI_DEBUG: "true"
 ```
 
+### Trace Mode
+YAMDI can be made to print every command it runs by setting the `YAMDI_TRACE` variable.
+```sh
+docker run --env YAMDI_TRACE="true" ...
+```
+```yml
+services:
+  yamdi:
+    environment:
+      YAMDI_TRACE: "true"
+```
+
 ## Credits
 YAMDI was started from [`docker-spigot`](https://github.com/AshDevFr/docker-spigot/) by AshDevFr, before everything was rewritten over time.
 

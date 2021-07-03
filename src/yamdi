@@ -306,6 +306,8 @@ readonly YAMDI_CLEAN_FILES
 readonly YAMDI_IGNORE_SERVER_PROPERTY_CHANGES
 : "${YAMDI_DEBUG:=false}"
 readonly YAMDI_DEBUG
+: "${YAMDI_TRACE:=false}"
+readonly YAMDI_TRACE
 # This is an undocumented option to silence a certain warning.
 : "${YAMDI_SKIP_VOLUME_CHECK:=false}"
 readonly YAMDI_SKIP_VOLUME_CHECK
@@ -344,6 +346,10 @@ else
   jvm_impl="hotspot"
 fi
 readonly jvm_impl
+
+if [ "$YAMDI_TRACE" = true ]; then
+  set -x
+fi
 
 if [ "$YAMDI_SKIP_VOLUME_CHECK" = false ] && [ -f $server_dir/volume-not-mounted ]; then
   error "There doesn't seem to be a Docker volume mounted to $server_dir! This means none of \
