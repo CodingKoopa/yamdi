@@ -142,9 +142,6 @@ import_directory() {
 #   - Path to output the patch to.
 # Outputs:
 #   - Status messages.
-# Variables Exported:
-#   - GIT_DIR: Location of the Git directory.
-#   - GIT_WORK_TREE: Location of the Git work tree.
 get_directory_changes() {
   source_directory=$1
   target_directory=$2
@@ -159,6 +156,7 @@ get_directory_changes() {
     info "Git repo found. Outputting changes to \"$patch_path\"."
     git diff >"$patch_path"
   fi
+  unset GIT_DIR GIT_WORK_TREE
 }
 
 # Given a minimum, maximum and "both" value, generate a JVM memory option string. If both the
