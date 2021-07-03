@@ -356,7 +356,21 @@ services:
 ```
 
 #### Memory Options
-The amount of memory to be used by the JVM for the BuildTools and the server can be separately set with the custom `YAMDI_BUILDTOOLS_MEMORY_AMOUNT` and `YAMDI_GAME_MEMORY_AMOUNT` variables, for example:
+The amount of memory allotted to the JVM should be set using the `YAMDI_GAME_MEMORY_AMOUNT` variable:
+```sh
+docker run --env YAMDI_GAME_MEMORY_AMOUNT="1G" ...
+```
+```yml
+services:
+  yamdi:
+    environment:
+      YAMDI_GAME_MEMORY_AMOUNT: "1G"
+```
+
+You can also set the minimum and maximum memory amounts separately, using the `YAMDI_GAME_MEMORY_AMOUNT_MIN` and `YAMDI_GAME_MEMORY_AMOUNT_MAX` variables, which have a higher precedence than `YAMDI_GAME_MEMORY_AMOUNT`
+
+##### BuildTools Memory Options
+The amount of memory alloted to the JVM while running BuildTools can be set using the `YAMDI_BUILDTOOLS_MEMORY_AMOUNT` variable:
 ```sh
 docker run --env YAMDI_BUILDTOOLS_MEMORY_AMOUNT="800M" --env YAMDI_GAME_MEMORY_AMOUNT="1G" ...
 ```
@@ -369,9 +383,9 @@ services:
 ```
 Here, the device only has 2GB of RAM available. BuildTools needs at least approximately 700 MB of RAM. However, if 1 GB is used for BuildTools, the same amount is also used for the child Java processes that BuildTools spawns, effectively doubling the amount of RAM that Java uses overall. Therefore, on limited machines, it is wise to use as little RAM for BuildTools as possible. Since it will be probably be desired for more RAM to be used for the server itself, two separate variables are provided.
 
-These variables will be assuming that you want to set the maximum and minimum memory amounts as the same, as this is usually desirable. However, `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN` and `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX`, as well as equivalents for `YAMDI_GAME_MEMORY_AMOUNT` are usable. If only one out of the `MIN` and `MAX` are provided, then it will be used for both.
+You can also use `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN` and `YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX` in the same way as their analogues for the game process.
 
-If nothing is specified, YAMDI defaults to a safe 1GB for both.
+If unspecified, the BuildTools variables will default
 
 #### Experimental Options
 By default, for HotSpot images, YAMDI applies experimental JVM options [suggested by Aiker](https://mcflags.emc.gs/) for performance. For OpenJ9 images, [Tux's JVM options](https://steinborn.me/posts/tuning-minecraft-openj9/) are used. This behavior can be disabled by setting `YAMDI_USE_SUGGESTED_JVM_OPTS` to false, although this shouldn't be done unless you have good reason to.

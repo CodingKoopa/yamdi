@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Quit on error and disallow undefined variable substitution.
-set -e
+set -eu
 
 # Prints a debug message, if enabled.
 # Arguments:
@@ -164,7 +164,6 @@ get_directory_changes() {
 # Arguments:
 #   - Number of minimum MB.
 #   - Number of maximum MB.
-#   - Number to be used for both minimum and maximum MB.
 # Outputs:
 #   - The generated JVM option string.
 # Variables Read:
@@ -173,31 +172,15 @@ get_directory_changes() {
 generate_memory_opts() {
   minimum="$1"
   maximum="$2"
-  both="$3"
 
-  if [ -n "$minimum" ] && [ -z "$maximum" ]; then
-    output="-Xms${minimum} -Xmx${minimum}"
-  elif [ -z "$minimum" ] && [ -n "$maximum" ]; then
-    output="-Xms${maximum} -Xmx${maximum}"
-  elif [ -n "$both" ]; then
-    output="-Xms${both} -Xmx${both}"
-  else
-    output="-Xms1024M -Xmx1024M"
-  fi
+  output="-Xms${minimum} -Xmx${minimum}"
 
-  # See the setting of most of these options, in the main script.
-  if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
-    # shellcheck disable=2154
-    if [ "$jvm_impl" = "openj9" ]; then
-      if [ -n "$maximum" ]; then
-        upper_bound="$maximum"
-      elif [ -n "$both" ]; then
-        upper_bound="$both"
-      else
-        upper_bound="1024"
-      fi
+  # shellcheck disable=2154
+  if [ "$jvm_impl" = "openj9" ]; then
+    # See the setting of most of these options, in the main script.
+    if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
       # Strip out the letter indicating the storage unit.
-      upper_bound=$(printf %s $upper_bound | grep -oE '[0-9]+')
+      upper_bound=$(printf %s "$maximum" | grep -oE '[0-9]+')
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
       # lived objects.
       output="$output -Xmns$(("$upper_bound" / 2))M"
@@ -249,18 +232,18 @@ exit_script() {
 # Outputs:
 #   - Status messages.
 # Variables Read:
-#   - JAVA_PID: The PID of the Java process.
+#   - java_pid: The PID of the Java process.
 stop() {
   info "$1 recieved."
-  if [ -n "$JAVA_PID" ]; then
-    info "Server is running with PID $JAVA_PID, sending stop command."
+  if [ -n "$java_pid" ]; then
+    info "Server is running with PID $java_pid, sending stop command."
     # Send the "stop" command to the server.
     cmd stop
     # Take over the job of quitting YAMDI, as the code at the end of this script won't be executed
     # as it normally would.
     info "Waiting for Java process to exit."
     set +e
-    wait "$JAVA_PID"
+    wait "$java_pid"
     java_ret=$?
     set -e
     exit_script $java_ret
@@ -283,6 +266,51 @@ info "Starting Yet Another Minecraft Docker Image."
 # command.
 trap "stop SIGINT" INT
 trap "stop SIGTERM" TERM
+
+# Setup defaults for documented YAMDI variables. Refer to the documentation for how these are used.
+
+# Temporarily allow reference of undefined variables so that we may use -n.
+set +u
+
+: "${YAMDI_SERVER_TYPE:=paper}"
+readonly YAMDI_SERVER_TYPE
+: "${YAMDI_MINECRAFT_VERSION:=latest}"
+: "${YAMDI_PAPER_BUILD:=latest}"
+: "${YAMDI_JVM_OPTS:=}"
+readonly YAMDI_JVM_OPTS
+# TODO: Calculate a more sensible default.
+: "${YAMDI_GAME_MEMORY_AMOUNT:=1024M}"
+readonly YAMDI_GAME_MEMORY_AMOUNT
+# Copy game max to buildtools max if game max is defined, and buildtools isn't.
+if [ -n "$YAMDI_GAME_MEMORY_AMOUNT_MAX" ] && [ -z "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" ]; then
+  YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX=$YAMDI_GAME_MEMORY_AMOUNT_MAX
+fi
+: "${YAMDI_GAME_MEMORY_AMOUNT_MAX:=$YAMDI_GAME_MEMORY_AMOUNT}"
+readonly YAMDI_GAME_MEMORY_AMOUNT_MAX
+if [ -n "$YAMDI_GAME_MEMORY_AMOUNT_MIN" ] && [ -z "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" ]; then
+  YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN=$YAMDI_GAME_MEMORY_AMOUNT_MAX
+fi
+: "${YAMDI_GAME_MEMORY_AMOUNT_MIN:=$YAMDI_GAME_MEMORY_AMOUNT_MAX}"
+readonly YAMDI_GAME_MEMORY_AMOUNT_MIN
+: "${YAMDI_BUILDTOOLS_MEMORY_AMOUNT:=$YAMDI_GAME_MEMORY_AMOUNT}"
+readonly YAMDI_BUILDTOOLS_MEMORY_AMOUNT
+: "${YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX:=$YAMDI_BUILDTOOLS_MEMORY_AMOUNT}"
+readonly YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX
+: "${YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN:=$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX}"
+readonly YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN
+: "${YAMDI_USE_SUGGESTED_JVM_OPTS:=true}"
+readonly YAMDI_USE_SUGGESTED_JVM_OPTS
+: "${YAMDI_CLEAN_FILES:=false}"
+readonly YAMDI_CLEAN_FILES
+: "${YAMDI_IGNORE_SERVER_PROPERTY_CHANGES:=true}"
+readonly YAMDI_IGNORE_SERVER_PROPERTY_CHANGES
+: "${YAMDI_DEBUG:=false}"
+readonly YAMDI_DEBUG
+# This is an undocumented option to silence a certain warning.
+: "${YAMDI_SKIP_VOLUME_CHECK:=false}"
+readonly YAMDI_SKIP_VOLUME_CHECK
+
+set -u
 
 # Setup variables that are expected to be set.
 
@@ -317,8 +345,7 @@ else
 fi
 readonly jvm_impl
 
-# TODO: After set -u is fixed, have this be = false.
-if [ ! "$YAMDI_SKIP_VOLUME_CHECK" = true ] && [ -f $server_dir/volume-not-mounted ]; then
+if [ "$YAMDI_SKIP_VOLUME_CHECK" = false ] && [ -f $server_dir/volume-not-mounted ]; then
   error "There doesn't seem to be a Docker volume mounted to $server_dir! This means none of \
 the server data will persist once this container is gone. This likely isn't want you want, exiting."
   exit 1
@@ -336,7 +363,7 @@ fi
 info "Importing server configuration files."
 import_directory "$server_config_host_dir" "$server_dir"
 # Ignore server properties unless explicitly told not to.
-if [ ! "$YAMDI_IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
+if [ "$YAMDI_IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
   # Allow this to fail, for the case in which we haven't setup a host config directory.
   git update-index --assume-unchanged "$server_dir/server.properties" 2>/dev/null || true
 fi
@@ -358,13 +385,6 @@ import_directory "$server_plugins_host_dir" "$server_dir/plugins"
 debug "Unsetting Git variables."
 unset GIT_DIR GIT_WORK_TREE
 
-if [ -z "$YAMDI_SERVER_TYPE" ]; then
-  YAMDI_SERVER_TYPE="spigot"
-fi
-if [ -z "$YAMDI_MINECRAFT_VERSION" ]; then
-  YAMDI_MINECRAFT_VERSION="latest"
-fi
-
 if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
@@ -377,7 +397,7 @@ if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
 
   # Only build a new spigot.jar if manually enabled, or if a jar for this REV does not already
   # exist.
-  if [ "$FORCE_SPIGOT_REBUILD" = true ] || [ ! -f "$spigot_revision_jar" ]; then
+  if [ ! -f "$spigot_revision_jar" ]; then
     debug "Building $server_name."
     # Build in a temporary directory.
     spigot_build_directory=/tmp/spigot-build
@@ -392,7 +412,7 @@ if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
 artifact/target/BuildTools.jar"
 
       buildtools_memory_opts=$(generate_memory_opts "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MIN" \
-        "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX" "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT")
+        "$YAMDI_BUILDTOOLS_MEMORY_AMOUNT_MAX")
       readonly buildtools_memory_opts
       total_buildtools_memory_opts="$buildtools_memory_opts $YAMDI_JVM_OPTS"
       readonly total_buildtools_memory_opts
@@ -419,9 +439,6 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
 
   server_jar="$server_dir/paper.jar"
   readonly server_jar
-  if [ -z "$YAMDI_PAPER_BUILD" ]; then
-    YAMDI_PAPER_BUILD="latest"
-  fi
 
   # Disable exit on error so that we can handle curl errors.
   set +e
@@ -534,9 +551,10 @@ rm -f "$command_input_file"
 mkfifo -m700 "$command_input_file"
 
 game_memory_opts=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" \
-  "$YAMDI_GAME_MEMORY_AMOUNT_MAX" "$YAMDI_GAME_MEMORY_AMOUNT")
+  "$YAMDI_GAME_MEMORY_AMOUNT_MAX")
 readonly game_memory_opts
 
+suggested_jvm_opts=""
 # Append suggested JVM options unless required not to.
 if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
   if [ "$jvm_impl" = "hotspot" ]; then
@@ -585,8 +603,6 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Disable explicit garbage collection, for the same reason as in hotspot.
     suggested_jvm_opts="$suggested_jvm_opts -Xdisableexplicitgc"
   fi
-else
-  suggested_jvm_opts=""
 fi
 readonly suggested_jvm_opts
 
@@ -597,11 +613,11 @@ info "Launching Java process for $server_name with JVM options \"$total_game_jvm
 # pipe. Execute it in the background, so we can still handle signals, and manage the "tail" process.
 # shellcheck disable=SC2086
 tail -f $command_input_file | java $total_game_jvm_opts -jar "$server_jar" nogui &
-export JAVA_PID=$!
+export java_pid=$!
 # Start a background subshell that we can use to monitor the background process.
 (
   # Wait for the Java process to exit.
-  while kill -0 $JAVA_PID 2>/dev/null; do sleep 1; done
+  while kill -0 $java_pid 2>/dev/null; do sleep 1; done
   # Kill the "tail" process that feeds commands to the "java" process. Without doing this, if the
   # "java" process exits, then the "tail" process will continue to exist. Since we're using POSIX
   # sh, we can't use process substitution or the pipefail option to alleviate this, as recommmended
@@ -611,13 +627,13 @@ export JAVA_PID=$!
   # "wait" command will wait indefinitely.
   kill "$(pidof tail)"
 ) &
-info "Waiting for Java process (PID $JAVA_PID) to exit."
+info "Waiting for Java process (PID $java_pid) to exit."
 # Allow wait to return an error without making the whole script exit.
 set +e
 # Wait for the Java process to exit. This may seem redundant with the prior while loop; the purpose
 # of this one is to capture the exit code, which is useful to determine whether the process exited
 # peacefully.
-wait $JAVA_PID
+wait $java_pid
 java_ret=$?
 set -e
 debug "Java process exited (return $java_ret)."
