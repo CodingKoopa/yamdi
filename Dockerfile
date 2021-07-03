@@ -154,8 +154,10 @@ ENTRYPOINT ["/bin/sh", "-c", \
   # See here for more info: https://github.com/moby/moby/issues/2259.
   "chown -R nonroot:nonroot /opt/yamdi/user && \
   # Execute yamdi, as the non-root user, specifying the login shell because the system user doesn't
-  # have one defined. Using exec ensures that yamdi replaces the current process.
-  exec su -c yamdi -s /bin/sh nonroot"]
+  # have one defined. Using exec ensures that yamdi replaces the current process. It's necessary to
+  # specify the full path to the executable because Debian's "su" implementation doesn't preserve
+  # the PATH.
+  exec su -c /opt/yamdi/yamdi -s /bin/sh nonroot"]
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
