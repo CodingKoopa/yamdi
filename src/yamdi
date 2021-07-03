@@ -66,8 +66,7 @@ import_directory() {
   source_directory=$1
   target_directory=$2
 
-  # If the directory is empty or doesn't exist. An unmounted Docker volume should be an empty
-  # directory. (TODO: update this comment)
+  # If the directory is empty or doesn't exist.
   if [ -z "$(ls -A "$source_directory")" ] || [ ! -d "$source_directory" ]; then
     warning "No files to import."
     return 0
