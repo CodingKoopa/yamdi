@@ -241,8 +241,7 @@ exit_script() {
   exit "$java_ret"
 }
 
-# Stops the server, and exits the script. This function can handle SIGINT and SIGTERM signals. This
-# function needs "utils.sh" to be sourced.
+# Stops the server, and exits the script.
 # Arguments:
 #   - The name of the signal received.
 # Outputs:
