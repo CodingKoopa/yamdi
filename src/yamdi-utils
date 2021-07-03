@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Set the directory for YAMDI data to be kept.
-export YAMDI_DIRECTORY="/opt/yamdi/"
+export YAMDI_DIRECTORY="/opt/yamdi"
 # Set the directory for the server host configuration to be kept.
 export SERVER_CONFIG_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-config-host"
 # Set the directory for the server host plugins to be kept.
 export SERVER_PLUGINS_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-plugins-host"
 # Set the directory for user data to be kept.
-export USER_DIRECTORY="$YAMDI_DIRECTORY/user/"
+export USER_DIRECTORY="$YAMDI_DIRECTORY/user"
 # Set the directory for the server installation to be kept.
 export SERVER_DIRECTORY="$USER_DIRECTORY/server"
 # Set the directory for the command named pipe to be.
