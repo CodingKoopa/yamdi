@@ -1,10 +1,7 @@
 #!/bin/sh
 
-# shellcheck source=src/yamdi-utils
-. yamdi-utils
-
 if [ "$(whoami)" != nonroot ]; then
-  su -c "echo \"$*\" >\"$COMMAND_INPUT_FILE\"" -s /bin/sh nonroot
+  su -c "echo \"$*\" >/tmp/server-commmand-input" -s /bin/sh nonroot
 else
-  echo "$@" >"$COMMAND_INPUT_FILE"
+  echo "$@" >/tmp/server-commmand-input
 fi
