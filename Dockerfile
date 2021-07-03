@@ -160,4 +160,4 @@ ENTRYPOINT ["/bin/sh", "-c", \
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
-COPY src/yamdi src/cmd src/yamdi-utils /opt/yamdi/bin/
+COPY src/yamdi src/cmd /opt/yamdi/bin/
