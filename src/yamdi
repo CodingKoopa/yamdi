@@ -47,7 +47,7 @@ error() {
 # Outputs:
 #   - The corresponding user subdirectory, that should be writable.
 make_user_path() {
-  printf %s "$USER_DIRECTORY/$(basename "$1")-copy"
+  printf %s "$user_dir/$(basename "$1")-copy"
 }
 
 # Initializes a new temporary Git directory, makes a commit for it, and merges its contents with a
@@ -168,6 +168,9 @@ get_directory_changes() {
 #   - Number to be used for both minimum and maximum MB.
 # Outputs:
 #   - The generated JVM option string.
+# Variables Read:
+#   - YAMDI_USE_SUGGESTED_JVM_OPTS: See readme.
+#   - jvm_impl: The JVM implementation.
 generate_memory_opts() {
   minimum="$1"
   maximum="$2"
@@ -216,9 +219,9 @@ generate_memory_opts() {
 # Returns:
 #   - The same Java return code.
 # Variables Read:
-#   - SERVER_CONFIG_HOST_DIRECTORY: Location of the mountpoint of the host's configuration
+#   - server_config_host_dir: Location of the mountpoint of the host's configuration
 # directory.
-#   - SERVER_DIRECTORY: Location of the containerized server directory.
+#   - server_dir: Location of the containerized server directory.
 exit_script() {
   java_ret=$1
   readonly java_ret
@@ -231,11 +234,11 @@ exit_script() {
     info "Java process return is 0, didn't crash. Checking files for changes."
 
     info "Checking server configuration files."
-    get_directory_changes "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY" \
-      "$SERVER_DIRECTORY/config.patch"
+    get_directory_changes "$server_config_host_dir" "$server_dir" \
+      "$server_dir/config.patch"
     info "Checking server plugin files."
-    get_directory_changes "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins" \
-      "$SERVER_DIRECTORY/plugins.patch"
+    get_directory_changes "$server_plugins_host_dir" "$server_dir/plugins" \
+      "$server_dir/plugins.patch"
   fi
 
   exit "$java_ret"
@@ -283,18 +286,25 @@ trap "stop SIGINT" INT
 trap "stop SIGTERM" TERM
 
 # Setup variables that are expected to be set.
+
 # Set the directory for YAMDI data to be kept.
-export YAMDI_DIRECTORY="/opt/yamdi"
+yamdi_dir="/opt/yamdi"
+readonly yamdi_dir
 # Set the directory for the server host configuration to be kept.
-export SERVER_CONFIG_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-config-host"
+server_config_host_dir="$yamdi_dir/server-config-host"
+readonly server_config_host_dir
 # Set the directory for the server host plugins to be kept.
-export SERVER_PLUGINS_HOST_DIRECTORY="$YAMDI_DIRECTORY/server-plugins-host"
+server_plugins_host_dir="$yamdi_dir/server-plugins-host"
+readonly server_plugins_host_dir
 # Set the directory for user data to be kept.
-export USER_DIRECTORY="$YAMDI_DIRECTORY/user"
+user_dir="$yamdi_dir/user"
+readonly user_dir
 # Set the directory for the server installation to be kept.
-export SERVER_DIRECTORY="$USER_DIRECTORY/server"
+server_dir="$user_dir/server"
+readonly server_dir
 # Set the directory for the command named pipe to be.
-export COMMAND_INPUT_FILE="/tmp/server-commmand-input"
+command_input_file="/tmp/server-commmand-input"
+readonly command_input_file
 
 # Print and capture the Java version.
 info "Java version:"
@@ -309,8 +319,8 @@ fi
 readonly jvm_impl
 
 # TODO: After set -u is fixed, have this be = false.
-if [ ! "$YAMDI_SKIP_VOLUME_CHECK" = true ] && [ -f $SERVER_DIRECTORY/volume-not-mounted ]; then
-  error "There doesn't seem to be a Docker volume mounted to $SERVER_DIRECTORY! This means none of \
+if [ ! "$YAMDI_SKIP_VOLUME_CHECK" = true ] && [ -f $server_dir/volume-not-mounted ]; then
+  error "There doesn't seem to be a Docker volume mounted to $server_dir! This means none of \
 the server data will persist once this container is gone. This likely isn't want you want, exiting."
   exit 1
 fi
@@ -325,14 +335,14 @@ if [ "$YAMDI_CLEAN_FILES" = true ]; then
 fi
 
 info "Importing server configuration files."
-import_directory "$SERVER_CONFIG_HOST_DIRECTORY" "$SERVER_DIRECTORY"
+import_directory "$server_config_host_dir" "$server_dir"
 # Ignore server properties unless explicitly told not to.
 if [ ! "$YAMDI_IGNORE_SERVER_PROPERTY_CHANGES" = false ]; then
   # Allow this to fail, for the case in which we haven't setup a host config directory.
-  git update-index --assume-unchanged "$SERVER_DIRECTORY/server.properties" 2>/dev/null || true
+  git update-index --assume-unchanged "$server_dir/server.properties" 2>/dev/null || true
 fi
 
-if [ -d "$SERVER_DIRECTORY/plugins" ]; then
+if [ -d "$server_dir/plugins" ]; then
   # If we aren't doing a clean, don't go any further than the root JARs. If we do go further, then
   # JARs in subdirectories will be cleaned, mostly consisting of plugin dependency JARs.
   if [ ! "$YAMDI_CLEAN_FILES" = true ]; then
@@ -340,10 +350,10 @@ if [ -d "$SERVER_DIRECTORY/plugins" ]; then
     readonly _shallow
   fi
   # Delete pre-existing JARs because, otherwise they will persist when/if new JARs are added.
-  find "$SERVER_DIRECTORY/plugins" ${_shallow:+-maxdepth 1} -name "*.jar" -type f -delete
+  find "$server_dir/plugins" ${_shallow:+-maxdepth 1} -name "*.jar" -type f -delete
 fi
 info "Importing server plugin files."
-import_directory "$SERVER_PLUGINS_HOST_DIRECTORY" "$SERVER_DIRECTORY/plugins"
+import_directory "$server_plugins_host_dir" "$server_dir/plugins"
 
 # This is necessary because of Spigot BuildTools needing to use Git.
 debug "Unsetting Git variables."
@@ -359,9 +369,9 @@ fi
 if [ "$YAMDI_SERVER_TYPE" = "spigot" ]; then
   info "Spigot server selected."
 
-  server_jar="$SERVER_DIRECTORY/spigot.jar"
+  server_jar="$server_dir/spigot.jar"
   readonly server_jar
-  spigot_revision_jar="$SERVER_DIRECTORY/spigot-$YAMDI_MINECRAFT_VERSION.jar"
+  spigot_revision_jar="$server_dir/spigot-$YAMDI_MINECRAFT_VERSION.jar"
   readonly spigot_revision_jar
   server_name="Spigot-$YAMDI_MINECRAFT_VERSION"
   readonly server_name
@@ -408,7 +418,7 @@ artifact/target/BuildTools.jar"
 elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   info "Paper server selected."
 
-  server_jar="$SERVER_DIRECTORY/paper.jar"
+  server_jar="$server_dir/paper.jar"
   readonly server_jar
   if [ -z "$YAMDI_PAPER_BUILD" ]; then
     YAMDI_PAPER_BUILD="latest"
@@ -485,7 +495,7 @@ versions/$YAMDI_MINECRAFT_VERSION/builds/$YAMDI_PAPER_BUILD")
   paper_build_jar_name=$(printf %s "$build_json" | jq .downloads.application.name | sed s/\"//g)
   readonly paper_build_jar_name
 
-  paper_revision_jar="$SERVER_DIRECTORY/\
+  paper_revision_jar="$server_dir/\
 $YAMDI_SERVER_TYPE-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD.jar"
   readonly paper_revision_jar
   server_name="Paper-$YAMDI_MINECRAFT_VERSION-$YAMDI_PAPER_BUILD"
@@ -514,16 +524,15 @@ fi
 
 # Perform server JAR cleanup.
 if [ "$YAMDI_CLEAN_FILES" = true ]; then
-  find "$SERVER_DIRECTORY" -maxdepth 1 \
+  find "$server_dir" -maxdepth 1 \
     \( -name "*.jar" ! -name "$(basename "$(readlink "$server_jar")")" \) -type f -delete
 fi
 
 # Make sure the command input file is clear.
-rm -f "$COMMAND_INPUT_FILE"
-# Make a named pipe for sending commands to the server. It is important that the permissions are
-# 700 because, if they were world writeable, any user could run a server command with administrator
-# priviledges.
-mkfifo -m700 "$COMMAND_INPUT_FILE"
+rm -f "$command_input_file"
+# Make a named pipe for sending commands to the server. The permissions 700 because, if they were
+# world writeable, then any user could run a server command with administrator priviledges.
+mkfifo -m700 "$command_input_file"
 
 game_memory_opts=$(generate_memory_opts "$YAMDI_GAME_MEMORY_AMOUNT_MIN" \
   "$YAMDI_GAME_MEMORY_AMOUNT_MAX" "$YAMDI_GAME_MEMORY_AMOUNT")
@@ -577,7 +586,10 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Disable explicit garbage collection, for the same reason as in hotspot.
     suggested_jvm_opts="$suggested_jvm_opts -Xdisableexplicitgc"
   fi
+else
+  suggested_jvm_opts=""
 fi
+readonly suggested_jvm_opts
 
 total_game_jvm_opts="$game_memory_opts $suggested_jvm_opts $YAMDI_JVM_OPTS"
 readonly total_game_jvm_opts
@@ -585,7 +597,7 @@ info "Launching Java process for $server_name with JVM options \"$total_game_jvm
 # Start the launcher with the options we've put together, while feeding it input from the named
 # pipe. Execute it in the background, so we can still handle signals, and manage the "tail" process.
 # shellcheck disable=SC2086
-tail -f $COMMAND_INPUT_FILE | java $total_game_jvm_opts -jar "$server_jar" nogui &
+tail -f $command_input_file | java $total_game_jvm_opts -jar "$server_jar" nogui &
 export JAVA_PID=$!
 # Start a background subshell that we can use to monitor the background process.
 (
