@@ -143,8 +143,8 @@ VOLUME /opt/yamdi/user/server /opt/yamdi/server-config-host /opt/yamdi/server-pl
 # Expose the Minecraft server port and Dynmap web port.
 EXPOSE 25565 8123
 
-# Append the YAMDI directory to the path to make it accessible.
-ENV PATH=/opt/yamdi:$PATH
+# Append the YAMDI directory to the path to make the "yamdi" and "cmd" executables accessible.
+ENV PATH=/opt/yamdi/bin:$PATH
 
 ENTRYPOINT ["/bin/sh", "-c", \
   # At startup, running as root, transfer ownership of the user directory to the non-root user. This
@@ -161,4 +161,4 @@ ENTRYPOINT ["/bin/sh", "-c", \
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
-COPY src/yamdi src/cmd src/yamdi-utils /opt/yamdi/
+COPY src/yamdi src/cmd src/yamdi-utils /opt/yamdi/bin/
