@@ -198,7 +198,7 @@ generate_memory_opts() {
         upper_bound="1024"
       fi
       # Strip out the letter indicating the storage unit.
-      upper_bound=$(echo $upper_bound | grep -oE '[0-9]+')
+      upper_bound=$(printf %s $upper_bound | grep -oE '[0-9]+')
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
       # lived objects.
       output="$output -Xmns$(("$upper_bound" / 2))M"
@@ -207,7 +207,7 @@ generate_memory_opts() {
     fi
   fi
 
-  echo "$output"
+  printf %s "$output"
 }
 
 # Exits YAMDI, saving the patch for any changes that have been made to the configuration files by
@@ -450,14 +450,14 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
     readonly versions_json
 
     handle_curl_errors
-    version_json_error=$(echo "$versions_json" | jq .error)
+    version_json_error=$(printf %s "$versions_json" | jq .error)
     readonly version_json_error
     if [ ! "null" = "$version_json_error" ]; then
       error "Failed to fetch Paper versions. Curl error: \"$version_json_error\"."
       exit 2
     fi
 
-    YAMDI_MINECRAFT_VERSION=$(echo "$versions_json" | jq .versions[-1] | sed s/\"//g)
+    YAMDI_MINECRAFT_VERSION=$(printf %s "$versions_json" | jq .versions[-1] | sed s/\"//g)
   fi
   debug "Paper revision: \"$YAMDI_MINECRAFT_VERSION\"."
 
@@ -468,14 +468,14 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
     readonly builds_json
 
     handle_curl_errors
-    builds_json_error=$(echo "$builds_json" | jq .error)
+    builds_json_error=$(printf %s "$builds_json" | jq .error)
     readonly builds_json_error
     if [ ! "null" = "$builds_json_error" ]; then
       error "Failed to fetch Paper build info. Curl error: \"$builds_json_error\"."
       exit 2
     fi
 
-    YAMDI_PAPER_BUILD=$(echo "$builds_json" | jq .builds[-1] | sed s/\"//g)
+    YAMDI_PAPER_BUILD=$(printf %s "$builds_json" | jq .builds[-1] | sed s/\"//g)
   fi
   debug "Paper build: \"$YAMDI_PAPER_BUILD\"."
 

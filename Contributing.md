@@ -11,9 +11,10 @@ All shell scripts should:
 
 Both of these will be checked by CI.
 
-Additionally, the [Google Shell Style Guide](https://google.github.io/styleguide/shell.xml) should be followed. The exceptions to this reference practiced are:
+Additionally, the [Google Shell Style Guide](https://google.github.io/styleguide/shell.xml) should be followed. The exceptions/additions to this reference practiced are:
 - `main` is not used.
 - Executable scripts should be named with kebab case.
+- Prefer `printf` over `echo` because the latter is nonstandard.
 - Comments should be made as described below.
 
 ### Function Documentation

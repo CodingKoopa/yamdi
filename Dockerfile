@@ -70,7 +70,7 @@ RUN \
   \
   # Handle any other cases.
   else \
-  echo >&2 "Error: Could not find a suitable package manager to use in this image."; \
+  printf >&2 "Error: Could not find a suitable package manager to use in this image.\n"; \
   return 1; \
   fi; \
   \
@@ -96,7 +96,7 @@ RUN \
   groupadd --gid 10001 --system nonroot; \
   # Handle any other cases.
   else \
-  echo >&2 "Error: Could not find a way to add a group to use in this image."; \
+  printf >&2 "Error: Could not find a way to add a group to use in this image.\n"; \
   return 1; \
   fi; \
   \
@@ -117,7 +117,7 @@ RUN \
   \
   # Handle any other cases.
   else \
-  echo >&2 "Error: Could not find a way to add a user in this image."; \
+  printf >&2 "Error: Could not find a way to add a user in this image.\n"; \
   return 1; \
   fi; \
   \
