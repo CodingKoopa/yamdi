@@ -75,11 +75,11 @@ build:
     - args="$args --push"; fi
     # If we are building for any architectures other than our own.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
-    # Create a new builder instance whose driver will support multi-arch building.
-    - docker buildx create --use;
-    # Configure binfmt_misc to use QEMU. This is necessary to fix this issue:
+      # Configure binfmt_misc to use QEMU. This is necessary to fix this issue:
     # https://github.com/docker/buildx/issues/584
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes; fi
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # Create a new builder instance whose driver will support multi-arch building.
+    - docker buildx create --use; fi
     # We schedule daily builds so that security fixes can be integrated into the builds, in which
     # case we don't want to cache anything. If this is a job triggered by a commit, though, we can
     # cache all we want and get fast builds. Here, we selectively choose the sources for which we
