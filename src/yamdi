@@ -158,6 +158,15 @@ get_directory_changes() {
   unset GIT_DIR GIT_WORK_TREE
 }
 
+# Strips out non-digit characters from a string.
+# Arguments:
+#   - The input string.
+# Outputs:
+#   - The stripped string.
+strip_str() {
+  printf %s "$1" | grep -oE '[0-9]+'
+}
+
 # Given a minimum, maximum and "both" value, generate a JVM memory option string. If both the
 # min and max and set, they will be use respectively. If only one is set, it will be used for
 # both.
@@ -180,7 +189,7 @@ generate_memory_opts() {
     # See the setting of most of these options, in the main script.
     if [ "$YAMDI_USE_SUGGESTED_JVM_OPTS" = true ]; then
       # Strip out the letter indicating the storage unit.
-      upper_bound=$(printf %s "$maximum" | grep -oE '[0-9]+')
+      upper_bound=$(strip_str "$maximum")
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
       # lived objects.
       output="$output -Xmns$(("$upper_bound" / 2))M"
@@ -569,6 +578,17 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
 
     # The rest of these options are taken from here: https://mcflags.emc.gs/.
 
+    if [ "$(strip_str "$YAMDI_GAME_MEMORY_AMOUNT_MAX")" -gt 12 ]; then
+      l=true
+      readonly l
+      # Just in case, make sure the alternate variable doesn't exist (it really shouldn't).
+      unset s
+    else
+      s=true
+      readonly s
+      unset l
+    fi
+
     # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
     suggested_jvm_opts="$suggested_jvm_opts -XX:+UseG1GC"
     # Allow garbage collection to use multiple threads, for performance.
@@ -583,19 +603,19 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Reserve process memory ahead of time.
     suggested_jvm_opts="$suggested_jvm_opts -XX:+AlwaysPreTouch"
     # Raise the size of the new generation to keep up with MC's allocations, because MC has many.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1NewSizePercent=30"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1NewSizePercent=${s:+30}${l:+40}"
     # Adjust the max size of the new generation accordingly.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MaxNewSizePercent=40"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MaxNewSizePercent=${s:+40}${l:+50}"
     # Raise the size a G1 region to raise the bar for what is deemed a "Humongous" allocation.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1HeapRegionSize=8M"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1HeapRegionSize=${s:+8M}${l:+16M}"
     # Raise the amount of memory reserved, to avoid "to-space exhaustion".
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1ReservePercent=20"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1ReservePercent=${s:+20}${l:+15}"
     # Aikar didn't include an explanation for this one.
     suggested_jvm_opts="$suggested_jvm_opts -XX:G1HeapWastePercent=5"
     # Reclaim old generation memory faster to avoid running out.
     suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCCountTarget=4"
     # Aikar didn't include an explanation for this one.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:InitiatingHeapOccupancyPercent=15"
+    suggested_jvm_opts="$suggested_jvm_opts -XX:InitiatingHeapOccupancyPercent=${s:+15}${l:+20}"
     # Lower the garbage collection threshold, to make cleanups not as demanding.
     suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCLiveThresholdPercent=90"
     # Lower the time spent during pause spend updating Rsets to reduce pause durations.
