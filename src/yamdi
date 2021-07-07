@@ -178,7 +178,7 @@ generate_memory_opts() {
   # shellcheck disable=2154
   if [ "$jvm_impl" = "openj9" ]; then
     # See the setting of most of these options, in the main script.
-    if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
+    if [ "$YAMDI_USE_SUGGESTED_JVM_OPTS" = true ]; then
       # Strip out the letter indicating the storage unit.
       upper_bound=$(printf %s "$maximum" | grep -oE '[0-9]+')
       # Set the nursery minimum to 50% of the heap size from 25%, to allow more space for short
@@ -377,7 +377,7 @@ fi
 if [ -d "$server_dir/plugins" ]; then
   # If we aren't doing a clean, don't go any further than the root JARs. If we do go further, then
   # JARs in subdirectories will be cleaned, mostly consisting of plugin dependency JARs.
-  if [ ! "$YAMDI_CLEAN_FILES" = true ]; then
+  if [ "$YAMDI_CLEAN_FILES" = false ]; then
     _shallow=true
     readonly _shallow
   fi
