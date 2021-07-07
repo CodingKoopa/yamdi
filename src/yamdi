@@ -567,33 +567,46 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Set the error file path to include the server info.
     suggested_jvm_opts="$suggested_jvm_opts -XX:ErrorFile=./$server_name-error-pid%p.log"
 
-    # Enable experimental VM features, for the options we'll be setting. Although this is not
-    # listed in the documentation for "java", when I tested an experimental feature in a YAMDI
-    # container, this was necessary. These options are largely taken from here:
-    # https://mcflags.emc.gs/.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:+UnlockExperimentalVMOptions"
+    # The rest of these options are taken from here: https://mcflags.emc.gs/.
 
     # Ensure that the G1 garbage collector is enabled, because in some cases it isn't the default.
     suggested_jvm_opts="$suggested_jvm_opts -XX:+UseG1GC"
-    # Don't reserve memory, because this option seems to break and cause OOM errors when running in
-    # Docker.
-    # suggested_jvm_opts="$suggested_jvm_opts -XX:+AlwaysPreTouch"
-    # Disable explicit garbage collection, because some plugins try to manage their own memory and
-    # suck at it.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:+DisableExplicitGC"
-    # Adjust the max size of the new generation that will be set later.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MaxNewSizePercent=80"
-    # Lower the garbage collection threshold, to make cleanups not as demanding.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCLiveThresholdPercent=35"
-    # Raise the New Generation size to keep up with MC's allocations, because MC has many.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:G1NewSizePercent=50"
-    # Take 100ms at the most to collect garbage.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:MaxGCPauseMillis=100"
     # Allow garbage collection to use multiple threads, for performance.
     suggested_jvm_opts="$suggested_jvm_opts -XX:+ParallelRefProcEnabled"
-    # Set the garbage collection target survivor ratio higher to use more of the survivor space
-    # before promoting it, because MC has steady allocations.
-    suggested_jvm_opts="$suggested_jvm_opts -XX:TargetSurvivorRatio=90"
+    # Set the target maximum time to take to collect garbage.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:MaxGCPauseMillis=200"
+    # Enable experimental VM features, for some of the options we'll be setting.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+UnlockExperimentalVMOptions"
+    # Disable explicit garbage collection, because some plugins try to manage their own memory and
+    # are bad at it.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+DisableExplicitGC"
+    # Reserve process memory ahead of time.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+AlwaysPreTouch"
+    # Raise the size of the new generation to keep up with MC's allocations, because MC has many.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1NewSizePercent=30"
+    # Adjust the max size of the new generation accordingly.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MaxNewSizePercent=40"
+    # Raise the size a G1 region to raise the bar for what is deemed a "Humongous" allocation.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1HeapRegionSize=8M"
+    # Raise the amount of memory reserved, to avoid "to-space exhaustion".
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1ReservePercent=20"
+    # Aikar didn't include an explanation for this one.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1HeapWastePercent=5"
+    # Reclaim old generation memory faster to avoid running out.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCCountTarget=4"
+    # Aikar didn't include an explanation for this one.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:InitiatingHeapOccupancyPercent=15"
+    # Lower the garbage collection threshold, to make cleanups not as demanding.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1MixedGCLiveThresholdPercent=90"
+    # Lower the time spent during pause spend updating Rsets to reduce pause durations.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:G1RSetUpdatingPauseTimePercent=5"
+    # Lower the space allocated for survivors since we reduced MaxTenuringThreshold.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:SurvivorRatio=32"
+    # Disallow GC from writing to file system, because this can cause latency.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:+PerfDisableSharedMem"
+    # Don't promote transient data to the old generation; assume anything surviving more than one
+    # GC pass is going to be long-lived.
+    suggested_jvm_opts="$suggested_jvm_opts -XX:MaxTenuringThreshold=1"
   elif [ "$jvm_impl" = "openj9" ]; then
     # These options are largely taken from here:
     # https://steinborn.me/posts/tuning-minecraft-openj9/.
