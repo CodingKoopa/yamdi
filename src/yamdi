@@ -607,6 +607,10 @@ if [ ! "$YAMDI_USE_SUGGESTED_JVM_OPTS" = false ]; then
     # Don't promote transient data to the old generation; assume anything surviving more than one
     # GC pass is going to be long-lived.
     suggested_jvm_opts="$suggested_jvm_opts -XX:MaxTenuringThreshold=1"
+    # Advertise our usage of Aikar's flags.
+    suggested_jvm_opts="$suggested_jvm_opts -Dusing.aikars.flags=https://mcflags.emc.gs"
+    # Advertise our usage of the updated flags for 1.15.
+    suggested_jvm_opts="$suggested_jvm_opts -Daikars.new.flags=true"
   elif [ "$jvm_impl" = "openj9" ]; then
     # These options are largely taken from here:
     # https://steinborn.me/posts/tuning-minecraft-openj9/.
