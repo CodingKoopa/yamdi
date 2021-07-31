@@ -71,7 +71,7 @@ RUN \
   # Handle any other cases.
   else \
   printf >&2 "Error: Could not find a suitable package manager to use in this image.\n"; \
-  return 1; \
+  exit 1; \
   fi; \
   \
   # Add the non-root group that we'll add the non-root user to. We create the group in a separate
@@ -118,7 +118,7 @@ RUN \
   # Handle any other cases.
   else \
   printf >&2 "Error: Could not find a way to add a user in this image.\n"; \
-  return 1; \
+  exit 1; \
   fi; \
   \
   # Create the user subdirectory that the non-root user will be using. It's necessary to create and
