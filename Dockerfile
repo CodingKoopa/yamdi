@@ -156,11 +156,20 @@ ENTRYPOINT ["/bin/sh", "-c", \
   # doesn't provide a mechanism to mount the volume as nonroot to begin with.
   #
   # See here for more info: https://github.com/moby/moby/issues/2259.
-  "chown -R nonroot:nonroot /opt/yamdi/user && \
-  # Execute yamdi, as the non-root user, specifying the login shell because the system user doesn't
-  # have one defined. Using exec ensures that yamdi replaces the current process. It's necessary to
-  # pass through the path
-  exec su -c \"PATH=$PATH yamdi\" -s /bin/sh nonroot"]
+  "chown -R nonroot:nonroot /opt/yamdi/user; \
+  # Check if we have the BusyBox implementation of "su". In my testing, only on Alpine Linux does
+  # "exec su" produce the desired results. See: https://gitlab.com/CodingKoopa/yamdi/-/issues/46.
+  if su --help 2>&1 | grep -q BusyBox; then \
+  # Execute YAMDI, as the non-root user, specifying the login shell because the system user doesn't
+  # have one defined. Using exec ensures that the script receives signals.
+  exec su -c \"PATH=$PATH yamdi\" -s /bin/sh nonroot; \
+  else \
+  # Update the HOME variable because, when we run setpriv, we can't reset the environment variables
+  # without restricting ourselves to a PATH that doesn't include YAMDI or Java.
+  export HOME=/home/nonroot; \
+  # Execute YAMDI, as the non-root user, using exec ensures that the script receives signals.
+  exec setpriv --reuid=nonroot --regid=nonroot --init-groups yamdi; \
+  fi"]
 
 # Copy the scripts into the YAMDI directory. This step is done last to get the fastest builds while
 # developing YAMDI.
