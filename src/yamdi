@@ -146,7 +146,7 @@ get_directory_changes() {
   target_directory=$2
   patch_path=$3
 
-  GIT_DIR="$(make_user_path "$source_directory")/.git-yamdi"
+  GIT_DIR=$(make_user_path "$source_directory")/.git-yamdi || true
   export GIT_DIR
   export GIT_WORK_TREE="$target_directory"
   if [ ! -d "$GIT_DIR" ]; then
