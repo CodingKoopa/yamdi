@@ -21,6 +21,7 @@ RUN \
   \
   # Handle Advanced Package Tool, used on Debian, Ubuntu, and other Debian derivations. Both apt-get
   # and apt are usually available; the former is preferable for scripting purposes.
+  # This can be tested using the Ubuntu variant of the unofficial AdoptOpenJDK image.
   if command -v apt-get > /dev/null; then \
   # Indicate that no input can be given. This is for any tools that may be called by apt-get; for
   # apt-get itself we still have to use the command line argument.
@@ -37,6 +38,7 @@ RUN \
   rm -rf /var/lib/apt/lists/*; \
   \
   # Handle Alpine Package Keeper, used on Alpine Linux.
+  # This can be tested using the Alpine JRE variant of the unofficial AdoptOpenJDK image.
   elif command -v apk > /dev/null; then \
   # Update the package index, because the official Alpine Linux package does not ship with one,
   # since it would get stale quickly.
@@ -49,6 +51,7 @@ RUN \
   rm -rf /var/cache/apk/*; \
   \
   # Handle Dandified YUM, used by newer versions of RHEL and Fedora.
+  # This can be tested using the UBI JRE variant of the unofficial AdoptOpenJDK image.
   elif command -v dnf > /dev/null; then \
   \
   # Update the currently installed packages, limited to upgrades that provide a bugfix, enhancement,
@@ -60,6 +63,7 @@ RUN \
   dnf clean all; \
   \
   # Handle Yellowdog Updater, Modified, used by Oracle Linux.
+  # This can be tested using the CentOS JRE variant of the unofficial AdoptOpenJDK image.
   elif command -v yum > /dev/null; then \
   # Update the currently installed packages, because the base image may not be caught up.
   yum --assumeyes update; \
