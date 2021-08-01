@@ -101,7 +101,7 @@ RUN \
   # Handle any other cases.
   else \
   printf >&2 "Error: Could not find a way to add a group to use in this image.\n"; \
-  return 1; \
+  exit 1; \
   fi; \
   \
   # Add the non-root user that we'll add the non-root user to. See here for more info:
