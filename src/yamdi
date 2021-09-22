@@ -146,6 +146,10 @@ get_directory_changes() {
   target_directory=$2
   patch_path=$3
 
+  # We have to override the exit code of this command because it returns the SIGTERM (and probably
+  # SIGINT respectively) error code, exiting the script because of "set -e". *Why* this command
+  # produces an error code, I can't think of a conceivable reason for, nor can I isolate this with
+  # a separate testcase script.
   GIT_DIR=$(make_user_path "$source_directory")/.git-yamdi || true
   export GIT_DIR
   export GIT_WORK_TREE="$target_directory"
