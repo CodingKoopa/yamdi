@@ -1,13 +1,13 @@
 variables:
-  YAMDI_DOCKER_REGISTRY:
+  DOCKER_REGISTRY:
     description: "URL of the Docker registry to use."
     # The v2 registry seems to have authentication issues when used here.
     value: "https://index.docker.io/v1/"
-  YAMDI_DOCKER_USER:
+  DOCKER_USER:
     description: "Username of the registry user."
-  YAMDI_DOCKER_PASS:
+  DOCKER_PASS:
     description: "Password of the registry user."
-  YAMDI_DOCKER_IMAGE:
+  DOCKER_IMAGE:
     description: "Image to push to."
 
 # Define the stages.
@@ -69,8 +69,8 @@ build:
     - if [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
     # Log into the Docker registry.
     - |
-      printf %s "$YAMDI_DOCKER_PASS" | docker login "$YAMDI_DOCKER_REGISTRY" \
-      --username "$YAMDI_DOCKER_USER" --password-stdin
+      printf %s "$DOCKER_PASS" | docker login "$DOCKER_REGISTRY" \
+      --username "$DOCKER_USER" --password-stdin
     # Append the push argument.
     - args="$args --push"; fi
     # If we are building for any architectures other than our own.
@@ -91,13 +91,13 @@ build:
         [ "$CI_PIPELINE_SOURCE" = "webide" ]; then
     # Cache from the first tag belonging to this job. this is arbitrary - unless the CI
     # configuration has changed, any of the tags would work.
-    - args="$args --cache-from $YAMDI_DOCKER_IMAGE:$(printf %s "$YAMDI_TAGS" | cut -d' ' -f1)"; fi
+    - args="$args --cache-from $DOCKER_IMAGE:$(printf %s "$YAMDI_TAGS" | cut -d' ' -f1)"; fi
     # Retrieve the date from the predefined CI datetime variable.
     - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr -d -)
     # Iterate over the tags specified. The default IFS delimiter includes spaces.
     - for tag in $YAMDI_TAGS; do
     # # Construct the tag arguments.
-    - args="$args --tag $YAMDI_DOCKER_IMAGE:$tag --tag $YAMDI_DOCKER_IMAGE:$tag-$date"; done
+    - args="$args --tag $DOCKER_IMAGE:$tag --tag $DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images. Even if we aren't using the cache to build, we want to make sure
     # to be writing inline cache metadata to the image.
     - |
