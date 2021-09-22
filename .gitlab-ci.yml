@@ -75,7 +75,7 @@ build:
     - args="$args --push"; fi
     # If we are building for any architectures other than our own.
     - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
-      # Configure binfmt_misc to use QEMU. This is necessary to fix this issue:
+    # Configure binfmt_misc to use QEMU. This is necessary to fix this issue:
     # https://github.com/docker/buildx/issues/584
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     # Create a new builder instance whose driver will support multi-arch building.
