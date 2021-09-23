@@ -93,9 +93,9 @@ YAMDI's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) provides p
 
 The images are pushed to [Docker Hub](https://hub.docker.com/r/yamdi/yamdi), with the following tags (currently very limited due to upstream changes):
 
-| Tags     | Distributor  | Java | JVM     | Type | OS     | Architecture                              |
-| -------- | ------------ | ---- | ------- | ---- | ------ | ----------------------------------------- |
-| `latest` | AdoptOpenJDK | 16   | Hotspot | JRE  | Ubuntu | `linux/amd64`, `linux/arm64`, `linux/arm` |
+| Tags     | Distributor      | Java | JVM     | Type | OS     | Architecture                              |
+| -------- | ---------------- | ---- | ------- | ---- | ------ | ----------------------------------------- |
+| `latest` | Eclipse Adoptium | 16   | Hotspot | JRE  | Ubuntu | `linux/amd64`, `linux/arm64`, `linux/arm` |
 
 If unsure, start with the `latest` image, as that tag corresponds with a safe default. Be careful with the Alpine Linux images: Although the smaller image size and more slim image contents make them a tempting pick, there may be performance implications to using it on a production Minecraft server.
 
