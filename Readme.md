@@ -91,14 +91,11 @@ For more info on the variety of Java installations that can be used, see [Java D
 ##### Prebuilt YAMDI
 YAMDI's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) provides prebuilt YAMDI images, updated every time there is a new commit, as well as on a nightly basis for security updates.
 
-The images are pushed to [Docker Hub](https://hub.docker.com/r/yamdi/yamdi), with the following tags:
+The images are pushed to [Docker Hub](https://hub.docker.com/r/yamdi/yamdi), with the following tags (currently very limited due to upstream changes):
 
-| Tags                                                                                        | Distributor  | Java | JVM     | Type | OS           | Architecture                              |
-| ------------------------------------------------------------------------------------------- | ------------ | ---- | ------- | ---- | ------------ | ----------------------------------------- |
-| `latest`, `latest-ubuntu`, `adoptopenjdk-jre16-ubuntu`, `adoptopenjdk-hotspot-jre16-ubuntu` | AdoptOpenJDK | 16   | Hotspot | JRE  | Ubuntu       | `linux/amd64`, `linux/arm64`, `linux/arm` |
-| `latest-alpine`, `adoptopenjdk-jre16-alpine`, `adoptopenjdk-hotspot-jre16-alpine`           | AdoptOpenJDK | 16   | Hotspot | JRE  | Alpine Linux | `linux/amd64`                             |
-| `adoptopenjdk-openj9-jre16-ubuntu`                                                          | AdoptOpenJDK | 16   | OpenJ9  | JRE  | Ubuntu       | `linux/amd64`                             |
-| `adoptopenjdk-openj9-jre16-ubuntu`                                                          | AdoptOpenJDK | 16   | OpenJ9  | JRE  | Alpine Linux | `linux/amd64`                             |
+| Tags     | Distributor  | Java | JVM     | Type | OS     | Architecture                              |
+| -------- | ------------ | ---- | ------- | ---- | ------ | ----------------------------------------- |
+| `latest` | AdoptOpenJDK | 16   | Hotspot | JRE  | Ubuntu | `linux/amd64`, `linux/arm64`, `linux/arm` |
 
 If unsure, start with the `latest` image, as that tag corresponds with a safe default. Be careful with the Alpine Linux images: Although the smaller image size and more slim image contents make them a tempting pick, there may be performance implications to using it on a production Minecraft server.
 
