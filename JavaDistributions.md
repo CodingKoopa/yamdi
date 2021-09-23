@@ -62,8 +62,29 @@ If unspecified, the builds only provide support for the HotSpot JVM, are TCK tes
 ### Building OpenJDK Yourself
 OpenJDK is open-source, so, sure, [you can build it yourself](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244#c839) if you really want! No support provided.
 
-### Adoptium / AdoptOpenJDK
-[Adoptium](https://adoptium.net/), formerly [AdoptOpenJDK](https://adoptopenjdk.net/), provides [Adoptium builds](https://adoptium.net/releases.html), offering HotSpot builds unmodified from the OpenJDK source, and OpenJ9 builds still based on the OpenJDK source, both not TCK tested. Free community support [is provided](https://adoptium.net/support.html#community-support), and commercial support is providede by IBM and jClarity.
+### Eclipse Temurin / AdoptOpenJDK
+[Eclipse Adoptium](https://adoptium.net/), formerly [AdoptOpenJDK](https://adoptopenjdk.net/), provides [Eclipse Temurin builds](https://adoptium.net/releases.html).
+
+AdoptOpenJDK offered HotSpot builds unmodified from the OpenJDK source, and OpenJ9 builds still based on the OpenJDK source, both not TCK tested.
+
+Eclipse Adoptium offers HotSpot builds only, which, unlike before, are TCK tested. For licensing reasons related to this TCK tested, OpenJ9 builds are not provided. IBM Semeru Runtimes were produced from hereon out to fill this hole.
+
+Free community support [is provided](https://adoptium.net/support.html#community-support), and commercial support is providede by IBM and jClarity.
+
+For more info on this... interesting, situation, see:
+- The [AdoptOpenJDK deprecation blog post](https://blog.adoptopenjdk.net/2021/08/goodbye-adoptopenjdk-hello-adoptium/).
+- [This Adoptium documentation issue](https://github.com/adoptium/containers/issues/1).
+- [The pull request adding the official Temurin Docker image](https://github.com/docker-library/official-images/pull/10662).
+- [The PR adding the official IBM Semeru Runtime Docker image](https://github.com/docker-library/official-images/pull/10666).
+
+### IBM Semeru Runtimes / IBM Java SDK
+Initially, [IBM](https://www.ibm.com/) the [IBM Java SDK](https://www.ibm.com/support/pages/java-sdk), built from OpenJDK source [modified to use OpenJ9](https://www.ibm.com/docs/en/sdk-java-technology/8?topic=introduction-java-virtual-machine), with commercial licensing, and commercial support.
+
+As AdoptOpenJDK was deprecated, without Adoptium providing OpenJ9 builds, IBM moved to provide the [IBM Semeru Runtimes](https://developer.ibm.com/languages/java/semeru-runtimes/), similarly built with modified OpenJDK source with OpenJ9.
+
+The IBM Semeru Runtime Open Edition is released with an open source license, without TCK testing. This is the most direct migration path from AdoptOpenJDK OpenJ9.
+
+With this, IBM Java SDK version 8 stayed as-is, including its proprietary components. IBM Java version 11, however, became IBM Semeru Runtime Certified Edition: released with the commercial licensing, commercial support, and TCK testing.
 
 ### Oracle OpenJDK
 [Oracle](https://www.oracle.com) provides [Oracle OpenJDK](http://jdk.java.net/), built from unmodified OpenJDK source, TCK tested. No support is provided, nor is LTS.
@@ -101,11 +122,8 @@ Oracle provides [Oracle JDK](https://www.oracle.com/java/technologies/javase-dow
 ### IcedTea
 Red Hat provides [IcedTea](https://openjdk.java.net/projects/icedtea/), historically built from OpenJDK source with replacements for encumbered proprietary components. Free community support is available.
 
-### OpenJDK builds by Linux distributions
+https://blog.adoptopenjdk.net/2021/08/goodbye-adoptopenjdk-hello-adoptium/### OpenJDK builds by Linux distributions
 Most Linux distributions package OpenJDK themselves. Some can transparently opt to install IcedTea instead, but with the Java Web Start and the web browser plugins being the only lasting encumbered components that IcedTea fills in, these days they might just build OpenJDK as-is.
-
-### IBM Java SDK
-[IBM](https://www.ibm.com/) provides the [IBM Java SDK](https://www.ibm.com/support/pages/java-sdk), built from OpenJDK source [modified to use OpenJ9](https://www.ibm.com/docs/en/sdk-java-technology/8?topic=introduction-java-virtual-machine), with commercial licensing. Commercial support is available.
 
 ### GraalVM Community Edition
 GraalVM, originally directly under Oracle, provides [GraalVM Community Edition](https://www.graalvm.org/downloads/), built from OpenJDK source modified to use GraalVM. Free community support is available.
@@ -119,7 +137,7 @@ Azul provides [Azul Platform Core](https://www.azul.com/downloads/), formerly Az
 ### Azul Zulu for Azure
 Azul provides Azul Zulu (now Azule Platform Core) builds tailored to Microsoft's Azure platform, [Azul Zulu for Azure - Enterprise Edition](https://www.azul.com/downloads/azure-only/zulu/), built from OpenJDK source modified with security and compatibility patches. Commercial support is available. **This distribution is only intended for Java apps "developed and deployed in Microsoft Azure, Azure Stack, or Microsoft SQL Server," proceed with caution!**
 
-## Docker Images
+## Maintained Docker Images
 YAMDI aims to provide support for practically any Java image you can feed it. This section documents the various different Docker images that provide Java SE.
 
 A couple of abbreviations used here are:
@@ -133,21 +151,21 @@ This is Docker Hub's official image for the Oracle OpenJDK builds. That is, thes
 - OSs: Oracle Linux 7, Windows Server Core, Alpine Linux
 - Architectures: `amd64`, `arm64v8`, `windows-amd64`
 
-### AdoptOpenJDK Images from Docker Hub ([`library/adoptopenjdk`](https://hub.docker.com/_/adoptopenjdk))
-This is the official Docker Hub maintained image for AdoptOpenJDK (now Adoptium) builds.
-- Java Versions: JDK and JRE 8 onwards
-- JVMs: HotSpot, OpenJ9
-- OSs: Ubuntu, Windows Server Core
-- Architectures: `amd64`, `arm32v7` (HotSpot only), `arm64v8` (HotSpot only), `pp64le`, `s380x`, `windows-amd64`
+### Eclipse Temurin ([`library/eclipse-temurin`](https://hub.docker.com/_/eclipse-temurin))
+This is Docker Hub and Eclipse Adoptium's official image for Eclipse Temurin builds.
+- Java Versions: JDK for last LTS releases
+- JVMs: HotSpot
+- OSs: Ubuntu, CentOS, Windows Server Core
+- Architectures: `amd64`, `arm32v7`, `arm64v8`, `pp64le`, `s390x`, `windows-amd64`
 
-## AdoptOpenJDK Images from AdoptOpenJDK ([`adoptopenjdk/openjdk...`](https://hub.docker.com/u/adoptopenjdk))
-This the official AdoptOpenJDK maintained image for AdoptOpenJDK (now Adoptium) builds.
-- Java Versions: JDK and JRE 8 onwards
-- JVMs: HotSpot, OpenJ9
-- OSs: Too complicated to succinctly summarize - See [here](https://github.com/AdoptOpenJDK/openjdk-docker#official-and-non-official-images).
-- Architectures: `amd64`, `arm32v7` (HotSpot only), `arm64v8` (HotSpot only), `pp64le`, `s380x`
+This image supersedes both the official and unofficial (or, Docker Hub maintained and AdoptOpenJDK maintained) AdoptOpenJDK images, with this being the only official Eclipse Temurin Docker image.
 
-[Alpine Linux images for recent Java versions are now using native musl builds](https://github.com/AdoptOpenJDK/openjdk-docker#musl-libc-based-alpine-images).
+### IBM Semeru Runtime ([`library/ibm-semeru-runtimes`](https://hub.docker.com/_/ibm-semeru-runtimes))
+This is Docker Hub and IBM's official image for the IBM Semery Runtime Open Edition images.
+- Java Versions: JDK for last LTS releases
+- JVMs: OpenJ9
+- OSs: Ubuntu, CentOS, Windows Server
+- Architectures: `amd64`, `arm32v7`, `arm64v8`, `pp64le`, `s390x`, `windows-amd64`
 
 ### Amazon Corretto ([`library/amazoncorretto`](https://hub.docker.com/_/amazoncorretto))
 This is Docker Hub and Amazon's official image for Amazon Corretto.
@@ -160,13 +178,13 @@ Although they don't seem to be pushed to Docker Hub, the GitHub repo for this im
 
 ### Oracle JDK ([`store/oracle/serverjre:8`](https://hub.docker.com/_/oracle-serverjre-8) (JRE 8), [`store/oracle/jdk:11`](https://hub.docker.com/_/oracle-jdk) (JDK 11))
 [The Binary Code License Agreement prohibits anyone but Oracle from publicly distributing Oracle JDK](https://devops.stackexchange.com/a/434), so these are the definitive Docker images for Oracle JDK.
-- Java Versions: JRE 8, JDK 11.
+- Java Versions: JRE 8, JDK 11
 - JVMs: HotSpot
 - OSs: Oracle Linux 7
 - Architectures: `amd64`
 
 ### IBM Java SDK ([`library/ibmjava`](https://hub.docker.com/_/ibmjava))
-This is Docker Huband IBM's official image for the IBM Java SDK.
+This is Docker Hub and IBM's official image for the IBM Java SDK.
 - Java Versions: SDK 8 (Full JDK), JRE 8, SFJ 8 (Slim JRE)
 - JVMs: OpenJ9
 - OSs: Ubuntu, Alpine Linux
@@ -201,3 +219,21 @@ This is Microsoft's official image for Azul Zulu (now Azul Platform Core) for Az
 
 **Important notice:**
 > These Zulu OpenJDK for Azure Docker images and corresponding Dockerfiles **are to be used solely with Java applications** or Java application components that are **being developed for deployment on Microsoft Azure**, Azure Functions (anywhere), Azure Stack, or Microsoft SQL Server and are **not intended to be used for any other purpose**.
+
+## Unmaintained Docker images
+
+### AdoptOpenJDK Images from Docker Hub ([`library/adoptopenjdk`](https://hub.docker.com/_/adoptopenjdk))
+This is the deprecated, formerly official, Docker Hub maintained image for AdoptOpenJDK builds.
+- Java Versions: JDK and JRE 8 onwards
+- JVMs: HotSpot, OpenJ9
+- OSs: Ubuntu, Windows Server Core
+- Architectures: `amd64`, `arm32v7` (HotSpot only), `arm64v8` (HotSpot only), `pp64le`, `s380x`, `windows-amd64`
+
+## AdoptOpenJDK Images from AdoptOpenJDK ([`adoptopenjdk/openjdk...`](https://hub.docker.com/u/adoptopenjdk))
+This the deprecated, formerly official, AdoptOpenJDK maintained image for AdoptOpenJDK builds.
+- Java Versions: JDK and JRE 8 onwards
+- JVMs: HotSpot, OpenJ9
+- OSs: Too complicated to succinctly summarize - See [here](https://github.com/AdoptOpenJDK/openjdk-docker#official-and-non-official-images).
+- Architectures: `amd64`, `arm32v7` (HotSpot only), `arm64v8` (HotSpot only), `pp64le`, `s380x`
+
+[Alpine Linux images for recent Java versions are now using native musl builds](https://github.com/AdoptOpenJDK/openjdk-docker#musl-libc-based-alpine-images).
