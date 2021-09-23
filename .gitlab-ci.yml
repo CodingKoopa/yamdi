@@ -107,4 +107,4 @@ build:
     matrix:
       - YAMDI_BASE_IMAGE: eclipse-temurin:16
         YAMDI_ARCH: linux/amd64,linux/arm64,linux/arm
-        YAMDI_TAGS: latest latest-ubuntu adoptopenjdk-jre16-ubuntu adoptopenjdk-hotspot-jre16-ubuntu
+        YAMDI_TAGS: latest
