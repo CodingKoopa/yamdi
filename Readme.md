@@ -89,7 +89,7 @@ There are a couple of options for the YAMDI image to use:
 For more info on the variety of Java installations that can be used, see [Java Distributions](JavaDistributions.md).
 
 ##### Prebuilt YAMDI
-YAMDI's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) provides prebuilt YAMDI images, updated every time there is a new commit, as well as on a nightly basis for security updates.
+YAMDI's [Continuous Integration (CI)](https://docs.gitlab.com/ee/ci/) provides prebuilt YAMDI images, updated when there is a new commit, as well as on a nightly basis for security updates.
 
 The images are pushed to [Docker Hub](https://hub.docker.com/r/yamdi/yamdi), with the following tags (currently very limited due to upstream changes):
 
