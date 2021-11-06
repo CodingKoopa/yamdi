@@ -103,12 +103,12 @@ Multi arch support is provided where the base images provide it, for `amd64` (`x
 
 If you need to use a YAMDI build from a specific date (noting that that same tag may be pushed to more than once if there is a new commit on that day), every one of the tags above has a variant with the date appended in `-YYYYMMDD` format. For instance, for the `latest-ubuntu` tag, there is a `latest-ubuntu-20210630` tag and a `latest-ubuntu-20210701` tag and so on. This should only be used temporarily, if a new YAMDI build breaks functionality for you, as images tagged with older dates **will not be updated with security fixes**.
 
-If using the Docker CLI to launch YAMDI, the image is ran using the `docker run`.
+If using the Docker CLI to launch YAMDI, the container is started using the `docker run`.
 ```sh
 docker run yamdi/yamdi:latest ...
 ```
 
-If using Docker Compose to launch YAMDI, the image is built using `docker-compose up`. If there is more than one service defined in the Compose file, you can use `docker-compose up yamdi` to only start YAMDI.
+If using Docker Compose to launch YAMDI, the container is started using `docker-compose up`. If there is more than one service defined in the Compose file, you can use `docker-compose up yamdi` to only start YAMDI.
 ```sh
 docker-compose up
 ```
