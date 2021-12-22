@@ -319,7 +319,7 @@ sudo cp "$VOLUME_PATH"/{config,plugins}.patch .
   cd mc-plugins
   patch -p1 <../plugins.patch
 )
-rm {config,plugins}.patch
+rm -f {config,plugins}.patch
 ```
 
 #### Ignore `server.properties`
