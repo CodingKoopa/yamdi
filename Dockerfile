@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.2
 
 # Set a reasonable default value for the base image.
-ARG YAMDI_BASE_IMAGE=adoptopenjdk/openjdk16:jre
+ARG YAMDI_BASE_IMAGE=eclipse-temurin:17
 
 # Source the specified base image.
 FROM ${YAMDI_BASE_IMAGE}

@@ -95,7 +95,7 @@ The images are pushed to [Docker Hub](https://hub.docker.com/r/yamdi/yamdi), wit
 
 | Tags     | Distributor      | Java | JVM     | Type | OS     | Architecture                              |
 | -------- | ---------------- | ---- | ------- | ---- | ------ | ----------------------------------------- |
-| `latest` | Eclipse Adoptium | 16   | Hotspot | JRE  | Ubuntu | `linux/amd64`, `linux/arm64`, `linux/arm` |
+| `latest` | Eclipse Adoptium | 17   | Hotspot | JRE  | Ubuntu | `linux/amd64`, `linux/arm64`, `linux/arm` |
 
 If unsure, start with the `latest` image, as that tag corresponds with a safe default. Be careful with the Alpine Linux images: Although the smaller image size and more slim image contents make them a tempting pick, there may be performance implications to using it on a production Minecraft server.
 
@@ -169,14 +169,14 @@ docker-compose up
 
 The Dockerfile is designed to adapt to whatever base image you give it. You can specify what base image you want to use by setting the `YAMDI_BASE_IMAGE` build-time variable to the full tag referring to the Java image you want to use. The vast array of Java images available is documented in [Java Distributions](JavaDistributions.md).
 ```sh
-docker build --build-arg YAMDI_BASE_IMAGE="adoptopenjdk/openjdk16:jre" ...
+docker build --build-arg YAMDI_BASE_IMAGE="adoptopenjdk/openjdk17:jre" ...
 ```
 ```yaml
 services:
   yamdi:
     build:
       args:
-      - YAMDI_BASE_IMAGE="adoptopenjdk/openjdk16:jre"
+      - YAMDI_BASE_IMAGE="adoptopenjdk/openjdk17:jre"
 ```
 
 ### Server Type

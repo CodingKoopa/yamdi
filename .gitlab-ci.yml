@@ -104,6 +104,6 @@ build:
       --build-arg BUILDKIT_INLINE_CACHE=1 --platform="$YAMDI_ARCH" $args .
   parallel:
     matrix:
-      - YAMDI_BASE_IMAGE: eclipse-temurin:16
+      - YAMDI_BASE_IMAGE: eclipse-temurin:17
         YAMDI_ARCH: linux/amd64,linux/arm64,linux/arm
         YAMDI_TAGS: latest latest-ubuntu

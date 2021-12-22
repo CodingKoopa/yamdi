@@ -10,7 +10,7 @@ services:
       context: .
       args:
         # Use Alpine as the base because it's small.
-        YAMDI_BASE_IMAGE: adoptopenjdk/openjdk16:alpine-jre
+        YAMDI_BASE_IMAGE: adoptopenjdk/openjdk17:alpine-jre
     environment:
       YAMDI_SERVER_TYPE: "paper"
       YAMDI_MINECRAFT_VERSION: "latest"
