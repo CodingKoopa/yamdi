@@ -56,8 +56,10 @@ build:
   # Run in our Docker in Docker (dind) + buildx plugin image.
   image: yamdi/dind-buildx
   services:
-    # Enable the dind service.
-    - docker:dind
+    # Run dockerd in the background.
+    - name: yamdi/dind-buildx:dockerd
+      # Specify an alias so that the service will be available under "docker".
+      alias: docker
   script:
     # Disallow usage of undefined variables. The options "-e" for exiting if a command exits with a
     # non-zero status is already set.
