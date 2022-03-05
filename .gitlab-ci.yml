@@ -76,7 +76,7 @@ build:
     - args="$args --push"
     - fi
     # If we are building for any architectures other than our own.
-    - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$YAMDI_ARCH" ]; then
+    - if [ "$CI_RUNNER_EXECUTABLE_ARCH" != "$DOCKER_TARGET_ARCH" ]; then
     # Configure binfmt_misc to use QEMU. This is necessary to fix this issue:
     # https://github.com/docker/buildx/issues/584
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
@@ -94,21 +94,21 @@ build:
         [ "$CI_PIPELINE_SOURCE" = "webide" ]; then
     # Cache from the first tag belonging to this job. this is arbitrary - unless the CI
     # configuration has changed, any of the tags would work.
-    - args="$args --cache-from $DOCKER_IMAGE:$(printf %s "$YAMDI_TAGS" | cut -d' ' -f1)"
+    - args="$args --cache-from $DOCKER_IMAGE:$(printf %s "$DOCKER_TAGS" | cut -d' ' -f1)"
     - fi
     # Retrieve the date from the predefined CI datetime variable.
     - date=$(printf %s "$CI_PIPELINE_CREATED_AT" | cut -dT -f1 | tr -d -)
     # Iterate over the tags specified. The default IFS delimiter includes spaces.
-    - for tag in $YAMDI_TAGS; do
+    - for tag in $DOCKER_TAGS; do
     # # Construct the tag arguments.
     - args="$args --tag $DOCKER_IMAGE:$tag --tag $DOCKER_IMAGE:$tag-$date"; done
     # Build and push the images. Even if we aren't using the cache to build, we want to make sure
     # to be writing inline cache metadata to the image.
     - |
-      docker buildx build --build-arg YAMDI_BASE_IMAGE="$YAMDI_BASE_IMAGE" \
-      --build-arg BUILDKIT_INLINE_CACHE=1 --platform="$YAMDI_ARCH" $args .
+      docker buildx build --build-arg DOCKER_BASE_IMAGE="$DOCKER_BASE_IMAGE" \
+      --build-arg BUILDKIT_INLINE_CACHE=1 --platform="$DOCKER_TARGET_ARCH" $args .
   parallel:
     matrix:
-      - YAMDI_BASE_IMAGE: eclipse-temurin:17
-        YAMDI_ARCH: linux/amd64,linux/arm64,linux/arm
-        YAMDI_TAGS: latest latest-ubuntu
+      - DOCKER_BASE_IMAGE: eclipse-temurin:17
+        DOCKER_TARGET_ARCH: linux/amd64,linux/arm64,linux/arm
+        DOCKER_TAGS: latest latest-ubuntu
