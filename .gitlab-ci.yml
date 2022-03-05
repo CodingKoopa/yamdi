@@ -105,7 +105,7 @@ build:
     # Build and push the images. Even if we aren't using the cache to build, we want to make sure
     # to be writing inline cache metadata to the image.
     - |
-      docker buildx build --build-arg DOCKER_BASE_IMAGE="$DOCKER_BASE_IMAGE" \
+      docker buildx build --build-arg YAMDI_BASE_IMAGE="$DOCKER_BASE_IMAGE" \
       --build-arg BUILDKIT_INLINE_CACHE=1 --platform="$DOCKER_TARGET_ARCH" $args .
   parallel:
     matrix:
