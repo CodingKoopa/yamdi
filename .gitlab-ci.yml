@@ -36,7 +36,7 @@ shfmt:
   rules:
     - changes:
         # Watch for changes in the source.
-        - "src/*"
+        - src/*
   # Check that all shell code has proper formatting.
   script: shfmt -d src
 
@@ -46,7 +46,7 @@ shellcheck:
   image: koalaman/shellcheck-alpine:stable
   rules:
     - changes:
-        - "src/*"
+        - src/*
   # Check that all shell code is proper.
   script: shellcheck --external-sources src/*
 
