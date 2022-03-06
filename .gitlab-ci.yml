@@ -53,6 +53,9 @@ shellcheck:
 hadolint:
   stage: analyze
   image: hadolint/hadolint:latest-alpine
+  rules:
+    - changes:
+        - Dockerfile
   script: hadolint Dockerfile
 
 build:
