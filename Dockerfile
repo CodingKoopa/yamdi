@@ -4,10 +4,12 @@
 ARG YAMDI_BASE_IMAGE=eclipse-temurin:17
 
 # Source the specified base image.
+# hadolint ignore=DL3006
 FROM ${YAMDI_BASE_IMAGE}
 
 # For each of the command tests, we use the ">" redirector as opposed to the "&>" because sh seems
 # to erroneously think that the command succeeded when it didn't.
+# hadolint ignore=DL3008,DL3018,DL3033,DL3041
 RUN \
   # Quit on error (this makes it unnecessary to use "&&"), disallow undefined variable substitution,
   # and print commands as they are executed.
@@ -46,7 +48,7 @@ RUN \
   # Upgrade the currently installed packages, because the base image may not be caught up.
   apk upgrade; \
   # Install the dependencies.
-  apk add git curl jq; \
+  apk add --no-cache git curl jq; \
   # Remove the package index cache.
   rm -rf /var/cache/apk/*; \
   \
@@ -150,6 +152,7 @@ EXPOSE 25565 8123
 # Append the YAMDI directory to the path to make the "yamdi" and "cmd" executables accessible.
 ENV PATH=/opt/yamdi/bin:$PATH
 
+# hadolint ignore=DL3025
 ENTRYPOINT ["/bin/sh", "-c", \
   # At startup, running as root, transfer ownership of the user directory to the non-root user. This
   # is the only way to have our user be able to write to the server directory, because Docker
