@@ -50,6 +50,11 @@ shellcheck:
   # Check that all shell code is proper.
   script: shellcheck --external-sources src/*
 
+hadolint:
+  stage: analyze
+  image: hadolint/hadolint:latest-alpine
+  script: hadolint Dockerfile
+
 build:
   # Add to the build stage.
   stage: build
