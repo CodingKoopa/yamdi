@@ -246,6 +246,7 @@ exit_script() {
 #   - Status messages.
 # Variables Read:
 #   - java_pid: The PID of the Java process.
+# shellcheck disable=SC2317
 stop() {
   info "$1 recieved."
   if [ -n "$java_pid" ]; then
