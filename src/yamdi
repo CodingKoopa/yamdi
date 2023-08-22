@@ -455,7 +455,7 @@ artifact/target/BuildTools.jar"
   rm -rf "$server_jar"
   ln -s "$spigot_revision_jar" "$server_jar"
 
-elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
+elif [ "$YAMDI_SERVER_TYPE" = "paper" ]; then
   info "Paper server selected."
 
   server_jar="$server_dir/paper.jar"
@@ -483,7 +483,7 @@ elif [ $YAMDI_SERVER_TYPE = "paper" ]; then
   if [ "$YAMDI_MINECRAFT_VERSION" = "latest" ]; then
     debug "Resolving latest Paper revision."
 
-    versions_json=$(curl -s https://papermc.io/api/v2/projects/$YAMDI_SERVER_TYPE)
+    versions_json=$(curl -s https://papermc.io/api/v2/projects/"$YAMDI_SERVER_TYPE")
     readonly versions_json
 
     handle_curl_errors
