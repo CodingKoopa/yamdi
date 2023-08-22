@@ -261,7 +261,7 @@ stop() {
     java_ret=$?
     set -e
     debug "Java process exited from stop() (return $java_ret)."
-    exit_script $java_ret
+    exit_script "$java_ret"
   else
     info "It looks like the server was never started. Exiting without further action."
     exit 0
